@@ -1,0 +1,193 @@
+\chapter{State of the Art}
+\label{chap:state-of-art}
+
+This chapter examines the current state of the art in database version control systems and automotive parameter management. It begins by analyzing existing approaches to software configuration management in the automotive industry, followed by an evaluation of database versioning techniques and their applicability to parameter management systems. The chapter also explores role-based access control models and integration strategies for enterprise systems, establishing the theoretical foundation for the VMAP system design.
+
+\section{Parameter Management in Automotive Software Development}
+\label{sec:parameter-management}
+
+The complexity of automotive software has grown exponentially in recent decades, with modern vehicles containing up to 100 million lines of code distributed across dozens of electronic control units (ECUs) \cite{pretschner2007software}. This growth has significantly increased the importance and complexity of parameter management in automotive development.
+
+\subsection{Evolution of Automotive Parameter Management}
+\label{subsec:evolution-parameter-management}
+
+Parameter management in automotive systems has evolved from simple calibration tables to sophisticated configuration frameworks that handle thousands of parameters across multiple vehicle variants. Broy \cite{broy2006challenges} identifies this evolution as a critical aspect of automotive software development, noting that modern vehicles require extensive parametrization to adapt software behavior to different markets, regulatory environments, and hardware configurations.
+
+Early approaches to parameter management relied primarily on manual configuration using specialized tools for each ECU. These isolated tools typically stored parameters in proprietary formats with limited version control capabilities \cite{staron2021automotive}. As vehicle complexity increased, the limitations of these disconnected approaches became apparent, leading to efforts toward more integrated parameter management frameworks.
+
+More recent developments have focused on establishing model-based approaches to parameter management, where parameters are connected to architectural and behavioral models of the vehicle systems \cite{staron2021automotive}. These approaches aim to provide traceability between parameters and their effects on system behavior, supporting more systematic validation and verification processes. However, as Trovão \cite{trovao2024evolution} notes, the integration between parameter management and model-based development remains incomplete in many automotive organizations, with significant gaps in traceability and consistency management.
+
+Despite these advances, many automotive development teams continue to rely on general-purpose tools such as spreadsheets for parameter management, particularly for powertrain control parameters \cite{broy2006challenges}. This approach provides flexibility but introduces significant risks related to version control, consistency, and traceability. As vehicle systems become more integrated and interdependent, the limitations of spreadsheet-based parameter management become increasingly problematic, creating a need for more structured database-driven approaches.
+
+\subsection{Challenges in Automotive Parameter Management}
+\label{subsec:challenges-parameter-management}
+
+The management of parameters in automotive software development presents several specific challenges that distinguish it from general software configuration management. Staron \cite{staron2021automotive} identifies four key challenges that are particularly relevant to powertrain parameter management:
+
+First, parameter dependencies create complex relationships both within and across ECUs. Changes to one parameter may require coordinated changes to multiple related parameters to maintain system consistency. These dependencies are often implicit, making them difficult to track and enforce through general-purpose configuration management tools.
+
+Second, parameter validation requires specialized domain knowledge and testing capabilities. Unlike source code, which can be validated through compilation and syntactic analysis, parameters require functional testing to verify their correctness. This validation often involves specialized hardware-in-the-loop or vehicle-level testing, creating a significant gap between parameter modification and validation \cite{pretschner2007software}.
+
+Third, regulatory compliance introduces additional complexity to parameter management. Emission-related parameters, in particular, must comply with region-specific regulations and undergo certification processes. This requires maintaining multiple parameter configurations for different markets while ensuring that all configurations meet their respective regulatory requirements \cite{trovao2024evolution}.
+
+Fourth, variant management multiplies the complexity of parameter configurations. Modern vehicles are produced in numerous variants with different engines, transmissions, and optional features, each requiring specific parameter configurations. Managing these variants effectively requires sophisticated configuration selection mechanisms based on vehicle-specific characteristics \cite{broy2006challenges}.
+
+These challenges highlight the need for specialized parameter management systems that go beyond general-purpose version control approaches. As Pretschner et al. \cite{pretschner2007software} note, automotive-specific tools must address both the technical aspects of parameter management and the organizational processes surrounding parameter development and validation.
+
+\subsection{Current Approaches and Their Limitations}
+\label{subsec:current-approaches-limitations}
+
+Current parameter management approaches in the automotive industry fall into several categories, each with specific strengths and limitations. Proprietary calibration tools provided by ECU suppliers offer specialized functionality for specific ECUs but typically lack integration with enterprise systems and cross-ECU parameter management capabilities \cite{staron2021automotive}. These tools often use file-based storage with basic version control, limiting their effectiveness for complex multi-variant development.
+
+General-purpose spreadsheet applications remain widely used for parameter management due to their flexibility and familiarity. However, as Trovão \cite{trovao2024evolution} observes, spreadsheet-based approaches suffer from significant limitations in terms of concurrent access, version control, validation, and traceability. These limitations become particularly problematic when managing thousands of parameters across multiple vehicle variants and development phases.
+
+Commercial data management systems for automotive development, such as Vector's vCDM and ETAS' EHANDBOOK, provide more structured approaches to parameter management with integration to calibration tools and testing systems \cite{staron2021automotive}. However, these systems often focus on parameter storage and documentation rather than the full lifecycle management from definition through development, testing, and production.
+
+Enterprise product lifecycle management (PLM) systems offer comprehensive version control and workflow management but typically lack domain-specific functionality for parameter management. As Broy \cite{broy2006challenges} notes, the gap between general-purpose PLM systems and domain-specific parameter management needs creates efficiency and usability challenges for development teams.
+
+The limitations of current approaches create several specific issues in automotive parameter development. Version conflicts arise when multiple developers modify related parameters without coordination, particularly when using file-based tools without proper concurrent access controls \cite{pretschner2007software}. Traceability gaps make it difficult to connect parameter changes to specific requirements or validation results, complicating compliance and quality assurance processes. Integration barriers between parameter management tools and enterprise systems lead to manual synchronization processes that consume development resources and introduce potential for errors \cite{staron2021automotive}.
+
+These limitations highlight the need for specialized parameter management systems that combine the structured data management capabilities of database systems with domain-specific functionality for automotive parameter development. Such systems must address the unique versioning, validation, and variant management requirements of automotive parameters while providing seamless integration with enterprise engineering processes.
+
+\section{Database Version Control Systems}
+\label{sec:database-version-control}
+
+Version control for database content presents distinct challenges compared to traditional source code version control. While source code version control focuses on tracking changes to text files, database version control must address structured data with complex relationships and constraints \cite{bhattacherjee2015principles}. This section examines current approaches to database version control and their applicability to automotive parameter management.
+
+\subsection{Traditional Database Versioning Approaches}
+\label{subsec:traditional-database-versioning}
+
+Traditional approaches to database versioning fall into several categories, each addressing different aspects of the versioning challenge. Schema evolution tools focus on tracking and managing changes to database structure through migration scripts or schema manipulation languages \cite{curino2009automating}. These tools enable systematic evolution of database schemas while preserving data integrity during transitions. Commercial examples include Liquibase and Flyway, which provide version-controlled database migrations that can be integrated with application deployment processes \cite{dziadosz2017liquibase, sacco2022versioning}.
+
+Change data capture (CDC) systems track modifications to database content, creating audit trails of insertions, updates, and deletions \cite{seenivasan2023real}. These systems typically operate at the database engine level, capturing changes from transaction logs or through triggers. While CDC provides comprehensive change tracking, it focuses on operational data replication rather than supporting systematic version management across development phases.
+
+Temporal databases extend relational database systems with explicit support for time-varying data, allowing queries to retrieve data as it existed at specific points in time \cite{kulkarni2012temporal}. These systems manage time dimensions such as valid time (when facts are true in the modeled reality) and transaction time (when facts are recorded in the database). Commercial implementations include the temporal features in SQL Server 2016, Oracle Workspace Manager, and PostgreSQL temporal extensions \cite{saracco2010matter, agarwaloracle, al2013temporal}.
+
+Database workspace tools, such as Oracle Workspace Manager, implement branching and merging concepts for database content, allowing multiple development streams to proceed in parallel before being reconciled \cite{bhattacherjee2015principles}. These tools provide isolation between different development efforts while maintaining the ability to merge changes when development streams converge.
+
+\subsection{Versioning Strategies for Structured Data}
+\label{subsec:versioning-structured-data}
+
+Beyond these general approaches, several specific strategies have been developed for versioning structured data in databases. Salgado et al. \cite{salzberg1999comparison} identify four primary strategies: tuple versioning, attribute versioning, relation versioning, and database versioning, each representing a different granularity of version control.
+
+Tuple versioning maintains multiple versions of each row (tuple) in a table, typically adding timestamp attributes to indicate when each version was created and (if applicable) superseded. This approach provides detailed tracking of individual entity changes but can significantly increase storage requirements and complicate queries that need to reconstruct full object states across multiple related tables \cite{bhattacherjee2015principles}.
+
+Attribute versioning tracks changes to individual column values rather than entire rows, creating a more compact representation for cases where only a few attributes change between versions. However, this approach introduces significant complexity for reconstructing complete entity states at specific points in time, particularly when entities have relationships to other versioned entities \cite{biriukov2018implementation}.
+
+Relation versioning creates separate versions of entire tables, effectively capturing the state of all entities of a specific type at particular points in time. This approach simplifies retrieval of consistent snapshots but can lead to substantial data duplication when only a small percentage of entities change between versions \cite{mueller2018conception}.
+
+Database versioning maintains complete snapshots of the entire database at significant version points. While this approach provides the simplest retrieval of historical states, its storage requirements make it impractical for large databases with frequent changes or long version histories \cite{bhattacherjee2015principles}.
+
+Bhattacherjee et al. \cite{bhattacherjee2015principles} analyze the trade-offs between these strategies, noting that the optimal approach depends on specific usage patterns, particularly the ratio between storage costs and reconstruction costs. For systems where historical queries are relatively rare but must be comprehensive when performed, the authors suggest that hybrid approaches combining element-level change tracking with periodic snapshots often provide the best balance of storage efficiency and query performance.
+
+\subsection{Temporal Database Approaches}
+\label{subsec:temporal-database-approaches}
+
+Temporal database approaches provide a theoretical foundation for managing time-varying data in database systems. Kulkarni and Michels \cite{kulkarni2012temporal} describe the temporal features introduced in SQL:2011, which formalized support for period data types and temporal tables in the SQL standard. These features enable tracking of both valid time (business time) and transaction time (system time) dimensions, supporting bi-temporal data management.
+
+The valid time dimension represents when facts are true in the modeled reality, independent of when they are recorded in the database. This dimension supports business-oriented temporal queries such as "What was the value of this parameter in the Phase1?" or "When did this parameter change from value A to value B?" \cite{bohlen2018database}. The transaction time dimension represents when facts are recorded in the database, supporting auditability through questions like "Who changed this parameter, and when did they change it?" \cite{kulkarni2012temporal}.
+
+Bi-temporal databases combine both dimensions, providing a comprehensive framework for tracking both when changes occurred in the system and when they became effective in the real world \cite{bohlen2018database}. This approach is particularly valuable for regulated industries like automotive development, where both historical accuracy and change auditability are essential for compliance and quality assurance.
+
+Commercial database systems have implemented temporal capabilities to varying degrees. Saracco et al. \cite{saracco2010matter} describe the temporal features in IBM DB2, which include period data types, temporal tables, and specialized temporal operators for querying time-varying data. Al-Kateb et al. \cite{al2013temporal} outline similar capabilities in Teradata, highlighting the performance optimizations necessary for efficient temporal query processing. Ben-Gan et al. \cite{ben2017mcsa} document the temporal table support in SQL Server, which provides system-versioned tables that automatically maintain transaction time history.
+
+Despite these advances, Biriukov \cite{biriukov2018implementation} notes that implementing bi-temporal databases remains challenging in practice, with significant complexity in schema design, query formulation, and performance optimization. For domain-specific applications like automotive parameter management, customized temporal approaches that align with development processes often provide more practical solutions than generic bi-temporal frameworks \cite{biriukov2018implementation}.
+
+\subsection{Version Control for Parameter Management}
+\label{subsec:version-control-parameter-management}
+
+Version control for automotive parameter management presents specific requirements that differ from general database versioning needs. Staron \cite{staron2021automotive} identifies several key requirements for parameter version control in automotive development:
+
+First, parameter versions must be aligned with development phases that correspond to vehicle development milestones. Unlike source code versioning, which typically follows continuous development with arbitrary version points, parameter versioning must support a structured progression through predefined development phases such as Phase1, Phase2, Phase3, and Phase4.
+
+Second, parameter version control must maintain connections between related parameters across ECUs and modules. Changes to one parameter often require coordinated changes to related parameters, requiring version control mechanisms that can track and enforce these relationships across system boundaries.
+
+Third, parameter versions must be tied to specific vehicle configurations, supporting variant management across different markets and feature combinations. This requirement goes beyond traditional version control to include configuration selection mechanisms based on vehicle-specific characteristics.
+
+Fourth, parameter version control must support parallel development across different vehicle programs and model years, allowing development teams to work on multiple releases simultaneously without interference. This parallel development requirement aligns with the workspace concept in advanced database versioning systems but requires additional domain-specific extensions.
+
+These specialized requirements highlight the need for customized version control approaches tailored to automotive parameter management. As Bhattacherjee et al. \cite{bhattacherjee2015principles} note, domain-specific versioning systems often provide more effective solutions than generic versioning frameworks, particularly for domains with structured development processes and complex entity relationships.
+
+\section{Role-Based Access Control in Enterprise Systems}
+\label{sec:role-based-access-control}
+
+Role-Based Access Control (RBAC) has become a dominant paradigm for managing access rights in enterprise systems, providing a structured approach to security management that aligns with organizational responsibilities \cite{sandhu1998role}. For automotive parameter management, where different user roles have distinct responsibilities and access requirements, RBAC provides a foundation for implementing appropriate security controls.
+
+\subsection{RBAC Model and Extensions}
+\label{subsec:rbac-model-extensions}
+
+The core RBAC model, as defined by Sandhu et al. \cite{sandhu1998role}, consists of users, roles, permissions, and sessions. Users are assigned to roles that correspond to job functions, and roles are granted permissions that authorize specific operations on protected resources. This indirect association between users and permissions through roles simplifies security administration while maintaining the principle of least privilege.
+
+Several extensions to the basic RBAC model have been developed to address more complex security requirements. Hierarchical RBAC introduces role hierarchies that enable permission inheritance between roles, supporting organizational structures with senior roles inheriting permissions from junior roles \cite{sandhu1998role}. Constrained RBAC adds separation of duty constraints that prevent conflicts of interest by restricting role combinations or permission assignments. Administrative RBAC (ARBAC), as described by Sandhu and Bhamidipati \cite{sandhu1997arbac97}, addresses the management of the RBAC system itself, defining who can assign users to roles and modify role permissions.
+
+More recent developments have focused on integrating RBAC with other access control models to create hybrid approaches that combine the administrative benefits of roles with more flexible access control mechanisms. Ferraiolo et al. \cite{ferraiolo2011policy} describe policy-enhanced RBAC, which combines role-based permissions with attribute-based policies to provide context-sensitive access control. This hybrid approach is particularly valuable for systems where access decisions depend on both user roles and context-specific factors such as time, location, or resource attributes.
+
+\subsection{RBAC in Database Systems}
+\label{subsec:rbac-database-systems}
+
+Modern database management systems provide varying levels of support for RBAC principles. Elmasri and Navathe \cite{elmasri2015fundamentals} describe the evolution of database security mechanisms from simple user-based privileges to more sophisticated role-based models. Most enterprise database systems now include native support for roles, user-role assignments, and permission management through SQL statements like GRANT and REVOKE.
+
+PostgreSQL, in particular, offers a comprehensive implementation of RBAC concepts, including role hierarchies through role inheritance, permission management through fine-grained privileges, and row-level security policies for content-based access control \cite{obe2017postgresql}. These capabilities provide a solid foundation for implementing domain-specific access control models on top of the database system's native security features.
+
+However, database-level RBAC implementations typically focus on controlling access to database objects like tables, views, and functions, rather than providing application-level access control that considers domain-specific entities and operations. For complex applications like automotive parameter management, database-level RBAC must be complemented with application-level access control logic that maps domain-specific concepts to database operations \cite{ferraiolo2011policy}.
+
+\subsection{Access Control for Automotive Parameter Management}
+\label{subsec:access-control-parameter-management}
+
+Access control for automotive parameter management presents specific requirements that extend beyond basic RBAC models. Staron \cite{staron2021automotive} identifies several key access control requirements for automotive development systems:
+
+First, access control must reflect organizational responsibilities, allowing different teams to manage specific subsystems or parameters without interfering with each other's work. This requirement aligns with RBAC's role concept but requires extensions to support fine-grained control over specific parameter sets rather than just database objects.
+
+Second, access control must enforce phase-specific permissions, ensuring that parameters can only be modified during appropriate development phases. For example, after a phase is frozen for testing, parameters should become read-only until explicitly unfrozen by authorized users. This temporal aspect of access control goes beyond traditional RBAC to include state-based permission evaluation.
+
+Third, access control must balance centralized governance with distributed development responsibilities. While central administrators must maintain control over system configuration and user management, development teams need autonomy within their assigned areas of responsibility \cite{broy2006challenges}. This balance requires carefully designed delegation mechanisms that extend the basic RBAC model.
+
+Fourth, access control must maintain comprehensive audit trails for all security-relevant operations, including permission changes, role assignments, and access attempts. This auditability requirement is particularly important for regulated industries like automotive development, where changes to safety-critical parameters must be carefully controlled and documented \cite{trovao2024evolution}.
+
+These specialized requirements highlight the need for a domain-specific access control model that builds upon RBAC foundations while incorporating extensions for automotive parameter management. As Xu and Zhang \cite{xu2014specification} note, effective access control systems often combine elements from different access control models to address domain-specific requirements, creating hybrid approaches that provide both structured administration and operational flexibility.
+
+\section{Database Integration with Enterprise Systems}
+\label{sec:database-integration}
+
+Integration between database systems and enterprise applications presents significant challenges in automotive development environments, where parameter management must interact with numerous other systems across the development lifecycle. Effective integration strategies must address both technical interoperability and semantic consistency while maintaining performance and security \cite{hohpe2002enterprise}.
+
+\subsection{Enterprise Integration Patterns}
+\label{subsec:enterprise-integration-patterns}
+
+Enterprise integration patterns, as described by Hohpe and Woolf \cite{hohpe2002enterprise}, provide a catalog of solutions for common integration challenges. These patterns address various aspects of system integration, including messaging styles, messaging channels, message construction, and message transformation. 
+
+For database-centric applications like parameter management systems, several integration patterns are particularly relevant. The Repository pattern provides a structured approach to data access, abstracting the database implementation details behind a domain-focused interface \cite{fowler2003patterns}. This abstraction simplifies integration by providing a stable API for other systems to interact with the parameter repository.
+
+The Data Transfer Object (DTO) pattern addresses the challenge of transferring data between systems with different data models. By defining specialized objects for inter-system communication, this pattern enables consistent data exchange while isolating each system's internal representation \cite{fowler2003patterns}. For parameter management, DTOs provide a mechanism for exchanging parameter data with other systems while maintaining the integrity of the database model.
+
+The Canonical Data Model pattern, as described by Hohpe and Woolf \cite{hohpe2002enterprise}, establishes a common data representation across multiple systems, simplifying data transformation and ensuring consistent interpretation. This pattern is particularly valuable for parameter management, where the same parameter concepts may be represented differently in various systems across the development lifecycle.
+
+The Gateway pattern provides a structured approach to integrating with external systems, encapsulating the details of external system communication behind a domain-focused interface \cite{fowler2003patterns}. This encapsulation simplifies integration by isolating external system dependencies and providing a stable interface for the core application to interact with external systems.
+
+\subsection{Database Synchronization Approaches}
+\label{subsec:database-synchronization}
+
+Database synchronization presents specific challenges when integrating parameter management systems with other enterprise data sources. Mueller and Müller \cite{mueller2018conception} describe several approaches to database versioning and synchronization between research institutes, highlighting the challenges of maintaining consistency across systems with different update cycles.
+
+Batch synchronization approaches transfer complete data sets between systems at scheduled intervals, ensuring comprehensive updates but potentially creating significant processing loads during synchronization periods. These approaches typically use extract-transform-load (ETL) processes to transfer data between systems, applying transformations as needed to align data formats and structures \cite{williams2004web}.
+
+Incremental synchronization approaches transfer only changed data between systems, reducing processing loads but requiring reliable change detection mechanisms. These approaches often use change data capture (CDC) techniques to identify modified records, combined with transformation and loading processes tailored to handle incremental updates \cite{seenivasan2023real}.
+
+Message-based synchronization uses messaging systems to propagate changes between databases in near-real-time, providing more immediate consistency but requiring more complex infrastructure. These approaches typically implement the publisher-subscriber pattern described by Hohpe and Woolf \cite{hohpe2002enterprise}, with database systems publishing change events that are consumed by subscribing systems.
+
+For automotive parameter management, where different systems operate on different schedules and have varying update frequencies, hybrid synchronization approaches often provide the most effective solution. These approaches combine elements of batch, incremental, and message-based synchronization based on specific synchronization scenarios and timing requirements \cite{mueller2018conception}.
+
+\section{Research Directions}
+\label{sec:research-directions}
+
+Based on this review, several research directions emerge for advancing the state of the art in automotive parameter management:
+
+Development of domain-specific versioning models that align directly with automotive development processes while providing the traceability and auditability required for regulatory compliance \cite{staron2021automotive}.
+
+Creation of hybrid access control approaches that combine the administrative benefits of RBAC with the flexibility needed for module-specific permissions and phase-dependent access controls \cite{ferraiolo2011policy, xu2014specification}.
+
+Design of efficient synchronization mechanisms for maintaining consistency between parameter management systems and related enterprise systems, particularly parameter definition databases and vehicle configuration databases \cite{mueller2018conception, hohpe2002enterprise}.
+
+Implementation of specialized validation frameworks that can verify parameter consistency across related parameters, ensuring that parameter configurations maintain system integrity throughout the development lifecycle \cite{broy2006challenges, staron2021automotive}.
+
+These research directions provide a foundation for developing specialized parameter management systems that address the unique challenges of automotive software development. By combining insights from database version control, access control models, and enterprise integration patterns with domain-specific knowledge of automotive development processes, such systems can provide effective solutions for managing the growing complexity of vehicle software parametrization.

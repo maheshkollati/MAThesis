@@ -1,0 +1,390 @@
+\chapter{Variant Management Test Cases}
+\label{appendix:variant-management-tests}
+
+This appendix provides a comprehensive listing of all test cases used to validate the variant management functionality implemented in the VMAP database. The test cases are organized by category and include detailed information about test actions, expected outcomes, and test results.
+
+\section{Variant Creation Test Cases}
+\label{sec:variant-creation-tests}
+
+This section details the test cases for validating variant creation functionality across different parameter types and constraints.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Variant Creation Test Cases} 
+\label{tab:variant-creation-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+VC-01 & Basic Variant Creation & Create variant with valid name and code rule & Variant created successfully & Pass \\
+\hline
+VC-02 & Duplicate Variant Name & Create variant with name that already exists in PID & Name uniqueness error & Pass \\
+\hline
+VC-03 & Empty Variant Name & Create variant with empty name & Validation error & Pass \\
+\hline
+VC-04 & Special Characters in Name & Create variant with special characters in name & Variant created successfully & Pass \\
+\hline
+VC-05 & Maximum Name Length & Create variant with 100-character name (maximum length) & Variant created successfully & Pass \\
+\hline
+VC-06 & Exceed Name Length & Create variant with name exceeding 100 characters & Validation error & Pass \\
+\hline
+VC-07 & Valid Code Rule & Create variant with syntactically valid code rule & Variant created successfully & Pass \\
+\hline
+VC-08 & Complex Code Rule & Create variant with complex rule containing multiple operators & Variant created successfully & Pass \\
+\hline
+VC-09 & Invalid PID Reference & Create variant with non-existent PID & Foreign key constraint error & Pass \\
+\hline
+VC-10 & Creation in Frozen Phase & Create variant in a frozen phase & Phase frozen error & Pass \\
+\hline
+VC-11 & Variant in Inactive PID & Create variant for parameter in inactive PID & Validation error & Pass \\
+\hline
+VC-12 & Null Code Rule & Create variant with null code rule & Variant created successfully & Pass \\
+\hline
+VC-13 & Variant Audit Trail & Create variant and verify audit trail & Audit record created correctly & Pass \\
+\hline
+VC-14 & Variant for Boolean Parameter & Create variant for parameter with boolean type & Variant created successfully & Pass \\
+\hline
+VC-15 & Variant for Enum Parameter & Create variant for parameter with enumeration type & Variant created successfully & Pass \\
+\hline
+VC-16 & Concurrent Variant Creation & Create variants concurrently from multiple sessions & All variants created successfully & Pass \\
+\hline
+VC-17 & Transaction Rollback & Begin transaction, create variant, then force rollback & No variant created & Pass \\
+\hline
+VC-18 & Permission Verification & Create variant with insufficient permissions & Permission denied error & Pass \\
+\hline
+\end{longtable}
+
+\section{Segment Modification Test Cases}
+\label{sec:segment-modification-tests}
+
+This section details the test cases for validating segment modification functionality across different parameter dimensions and value types.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Segment Creation Test Cases} 
+\label{tab:segment-creation-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+SC-01 & Create Scalar Segment & Create segment for scalar parameter & Segment created successfully & Pass \\
+\hline
+SC-02 & Create Array Segment (1D) & Create segment for 1D array parameter & Segment created successfully & Pass \\
+\hline
+SC-03 & Create Matrix Segment (2D) & Create segment for 2D matrix parameter & Segment created successfully & Pass \\
+\hline
+SC-04 & Create 3D Array Segment & Create segment for 3D array parameter & Segment created successfully & Pass \\
+\hline
+SC-05 & Invalid Dimension Index & Create segment with out-of-bounds dimension index & Validation error & Pass \\
+\hline
+SC-06 & Invalid Parameter Reference & Create segment with non-existent parameter ID & Foreign key constraint error & Pass \\
+\hline
+SC-07 & Integer Parameter Value & Create segment with integer parameter type & Segment created successfully & Pass \\
+\hline
+SC-08 & Float Parameter Value & Create segment with float parameter type & Segment created successfully & Pass \\
+\hline
+SC-09 & Boolean Parameter Value & Create segment with boolean parameter type & Segment created successfully & Pass \\
+\hline
+SC-10 & Minimum Value Boundary & Create segment with minimum allowed value & Segment created successfully & Pass \\
+\hline
+SC-11 & Maximum Value Boundary & Create segment with maximum allowed value & Segment created successfully & Pass \\
+\hline
+SC-12 & Below Minimum Value & Create segment with value below minimum & Validation error & Pass \\
+\hline
+SC-13 & Above Maximum Value & Create segment with value above maximum & Validation error & Pass \\
+\hline
+SC-14 & Creation in Frozen Phase & Create segment in a frozen phase & Phase frozen error & Pass \\
+\hline
+SC-15 & Duplicate Parameter-Dimension & Create segment for already modified parameter dimension & Unique constraint error & Pass \\
+\hline
+SC-16 & High Precision Value & Create segment with high precision decimal value & Segment created successfully & Pass \\
+\hline
+\end{longtable}
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Segment Update Test Cases} 
+\label{tab:segment-update-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+SU-01 & Update Scalar Segment & Modify existing scalar segment value & Segment updated successfully & Pass \\
+\hline
+SU-02 & Update 1D Array Element & Modify element in 1D array segment & Segment updated successfully & Pass \\
+\hline
+SU-03 & Update 2D Matrix Element & Modify element in 2D matrix segment & Segment updated successfully & Pass \\
+\hline
+SU-04 & Value Range Verification & Update segment with value outside valid range & Validation error & Pass \\
+\hline
+SU-05 & Update in Frozen Phase & Modify segment in a frozen phase & Phase frozen error & Pass \\
+\hline
+SU-06 & Concurrent Updates & Update same segment from multiple sessions & Last update preserved with proper locking & Pass \\
+\hline
+SU-07 & Update Non-Existent Segment & Update segment that doesn't exist & Not found error & Pass \\
+\hline
+SU-08 & Change to Default Value & Update segment to match default parameter value & Segment updated successfully & Pass \\
+\hline
+\end{longtable}
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Segment Deletion Test Cases} 
+\label{tab:segment-deletion-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+SD-01 & Delete Single Segment & Remove existing segment & Segment deleted successfully & Pass \\
+\hline
+SD-02 & Delete Non-Existent Segment & Delete segment that doesn't exist & Not found error & Pass \\
+\hline
+SD-03 & Delete in Frozen Phase & Delete segment in a frozen phase & Phase frozen error & Pass \\
+\hline
+SD-04 & Cascade Delete via Variant & Delete variant and verify segments cascade & All segments deleted & Pass \\
+\hline
+SD-05 & Cascade Delete via Parameter & Delete parameter and verify segments cascade & All segments deleted & Pass \\
+\hline
+SD-06 & Segment Deletion Audit & Delete segment and verify audit trail & Audit record created correctly & Pass \\
+\hline
+SD-07 & Permission Verification & Delete segment with insufficient permissions & Permission denied error & Pass \\
+\hline
+SD-08 & Transaction Rollback & Begin transaction, delete segment, then force rollback & Segment not deleted & Pass \\
+\hline
+\end{longtable}
+
+\section{Performance Test Cases}
+\label{sec:variant-performance-tests}
+
+This section details the performance test cases used to evaluate variant and segment operations under different data volumes and load conditions.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Variant and Segment Performance Test Cases} 
+\label{tab:variant-performance-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+VP-01 & Baseline Variant Creation & Create 10 variants and measure time & < 2 seconds total time & Pass \\
+\hline
+VP-02 & Baseline Segment Creation & Create 100 segments and measure time & < 10 seconds total time & Pass \\
+\hline
+VP-03 & High Volume Variant Creation & Create 100 variants for single PID & < 20 seconds total time & Pass \\
+\hline
+VP-04 & High Volume Segment Creation & Create 1000 segments across multiple variants & < 2 minutes total time & Pass \\
+\hline
+VP-05 & Single PID Load Test & Create 500 variants for single PID & System remains responsive & Pass \\
+\hline
+VP-06 & Multi-dimensional Parameter Load & Create segments for 3D parameter with 1000 elements & < 3 minutes total time & Pass \\
+\hline
+VP-07 & Concurrent User Simulation & 10 concurrent users creating variants & No deadlocks or errors & Pass \\
+\hline
+VP-08 & Variant Retrieval Scaling & Retrieve variants from PIDs with 10, 100, and 500 variants & Response time < 250ms & Pass \\
+\hline
+\end{longtable}
+
+\section{Test Implementation Details}
+\label{sec:variant-test-implementation}
+
+The variant management test cases were implemented using a combination of automated unit tests, integration tests, and performance benchmarks. The following code listing shows the typical structure used for implementing variant creation tests:
+
+\begin{lstlisting}[language=CSharp, caption={Variant Creation Test Implementation Example}, label={lst:variant-creation-test}]
+[Test]
+public void VC01_BasicVariantCreation_Success()
+{
+    // Arrange
+    var testUser = _userRepository.GetTestUser("module_developer@example.com");
+    var testPid = _pidRepository.GetTestPid();
+    
+    var variant = new VariantCreationPayload
+    {
+        PidId = testPid.PidId,
+        EcuId = testPid.EcuId,
+        PhaseId = _activePhaseId,
+        Name = "Test Variant " + Guid.NewGuid().ToString().Substring(0, 8),
+        CodeRule = "A AND (B OR C)"
+    };
+    
+    // Act
+    var result = _variantService.CreateVariant(variant, testUser.UserId);
+    
+    // Assert
+    Assert.IsNotNull(result);
+    Assert.That(result.VariantId, Is.GreaterThan(0));
+    
+    // Verify database state
+    var dbVariant = _database.QuerySingleOrDefault<Variant>(
+        "SELECT * FROM variants WHERE variant_id = @VariantId", 
+        new { VariantId = result.VariantId });
+    
+    Assert.IsNotNull(dbVariant);
+    Assert.That(dbVariant.Name, Is.EqualTo(variant.Name));
+    Assert.That(dbVariant.CodeRule, Is.EqualTo(variant.CodeRule));
+    Assert.That(dbVariant.CreatedBy, Is.EqualTo(testUser.UserId));
+    
+    // Verify audit trail
+    var auditRecord = _database.QuerySingleOrDefault<ChangeRecord>(
+        "SELECT * FROM change_history WHERE entity_type = 'variants' " +
+        "AND entity_id = @VariantId AND change_type = 'CREATE'", 
+        new { VariantId = result.VariantId });
+    
+    Assert.IsNotNull(auditRecord);
+    Assert.That(auditRecord.UserId, Is.EqualTo(testUser.UserId));
+}
+\end{lstlisting}
+
+Similarly, segment modification tests followed this structure but with appropriate adaptations for the specific operations:
+
+\begin{lstlisting}[language=CSharp, caption={Segment Modification Test Implementation Example}, label={lst:segment-modification-test}]
+[Test]
+public void SC01_CreateScalarSegment_Success()
+{
+    // Arrange
+    var testUser = _userRepository.GetTestUser("module_developer@example.com");
+    var testVariant = _variantRepository.GetTestVariant();
+    var testParameter = _parameterRepository.GetScalarParameter(testVariant.PidId);
+    
+    var segment = new SegmentCreationPayload
+    {
+        VariantId = testVariant.VariantId,
+        ParameterId = testParameter.ParameterId,
+        DimensionIndex = 0,
+        Decimal = 42.5m
+    };
+    
+    // Act
+    var result = _segmentService.CreateSegment(segment, testUser.UserId);
+    
+    // Assert
+    Assert.IsNotNull(result);
+    Assert.That(result.SegmentId, Is.GreaterThan(0));
+    
+    // Verify database state
+    var dbSegment = _database.QuerySingleOrDefault<Segment>(
+        "SELECT * FROM segments WHERE segment_id = @SegmentId", 
+        new { SegmentId = result.SegmentId });
+    
+    Assert.IsNotNull(dbSegment);
+    Assert.That(dbSegment.VariantId, Is.EqualTo(segment.VariantId));
+    Assert.That(dbSegment.ParameterId, Is.EqualTo(segment.ParameterId));
+    Assert.That(dbSegment.DimensionIndex, Is.EqualTo(segment.DimensionIndex));
+    Assert.That(dbSegment.Decimal, Is.EqualTo(segment.Decimal));
+    Assert.That(dbSegment.CreatedBy, Is.EqualTo(testUser.UserId));
+    
+    // Verify parameter value is within valid range
+    var parameterRange = _database.QuerySingleOrDefault<ParameterRange>(
+        "SELECT * FROM parameter_values WHERE parameter_id = @ParameterId", 
+        new { ParameterId = testParameter.ParameterId });
+    
+    if (parameterRange != null)
+    {
+        Assert.That(segment.Decimal, Is.GreaterThanOrEqualTo(parameterRange.ValueRangeBegin));
+        Assert.That(segment.Decimal, Is.LessThanOrEqualTo(parameterRange.ValueRangeEnd));
+    }
+}
+\end{lstlisting}
+
+Performance tests were implemented using a benchmarking approach that measured execution time across multiple iterations:
+
+\begin{lstlisting}[language=CSharp, caption={Performance Test Implementation Example}, label={lst:performance-test}]
+[Test]
+public void VP01_BaselineVariantCreation_Performance()
+{
+    // Arrange
+    var testUser = _userRepository.GetTestUser("module_developer@example.com");
+    var testPid = _pidRepository.GetTestPid();
+    var variants = new List<VariantCreationPayload>();
+    
+    for (int i = 0; i < 10; i++)
+    {
+        variants.Add(new VariantCreationPayload
+        {
+            PidId = testPid.PidId,
+            EcuId = testPid.EcuId,
+            PhaseId = _activePhaseId,
+            Name = $"Perf Test Variant {i}_{Guid.NewGuid().ToString().Substring(0, 8)}",
+            CodeRule = "A AND B"
+        });
+    }
+    
+    // Act
+    var stopwatch = new Stopwatch();
+    stopwatch.Start();
+    
+    foreach (var variant in variants)
+    {
+        _variantService.CreateVariant(variant, testUser.UserId);
+    }
+    
+    stopwatch.Stop();
+    
+    // Assert
+    Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(2000));
+    Console.WriteLine($"Time to create 10 variants: {stopwatch.ElapsedMilliseconds}ms");
+}
+\end{lstlisting}
+
+This standardized approach ensured comprehensive validation of the variant management functionality while providing detailed performance metrics for system evaluation.
+
+\section{Test Environment Configuration}
+\label{sec:test-environment-config}
+
+All variant management tests were conducted in a controlled test environment with the following specifications:
+
+\begin{itemize}
+    \item PostgreSQL 17 running on Windows Server 2022
+    \item Database server: 8 vCPUs, 32GB RAM, SSD storage
+    \item Application server: 4 vCPUs, 16GB RAM
+    \item Database containing baseline dataset (20,000 parameters, 188 variants, 28,776 segments)
+    \item Testing conducted with both the baseline dataset and scaled dataset (100,000 parameters, 830 variants, 167,990 segments)
+    \item Network latency between application and database servers < 1ms
+    \item PostgreSQL configuration optimized for test environment with appropriate memory allocation for shared buffers, work memory, and maintenance work memory
+\end{itemize}
+
+The test environment was reset to a known state between test runs using database snapshots, ensuring consistent starting conditions for each test execution.

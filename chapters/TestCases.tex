@@ -1,0 +1,389 @@
+\appendix
+\chapter{User Management Test Cases}
+\label{appendix:user-management-tests}
+
+This appendix provides a comprehensive listing of all test cases used to validate the user management and access control system implemented in the VMAP database. The test cases are organized by category and include detailed information about test actions, expected outcomes, and test results.
+
+\section{Role-Based Permission Test Cases}
+\label{sec:role-based-permission-tests}
+
+This section details the test cases for validating permissions inherited through user roles. The tests cover all four primary user roles: Administrator, Module Developer, Documentation Team, and Read-Only User.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Administrator Role Permission Test Cases} 
+\label{tab:admin-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+AD-01 & Create User & Add new user with valid details & User created successfully & Pass \\
+\hline
+AD-02 & Modify User Role & Change user's assigned role & Role updated successfully & Pass \\
+\hline
+AD-03 & Delete User & Remove existing user & User deleted successfully & Pass \\
+\hline
+AD-04 & Create Role & Create new role with permissions & Role created successfully & Pass \\
+\hline
+AD-05 & Delete Variant & Delete existing variant & Variant deleted successfully & Pass \\
+\hline
+AD-06 & Freeze Phase & Set phase status to frozen & Phase frozen successfully & Pass \\
+\hline
+\end{longtable}
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Module Developer Role Permission Test Cases} 
+\label{tab:module-dev-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+MD-01 & Create Variant (Assigned Module) & Create new variant for parameter in assigned module & Variant created successfully & Pass \\
+\hline
+MD-02 & Create Variant (Unassigned Module) & Create new variant for parameter in unassigned module & Access denied error & Pass \\
+\hline
+MD-03 & Edit Variant (Assigned Module) & Modify existing variant code rule & Variant updated successfully & Pass \\
+\hline
+MD-04 & Delete Variant & Attempt to delete variant & Access denied error & Pass \\
+\hline
+MD-05 & Create Segment (Assigned Module) & Create new segment with valid value & Segment created successfully & Pass \\
+\hline
+MD-06 & Modify Frozen Phase & Attempt to modify segment in frozen phase & Access denied error & Pass \\
+\hline
+MD-07 & Generate Parameter File & Create parameter file for testing & File generated successfully & Pass \\
+\hline
+MD-08 & Read Parameters (Any Module) & View parameters from any module & Parameters displayed successfully & Pass \\
+\hline
+\end{longtable}
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Documentation Team Role Permission Test Cases} 
+\label{tab:doc-team-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+DT-01 & Create Documentation Snapshot & Create snapshot of frozen phase & Snapshot created successfully & Pass \\
+\hline
+DT-02 & Compare Phases & Compare parameters between two phases & Comparison results displayed & Pass \\
+\hline
+DT-03 & View Parameter History & View change history for parameter & History displayed successfully & Pass \\
+\hline
+DT-04 & Export Hex String & Copy parameter hex string & Hex string copied successfully & Pass \\
+\hline
+DT-05 & Modify Parameter & Attempt to modify parameter & Access denied error & Pass \\
+\hline
+DT-06 & Access All Phases & View parameters across all phases & Parameters displayed successfully & Pass \\
+\hline
+DT-07 & Generate Parameter File & Create parameter file for reference & File generated successfully & Pass \\
+\hline
+\end{longtable}
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Read-Only User Role Permission Test Cases} 
+\label{tab:read-only-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+RO-01 & View Parameters & Access parameter details & Parameters displayed successfully & Pass \\
+\hline
+RO-02 & View Variants & Access variant details & Variants displayed successfully & Pass \\
+\hline
+RO-03 & Modify Parameter & Attempt to modify parameter & Access denied error & Pass \\
+\hline
+RO-04 & Modify Variant & Attempt to modify variant & Access denied error & Pass \\
+\hline
+RO-05 & Generate Parameter File & Create parameter file for reference & File generated successfully & Pass \\
+\hline
+\end{longtable}
+
+\section{Module-Based Access Control Test Cases}
+\label{sec:module-based-access-tests}
+
+This section details the test cases for validating module-specific access controls, which extend the role-based permissions with attribute-based restrictions.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Module-Based Access Control Test Cases} 
+\label{tab:module-access-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+MA-01 & Assign Module Access & Grant write access to specific module & Access granted successfully & Pass \\
+\hline
+MA-02 & Revoke Module Access & Remove write access to specific module & Access revoked successfully & Pass \\
+\hline
+MA-03 & Read Access Cross-Module & Access parameters from unassigned module & Read access successful & Pass \\
+\hline
+MA-04 & Write Access Assigned Module & Create variant in assigned module & Variant created successfully & Pass \\
+\hline
+MA-05 & Write Access Unassigned Module & Create variant in unassigned module & Access denied error & Pass \\
+\hline
+MA-06 & Multiple Module Assignment & Create variants in multiple assigned modules & All variants created successfully & Pass \\
+\hline
+MA-07 & Edit Segment Assigned Module & Modify segment in assigned module & Segment updated successfully & Pass \\
+\hline
+MA-08 & Edit Segment Unassigned Module & Modify segment in unassigned module & Access denied error & Pass \\
+\hline
+MA-09 & Administrator Override & Admin modifies any module & Modification successful & Pass \\
+\hline
+MA-10 & Module Permission Inheritance & User with role change inherits proper module access & Access updated successfully & Pass \\
+\hline
+\end{longtable}
+
+\section{Direct Permission Assignment Test Cases}
+\label{sec:direct-permission-tests}
+
+This section details the test cases for validating user-specific permission assignments that override role-based permissions.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Direct Permission Assignment Test Cases} 
+\label{tab:direct-permission-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+DP-01 & Grant Additional Permission & Assign permission not in user's role & Permission applied successfully & Pass \\
+\hline
+DP-02 & Revoke Role Permission & Remove permission normally granted by role & Permission restriction applied & Pass \\
+\hline
+DP-03 & Grant Delete Permission & Give read-only user delete permission & Deletion operation successful & Pass \\
+\hline
+DP-04 & Permission Conflict Resolution & Conflicting role and direct permissions & Direct permission takes precedence & Pass \\
+\hline
+DP-05 & Role Change with Custom Permission & Change user's role with custom permissions & Custom permissions preserved & Pass \\
+\hline
+DP-06 & Permission Audit Trail & Track changes to user permissions & Audit trail correctly recorded & Pass \\
+\hline
+\end{longtable}
+
+\section{Phase-Specific Permission Test Cases}
+\label{sec:phase-permission-tests}
+
+This section details the test cases validating the interaction between access control and phase management, particularly focusing on phase freezing and phase-specific operations.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Phase-Specific Permission Test Cases} 
+\label{tab:phase-permission-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+PP-01 & Frozen Phase Modification & Attempt to modify variant in frozen phase & Access denied error & Pass \\
+\hline
+PP-02 & Documentation Access to Frozen Phase & Documentation team accesses frozen phase & Access granted successfully & Pass \\
+\hline
+PP-03 & Administrator Unfreeze & Administrator unfreezes a phase & Phase unfrozen successfully & Pass \\
+\hline
+PP-04 & Non-Administrator Freeze Attempt & Module developer attempts to freeze phase & Access denied error & Pass \\
+\hline
+PP-05 & Read Access to Frozen Phase & Read-only user accesses frozen phase & Access granted successfully & Pass \\
+\hline
+PP-06 & Phase Transition Permission & Module developer initiates phase transition & Transition completed successfully & Pass \\
+\hline
+\end{longtable}
+
+\section{Boundary Case Test Cases}
+\label{sec:boundary-case-tests}
+
+This section details test cases for edge conditions and corner cases in the access control system.
+
+\begin{longtable}{|p{0.7cm}|p{3.5cm}|p{3.7cm}|p{3.7cm}|c|}
+\caption{Boundary Case Test Cases} 
+\label{tab:boundary-case-test-cases} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Status} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+BC-01 & No Role Assignment & User with no assigned role attempts access & Access limited to public content & Pass \\
+\hline
+BC-02 & Multiple Role Assignment & User with multiple roles attempts action & Most permissive role takes effect & Pass \\
+\hline
+BC-03 & Role With No Permissions & Assign user to empty role & No permissions granted & Pass \\
+\hline
+BC-04 & Session Timeout Handling & Session expires during operation & User properly redirected to login & Pass \\
+\hline
+\end{longtable}
+
+\section{Test Implementation Details}
+\label{sec:test-implementation}
+
+Each test case was implemented using a structured approach that combined database-level validation with service-layer testing. The following code listing shows the general structure used for implementing these test cases:
+
+\begin{lstlisting}[language=CSharp, caption={Test Case Implementation Template}, label={lst:test-case-template}]
+[Test]
+public void TestCaseID_Description_ExpectedOutcome()
+{
+    // Arrange: Set up test environment
+    var testUser = CreateTestUser("[UserRole]");
+    var testEntity = CreateTestEntity();
+    
+    // Configure specific test conditions
+    ConfigureTestConditions();
+    
+    // Act: Perform the operation being tested
+    if (ShouldSucceed)
+    {
+        var result = _service.PerformOperation(testEntity, testUser.UserId);
+        
+        // Assert: Verify operation succeeded
+        Assert.IsNotNull(result);
+        Assert.That(result.Status, Is.EqualTo(OperationStatus.Success));
+        
+        // Verify database state reflects the change
+        var dbEntity = _database.QuerySingleOrDefault<Entity>(
+            "SELECT * FROM entities WHERE id = @Id", 
+            new { Id = testEntity.Id });
+        Assert.IsNotNull(dbEntity);
+        Assert.That(dbEntity.Property, Is.EqualTo(testEntity.Property));
+    }
+    else
+    {
+        // Assert: Verify operation is denied with appropriate error
+        var exception = Assert.Throws<PermissionDeniedException>(() => 
+            _service.PerformOperation(testEntity, testUser.UserId));
+        Assert.That(exception.Message, Contains.Substring("expected error message"));
+        
+        // Verify database state was not modified
+        var dbEntity = _database.QuerySingleOrDefault<Entity>(
+            "SELECT * FROM entities WHERE id = @Id", 
+            new { Id = testEntity.Id });
+        Assert.That(dbEntity, Is.Null().Or.Property("Property")
+                               .Not.EqualTo(testEntity.Property));
+    }
+}
+\end{lstlisting}
+
+This standardized approach ensured consistent validation across all test cases while providing clear evidence of both successful permission grants and appropriate permission denials. Each test verified both the immediate operation result and the resulting database state, ensuring comprehensive validation of the access control system.
+
+\section{Role Permission Matrix}
+\label{sec:role-permission-matrix}
+
+Table \ref{tab:permission-matrix} provides a comprehensive view of all permissions assigned to each user role in the VMAP system. This matrix formed the basis for the permission validation test cases.
+
+\begin{longtable}{|p{3.5cm}|c|c|c|c|}
+\caption{Role Permission Matrix} 
+\label{tab:permission-matrix} \\
+\hline
+\textbf{Permission} & \textbf{Admin} & \textbf{Module Dev} & \textbf{Doc Team} & \textbf{Read-Only} \\
+\hline
+\endfirsthead
+\multicolumn{5}{c}%
+{\tablename\ \thetable\ -- \textit{Continued from previous page}} \\
+\hline
+\textbf{Permission} & \textbf{Admin} & \textbf{Module Dev} & \textbf{Doc Team} & \textbf{Read-Only} \\
+\hline
+\endhead
+\hline \multicolumn{5}{r}{\textit{Continued on next page}} \\
+\endfoot
+\hline
+\endlastfoot
+manage\_users & \checkmark & \texttimes & \texttimes & \texttimes \\
+\hline
+manage\_roles & \checkmark & \texttimes & \texttimes & \texttimes \\
+\hline
+delete\_variants & \checkmark & \texttimes & \texttimes & \texttimes \\
+\hline
+create\_variants & \checkmark & \checkmark & \texttimes & \texttimes \\
+\hline
+edit\_variants & \checkmark & \checkmark & \texttimes & \texttimes \\
+\hline
+create\_segments & \checkmark & \checkmark & \texttimes & \texttimes \\
+\hline
+edit\_segments & \checkmark & \checkmark & \texttimes & \texttimes \\
+\hline
+delete\_segments & \checkmark & \checkmark & \texttimes & \texttimes \\
+\hline
+create\_snapshots & \checkmark & \texttimes & \checkmark & \texttimes \\
+\hline
+view\_history & \checkmark & \checkmark & \checkmark & \checkmark \\
+\hline
+generate\_par\_files & \checkmark & \checkmark & \checkmark & \checkmark \\
+\hline
+freeze\_phases & \checkmark & \texttimes & \texttimes & \texttimes \\
+\hline
+view\_all & \checkmark & \checkmark & \checkmark & \checkmark \\
+\hline
+\end{longtable}
+
+Note that Module Developer permissions for variant and segment operations are further constrained by module-specific access controls, as validated in the test cases in Section \ref{sec:module-based-access-tests}.

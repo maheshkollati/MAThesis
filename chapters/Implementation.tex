@@ -1,0 +1,761 @@
+\chapter{Implementation}
+\label{chap:implementation}
+
+This chapter presents the technical implementation of the VMAP system conceptual architecture described in Chapter \ref{chap:methodology}. Rather than exhaustively cataloging implementation details, the discussion focuses on key architectural components, highlighting technical decisions that enable efficient parameter versioning in automotive software development.
+
+\section{Database Structure Implementation}
+\label{sec:database-structure-implementation}
+
+The database implementation transforms abstract entities and relationships into concrete PostgreSQL structures, implementing the hierarchical organization of automotive electronic systems through four primary entity types: ECUs, Modules, PIDs, and Parameters.
+
+\subsection{Core Data Entities}
+\label{subsec:core-data-entities}
+
+The ECU and Module entities form the top levels of the hierarchy, implemented with a many-to-many relationship reflecting the reality that the same logical module may exist across multiple ECUs:
+
+\begin{lstlisting}[language=SQL, caption={ECU and Module Table Implementation}, label={lst:ecu-module-tables}]
+CREATE TABLE ecus (
+    ecu_id INTEGER PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    byte_order VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    external_id INTEGER UNIQUE -- PDD reference ID
+);
+
+CREATE TABLE modules (
+    module_id INTEGER PRIMARY KEY,
+    shortcut VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    kind VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    external_id INTEGER UNIQUE -- PDD reference ID
+);
+
+-- Link ECUs and Modules - A module can exist in multiple ECUs
+CREATE TABLE ecu_modules (
+    ecu_id INTEGER REFERENCES ecus(ecu_id) ON DELETE CASCADE,
+    module_id INTEGER REFERENCES modules(module_id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (ecu_id, module_id)
+);
+\end{lstlisting}
+
+The junction table \texttt{ecu\_modules} implements this many-to-many relationship following the foreign key pattern described by Elmasri and Navathe \cite{elmasri2015fundamentals}. Each entity includes an \texttt{external\_id} attribute to maintain mapping with the Parameter Definition Database, facilitating integration and synchronization.
+
+PIDs and Parameters constitute the lower hierarchy levels:
+
+\begin{lstlisting}[language=SQL, caption={PID and Parameter Table Implementation}, label={lst:pid-parameter-tables}]
+CREATE TABLE pids (
+    pid_id BIGINT PRIMARY KEY,
+    ecu_id INTEGER REFERENCES ecus(ecu_id) ON DELETE CASCADE,
+    module_id INTEGER REFERENCES modules(module_id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    external_id INTEGER UNIQUE, -- PDD reference ID
+    -- Ensure the ECU-Module combination exists
+    CONSTRAINT pid_ecu_module_fk FOREIGN KEY (ecu_id, module_id) 
+    REFERENCES ecu_modules(ecu_id, module_id)
+);
+
+CREATE TABLE parameters (
+    parameter_id BIGINT PRIMARY KEY,
+    pid_id BIGINT REFERENCES pids(pid_id) ON DELETE CASCADE,
+    ecu_id INTEGER,
+    phase_id INTEGER,
+    name VARCHAR(255) NOT NULL,
+    parameter_name VARCHAR(255),
+    type_id INTEGER REFERENCES parameter_data_types(data_type_id),
+    array_definition VARCHAR(50),
+    position INTEGER,
+    factor DECIMAL,
+    unit VARCHAR(50),
+    bias_offset DECIMAL,
+    is_active BOOLEAN DEFAULT true,
+    external_id INTEGER, -- PDD reference ID
+    FOREIGN KEY (ecu_id, phase_id) REFERENCES ecu_phases(ecu_id, phase_id)
+);
+\end{lstlisting}
+
+The PID table includes a compound foreign key constraint ensuring each PID references a valid ECU-Module combination, preventing orphaned PIDs. The parameters table incorporates strategic denormalization with direct references to \texttt{ecu\_id} and \texttt{phase\_id} alongside the PID foreign key. While introducing some redundancy, this approach significantly improves performance for parameter queries by release phase, a common operation in the system. As noted by Bhattacherjee et al. \cite{bhattacherjee2015principles}, strategic denormalization can substantially improve query performance when data access patterns favor specific traversal paths.
+
+A particularly challenging aspect was implementing multi-dimensional parameters, common in automotive applications for lookup tables and characteristic curves:
+
+\begin{lstlisting}[language=SQL, caption={Parameter Dimension Table Implementation}, label={lst:parameter-dimension-table}]
+CREATE TABLE parameter_dimensions (
+    dimension_id BIGINT PRIMARY KEY,
+    parameter_id BIGINT REFERENCES parameters(parameter_id) ON DELETE CASCADE,
+    dimension_index INTEGER NOT NULL,
+    default_value NUMERIC NOT NULL,
+    external_id INTEGER, -- PDD reference ID
+    UNIQUE (parameter_id, dimension_index)
+);
+\end{lstlisting}
+
+This implementation follows a modified entity-attribute-value (EAV) pattern addressing the need for flexible dimensionality while maintaining query performance. As noted by Nadkarni et al. \cite{nadkarni2016revisiting}, traditional EAV models can suffer from performance limitations, but careful design constraints can mitigate these issues. The \texttt{dimension\_index} field provides an ordered structure to dimensions, enabling efficient representation of arrays and matrices.
+
+\subsection{User Management and Access Control}
+\label{subsec:user-management-access-control-implementation}
+
+The user management implementation realizes the role-based access control (RBAC) model with extensions supporting module-specific permissions:
+
+\begin{lstlisting}[language=SQL, caption={Core RBAC Table Implementation}, label={lst:rbac-tables}]
+CREATE TABLE users (
+    user_id BIGINT PRIMARY KEY,
+    emp_id VARCHAR(50) UNIQUE NOT NULL,
+    first_name VARCHAR(255) NOT NULL,
+    last_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    status VARCHAR(50),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE roles (
+    role_id INTEGER PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE permissions (
+    permission_id INTEGER PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT
+);
+
+CREATE TABLE role_permissions (
+    role_id INTEGER REFERENCES roles(role_id) ON DELETE CASCADE,
+    permission_id INTEGER REFERENCES permissions(permission_id) ON DELETE CASCADE,
+    granted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    granted_by BIGINT REFERENCES users(user_id),
+    PRIMARY KEY (role_id, permission_id)
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    role_id INTEGER REFERENCES roles(role_id) ON DELETE CASCADE,
+    granted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    granted_by BIGINT REFERENCES users(user_id),
+    PRIMARY KEY (user_id, role_id)
+);
+\end{lstlisting}
+
+This implementation follows the RBAC0 model defined by Sandhu et al. \cite{sandhu1998role}, providing users, roles, and permissions with their many-to-many relationships. The inclusion of \texttt{granted\_at} and \texttt{granted\_by} fields in junction tables extends the basic model with audit information, addressing accountability requirements common in regulated industries like automotive development \cite{staron2021automotive}.
+
+The RBAC model is extended with module-based access control:
+
+\begin{lstlisting}[language=SQL, caption={Module-Based Access Control Implementation}, label={lst:module-access-control}]
+CREATE TABLE user_access (
+    user_id BIGINT REFERENCES users(user_id) ON DELETE CASCADE,
+    ecu_id INTEGER REFERENCES ecus(ecu_id) ON DELETE CASCADE,
+    module_id INTEGER REFERENCES modules(module_id) ON DELETE CASCADE,
+    write_access BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT REFERENCES users(user_id),
+    updated_by BIGINT REFERENCES users(user_id),
+    PRIMARY KEY (user_id, ecu_id, module_id),
+    CONSTRAINT user_access_ecu_module_fk FOREIGN KEY (ecu_id, module_id) 
+    REFERENCES ecu_modules(ecu_id, module_id)
+);
+\end{lstlisting}
+
+This implementation combines attributes of both role-based and attribute-based access control, creating what Ferraiolo et al. describe as policy-enhanced RBAC \cite{ferraiolo2011policy}. The \texttt{user\_access} table establishes a three-way relationship between users, ECUs, and modules, with a boolean flag distinguishing between read and write access. The constraint ensures access is granted only for valid ECU-module combinations, enforcing structural integrity. This approach implements the principle of least privilege, allowing administrators to grant write access specifically to modules developers are responsible for while maintaining read access across all modules.
+
+\subsection{Release Management Implementation}
+\label{subsec:release-management-implementation}
+
+The release management implementation realizes the phase-based versioning approach, providing a flexible framework for managing parameter evolution across development phases:
+
+\begin{lstlisting}[language=SQL, caption={Release and Phase Table Implementation}, label={lst:release-phase-tables}]
+CREATE TABLE releases (
+    release_id INTEGER PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE, -- e.g., "24.1", "24.3"
+    description TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT REFERENCES users(user_id),
+    updated_by BIGINT REFERENCES users(user_id)
+);
+
+CREATE TABLE release_phases (
+    phase_id INTEGER PRIMARY KEY,
+    release_id INTEGER REFERENCES releases(release_id) ON DELETE CASCADE,
+    name VARCHAR(50) NOT NULL, -- e.g., "Phase1", "Phase2", "Phase3", "Phase4"
+    sequence_number INTEGER NOT NULL, -- Determines the order of phases
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT REFERENCES users(user_id),
+    updated_by BIGINT REFERENCES users(user_id),
+    UNIQUE (release_id, name),
+    UNIQUE (release_id, sequence_number)
+);
+\end{lstlisting}
+
+This implementation supports the bi-annual release cycle (e.g., "24.1", "24.3") used in automotive development, with each release progressing through four sequential phases. The \texttt{sequence\_number} field provides explicit ordering of phases within a release, enabling efficient filtering and sorting in queries. Unique constraints ensure consistency of phase naming and sequencing within each release.
+
+The ECU-phase mapping implements the association between ECUs and specific release phases:
+
+\begin{lstlisting}[language=SQL, caption={ECU-Phase Mapping Implementation}, label={lst:ecu-phase-mapping}]
+CREATE TABLE ecu_phases (
+    ecu_id INTEGER REFERENCES ecus(ecu_id) ON DELETE CASCADE,
+    phase_id INTEGER REFERENCES release_phases(phase_id) ON DELETE CASCADE,
+    release_type VARCHAR(50), -- e.g., "Production", "Development", "Test"
+    start_date DATE,
+    end_date DATE,
+    is_active BOOLEAN DEFAULT true,
+    is_frozen BOOLEAN DEFAULT false,
+    frozen_at TIMESTAMP WITH TIME ZONE,
+    frozen_by BIGINT REFERENCES users(user_id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT REFERENCES users(user_id),
+    updated_by BIGINT REFERENCES users(user_id),
+    PRIMARY KEY (ecu_id, phase_id),
+    CONSTRAINT valid_date_range CHECK (start_date <= end_date OR end_date IS NULL)
+);
+\end{lstlisting}
+
+This implementation extends beyond a simple junction table, incorporating status flags and temporal attributes tracking ECU progression through phases. The \texttt{is\_frozen} flag implements the phase freezing mechanism, marking a phase as read-only when reaching a stable milestone. The ECU-phase mapping provides several capabilities supporting the versioning approach: independent progression of ECUs through development, explicit phase state tracking, and a fundamental versioning dimension associating parameters with specific development timeline points.
+
+This represents a departure from traditional temporal database approaches. Rather than using validity timestamps and complex temporal queries, the system uses explicit phase associations to create a more intuitive and efficient versioning model. As noted by Bhattacherjee et al. \cite{bhattacherjee2015principles}, domain-specific versioning approaches often provide better performance and usability than generic temporal database techniques when tailored to specific application domain requirements.
+
+\subsection{Variant and Segment Management}
+\label{subsec:variant-segment-management}
+
+The variant and segment management realizes the core parameter customization capabilities:
+
+\begin{lstlisting}[language=SQL, caption={Variant and Segment Implementation}, label={lst:variant-segment-tables}]
+CREATE TABLE variants (
+    variant_id BIGINT PRIMARY KEY,
+    pid_id BIGINT REFERENCES pids(pid_id) ON DELETE CASCADE,
+    ecu_id INTEGER,
+    phase_id INTEGER,
+    name VARCHAR(100) NOT NULL,
+    code_rule TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT REFERENCES users(user_id),
+    updated_by BIGINT REFERENCES users(user_id),
+    FOREIGN KEY (ecu_id, phase_id) REFERENCES ecu_phases(ecu_id, phase_id)
+);
+
+CREATE TABLE segments (
+    segment_id BIGINT PRIMARY KEY,
+    variant_id BIGINT REFERENCES variants(variant_id) ON DELETE CASCADE,
+    parameter_id BIGINT REFERENCES parameters(parameter_id) ON DELETE CASCADE,
+    dimension_index INTEGER NOT NULL,
+    decimal NUMERIC NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT REFERENCES users(user_id),
+    updated_by BIGINT REFERENCES users(user_id)
+);
+\end{lstlisting}
+
+Each variant is associated with a specific PID, ECU, and phase, creating a three-way relationship placing the variant in both functional and temporal contexts. The \texttt{code\_rule} field stores boolean expressions determining when a variant applies based on vehicle configuration codes, following the rule engine pattern described by Fowler \cite{fowler2003patterns}.
+
+Each segment associates a parameter with a variant, creating the core relationship defining parameter customization. The \texttt{dimension\_index} field supports multi-dimensional parameters, allowing modification of specific elements within array parameters. Segments store values in a canonical decimal representation regardless of the parameter's native data type, implementing the canonical model pattern described by Hohpe and Woolf \cite{hohpe2002enterprise}.
+
+To support documentation and compliance requirements, the system implements a snapshot mechanism capturing variant and segment states at specific time points:
+
+\begin{lstlisting}[language=SQL, caption={Documentation Snapshot Implementation}, label={lst:documentation-snapshot}]
+CREATE TABLE documentation_snapshots (
+    snapshot_id INTEGER PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    ecu_id INTEGER,
+    phase_id INTEGER,
+    variant_count INTEGER DEFAULT 0,
+    segment_count INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    created_by BIGINT REFERENCES users(user_id),
+    FOREIGN KEY (ecu_id, phase_id) REFERENCES ecu_phases(ecu_id, phase_id)
+);
+
+CREATE TABLE snapshot_variants (
+    snapshot_variant_id INTEGER PRIMARY KEY,
+    snapshot_id INTEGER REFERENCES documentation_snapshots(snapshot_id) ON DELETE CASCADE,
+    original_variant_id BIGINT, -- Reference to the original variant
+    pid_id BIGINT REFERENCES pids(pid_id) ON DELETE CASCADE,
+    name VARCHAR(100) NOT NULL,
+    code_rule TEXT,
+    created_at TIMESTAMP WITH TIME ZONE,
+    created_by BIGINT REFERENCES users(user_id)
+);
+
+CREATE TABLE snapshot_segments (
+    snapshot_segment_id INTEGER PRIMARY KEY,
+    snapshot_id INTEGER REFERENCES documentation_snapshots(snapshot_id) ON DELETE CASCADE,
+    snapshot_variant_id INTEGER REFERENCES snapshot_variants(snapshot_variant_id) ON DELETE CASCADE,
+    original_segment_id BIGINT, -- Reference to the original segment
+    parameter_id BIGINT REFERENCES parameters(parameter_id) ON DELETE CASCADE,
+    dimension_index INTEGER NOT NULL,
+    decimal NUMERIC NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE,
+    created_by BIGINT REFERENCES users(user_id)
+);
+\end{lstlisting}
+
+This implementation follows the snapshot pattern described by Fowler \cite{fowler2003patterns}, creating a complete copy of variant and segment data at specific points. Rather than using a temporal database approach with validity periods, the system explicitly materializes historical states, ensuring they remain accessible regardless of subsequent modifications to live data. References to original entities enable traceability between snapshot and live data, implementing the origin tracking pattern described by Tichy \cite{tichy1985rcs}.
+
+In the automotive industry, these snapshots serve multiple purposes: providing immutable records of parameter configurations at significant development milestones, supporting quality assurance processes and regulatory compliance requirements, and facilitating comparative analysis between development phases.
+
+\subsection{Change Tracking Mechanisms}
+\label{subsec:change-tracking-mechanisms}
+
+Comprehensive change tracking is implemented through the change history table, which records all modifications to key entities. Each change record includes entity type and ID, user, timestamp, change type, and both before and after states stored as JSONB documents. This approach implements the state snapshot pattern described by Fowler \cite{fowler2003patterns}, capturing complete entity state rather than just modified fields.
+
+The change tracking system incorporates a transaction ID to group related changes, implementing the unit of work pattern \cite{fowler2003patterns}. This grouping preserves the integrity of multi-entity operations, ensuring changes are interpreted in their proper context. The system serves multiple purposes beyond auditing: providing foundation for change history analysis, enabling detailed examination of parameter configuration evolution, and supporting accountability in the development process.
+
+\section{Version Control Implementation}
+\label{sec:version-control-implementation}
+
+The version control implementation constitutes the core VMAP system functionality, enabling parameter evolution management across different development phases.
+
+\subsection{Release Phase Management}
+\label{subsec:release-phase-management}
+
+The release phase management provides the temporal framework for parameter versioning. A phase relationship view establishes explicit navigation paths between phases in the development sequence:
+
+\begin{lstlisting}[language=SQL, caption={Phase Relationship View Implementation}, label={lst:phase-relationship-view}]
+CREATE OR REPLACE VIEW vw_phase_relationships AS
+SELECT 
+    r.release_id,
+    r.name AS release_name,
+    rp.phase_id,
+    rp.name AS phase_name,
+    rp.sequence_number,
+    (
+        SELECT rp2.phase_id
+        FROM release_phases rp2
+        WHERE rp2.release_id = r.release_id
+        AND rp2.sequence_number = rp.sequence_number + 1
+    ) AS next_phase_id,
+    (
+        SELECT r2.release_id
+        FROM releases r2
+        WHERE r2.name > r.name
+        ORDER BY r2.name
+        LIMIT 1
+    ) AS next_release_id
+FROM 
+    releases r
+    JOIN release_phases rp ON r.release_id = rp.release_id
+WHERE 
+    r.is_active = true
+ORDER BY 
+    r.name, rp.sequence_number;
+\end{lstlisting}
+
+This view implements sophisticated temporal mapping, identifying both the next phase within a release and the initial phase of the next release. The implementation uses nested subqueries to determine sequential relationships, creating explicit links between phases across the development timeline. This follows the explicit relationship pattern described by Date \cite{date2011sql}, making temporal relationships queryable through standard SQL rather than relying on application logic to interpret sequence numbers.
+
+Phase state management is implemented through stored procedures that control phase transitions between editable and frozen states. The freeze operation records the user, timestamp, and reason, maintaining accountability for these significant state changes. Additionally, a documentation snapshot is automatically created to preserve the complete parameter configuration at freezing time.
+
+\subsection{Parameter History Tracking}
+\label{subsec:parameter-history-tracking}
+
+Parameter history tracking extends the core change tracking mechanism with specific features for analyzing parameter evolution over time:
+
+\begin{lstlisting}[language=SQL, caption={Parameter History Function Implementation}, label={lst:parameter-history-function}]
+CREATE OR REPLACE FUNCTION get_parameter_history(
+    p_parameter_id BIGINT,
+    p_dimension_index INTEGER DEFAULT NULL
+)
+RETURNS TABLE (
+    change_id BIGINT,
+    changed_at TIMESTAMP WITH TIME ZONE,
+    user_name VARCHAR,
+    variant_id BIGINT,
+    variant_name VARCHAR,
+    old_value NUMERIC,
+    new_value NUMERIC,
+    change_type VARCHAR,
+    transaction_id BIGINT
+) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        ch.change_id,
+        ch.changed_at,
+        u.first_name || ' ' || u.last_name AS user_name,
+        v.variant_id,
+        v.name AS variant_name,
+        CASE
+            WHEN ch.change_type = 'DELETE' THEN 
+                (ch.old_values->>'decimal')::NUMERIC
+            WHEN ch.change_type = 'UPDATE' THEN 
+                (ch.old_values->>'decimal')::NUMERIC
+            ELSE NULL
+        END AS old_value,
+        CASE
+            WHEN ch.change_type = 'CREATE' THEN 
+                (ch.new_values->>'decimal')::NUMERIC
+            WHEN ch.change_type = 'UPDATE' THEN 
+                (ch.new_values->>'decimal')::NUMERIC
+            ELSE NULL
+        END AS new_value,
+        ch.change_type,
+        ch.transaction_id
+    FROM 
+        change_history ch
+        JOIN users u ON ch.user_id = u.user_id
+        JOIN segments s ON ch.entity_id = s.segment_id 
+                       AND ch.entity_type = 'segments'
+        JOIN variants v ON s.variant_id = v.variant_id
+    WHERE 
+        s.parameter_id = p_parameter_id
+        AND (p_dimension_index IS NULL 
+             OR s.dimension_index = p_dimension_index)
+    ORDER BY 
+        ch.changed_at DESC;
+END;
+$$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+This function uses JSON path operators to extract and type-cast values from the JSONB store, implementing the document extraction pattern described by Abelló et al. \cite{abello2006active}. It handles different data structures for different change types while presenting a consistent interface to the caller. By including user information in the result set, it implements the attribution pattern described by Fowler \cite{fowler2003patterns}, providing immediate context for who made each change without requiring additional queries.
+
+\subsection{Freeze Mechanism Implementation}
+\label{subsec:freeze-mechanism-implementation}
+
+The freeze mechanism is enforced through triggers that prevent modifications to frozen phases:
+
+\begin{lstlisting}[language=SQL, caption={Freeze Status Enforcement Implementation}, label={lst:freeze-enforcement}]
+CREATE OR REPLACE FUNCTION enforce_freeze_status()
+RETURNS TRIGGER AS $$
+DECLARE
+    is_frozen BOOLEAN;
+BEGIN
+    -- Get freeze status for the relevant phase
+    IF TG_TABLE_NAME = 'variants' THEN
+        SELECT ep.is_frozen INTO is_frozen
+        FROM ecu_phases ep
+        WHERE ep.ecu_id = NEW.ecu_id AND ep.phase_id = NEW.phase_id;
+    ELSIF TG_TABLE_NAME = 'segments' THEN
+        SELECT ep.is_frozen INTO is_frozen
+        FROM variants v
+        JOIN ecu_phases ep ON v.ecu_id = ep.ecu_id 
+                          AND v.phase_id = ep.phase_id
+        WHERE v.variant_id = NEW.variant_id;
+    END IF;
+    
+    -- Prevent modifications if phase is frozen
+    IF is_frozen THEN
+        RAISE EXCEPTION 'Cannot modify % in frozen phase', TG_TABLE_NAME;
+    END IF;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+\end{lstlisting}
+
+This implementation uses a polymorphic trigger approach working with multiple entity types, implementing the shared constraint pattern described by Karwin \cite{karwin2010sql}. It includes conditional logic navigating different relationship paths depending on entity type. The explicit exceptions with descriptive messages implement the informative error pattern described by Molinaro \cite{molinaro2005sql}, providing clear feedback when modifications are attempted on frozen phases.
+
+\section{Query Optimization Strategies}
+\label{sec:query-optimization-strategies}
+
+The VMAP system implements sophisticated query optimization strategies ensuring responsive performance despite the complexity of parameter data and version control requirements.
+
+\subsection{Indexing Strategy}
+\label{subsec:indexing-strategy}
+
+A comprehensive indexing strategy accelerates common query patterns while balancing performance and storage requirements:
+
+\begin{lstlisting}[language=SQL, caption={Hierarchical Access Path Indexing Implementation}, label={lst:hierarchical-indexing}]
+-- Core entity hierarchy indexes
+CREATE INDEX idx_modules_ecu ON ecu_modules(ecu_id);
+CREATE INDEX idx_pids_ecu_module ON pids(ecu_id, module_id);
+CREATE INDEX idx_parameters_pid_phase ON parameters(pid_id, phase_id);
+CREATE INDEX idx_variants_pid_phase ON variants(pid_id, phase_id);
+CREATE INDEX idx_segments_variant ON segments(variant_id);
+CREATE INDEX idx_segments_parameter ON segments(parameter_id);
+
+-- Covering indexes for common joins
+CREATE INDEX idx_variants_complete ON variants(variant_id, pid_id, 
+                                   ecu_id, phase_id, name);
+CREATE INDEX idx_parameters_complete ON parameters(parameter_id, pid_id, 
+                                     name, ecu_id, phase_id);
+\end{lstlisting}
+
+These indexes match the natural navigation paths in the data model, implementing the access path optimization pattern described by Molinaro \cite{molinaro2005sql}. The covering indexes contain all columns needed for common operations, implementing the index-only scan pattern described by Karwin \cite{karwin2010sql}.
+
+Text search optimization uses PostgreSQL's trigram indexing extension, enabling efficient partial-match and similarity-based searches. According to Obe and Hsu \cite{obe2017postgresql}, these indexes accelerate pattern matching operations for parameter names and identifiers:
+
+\begin{lstlisting}[language=SQL, caption={Text Search Optimization Implementation}, label={lst:text-search-optimization}]
+-- Create the pg_trgm extension for similarity searching
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- Trigram indexes for name searching
+CREATE INDEX idx_parameters_name_trgm 
+    ON parameters USING gin (name gin_trgm_ops);
+CREATE INDEX idx_parameters_parameter_name_trgm 
+    ON parameters USING gin (parameter_name gin_trgm_ops);
+CREATE INDEX idx_variants_name_trgm 
+    ON variants USING gin (name gin_trgm_ops);
+\end{lstlisting}
+
+These domain-specific indexing strategies reflect the unique requirements of automotive parameter management, where efficient navigation through complex hierarchical and temporal structures is essential for system responsiveness. The implemented strategy achieves balance by focusing on the most common access patterns while avoiding redundant or rarely-used indexes.
+
+\subsection{Partitioning Implementation}
+\label{subsec:partitioning-implementation}
+
+For large-scale implementations with extensive history tracking, table partitioning improves performance and manageability:
+
+\begin{lstlisting}[language=SQL, caption={Table Partitioning Implementation}, label={lst:table-partitioning}]
+-- Partitioned change history table
+CREATE TABLE change_history_partitioned (
+    change_id BIGINT NOT NULL,
+    user_id BIGINT,
+    ecu_id INTEGER,
+    phase_id INTEGER,
+    entity_type VARCHAR(50) NOT NULL,
+    entity_id BIGINT NOT NULL,
+    change_type VARCHAR(50),
+    old_values JSONB,
+    new_values JSONB,
+    changed_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    transaction_id BIGINT NOT NULL
+) PARTITION BY RANGE (changed_at);
+
+-- Create monthly partitions for change history
+CREATE TABLE change_history_y2024m01 PARTITION OF change_history_partitioned
+    FOR VALUES FROM ('2024-01-01') TO ('2024-02-01');
+\end{lstlisting}
+
+This approach uses PostgreSQL's declarative partitioning feature, implementing the range partitioning pattern described by Obe and Hsu \cite{obe2017postgresql}. According to Bhattacherjee et al. \cite{bhattacherjee2015principles}, partitioning large historical tables provides several benefits: improved query performance for time-bounded queries, efficient archiving of old partitions to slower storage, simplified maintenance operations, and better parallelization of queries across partitions.
+
+The partitioning strategy specifically targets the change history table because of its continuous growth characteristics. By partitioning this table by month, the implementation achieves the performance benefits noted by Elmasri and Navathe \cite{elmasri2015fundamentals} for time-series data management, where queries typically focus on specific time periods rather than the entire history.
+
+\section{Integration Implementation}
+\label{sec:integration-implementation}
+
+The integration implementation connects VMAP with external enterprise systems providing parameter definitions and vehicle configuration data. The implementation focuses on two primary integration points: the Parameter Definition Database (PDD) and the Vehicle Configuration Database (VCD).
+
+\subsection{Parameter Definition Database Synchronization}
+\label{subsec:pdd-synchronization-process}
+
+The database infrastructure for PDD synchronization includes tables tracking synchronization operations and results:
+
+\begin{lstlisting}[language=SQL, caption={Parameter Definition Database Synchronization Infrastructure}, label={lst:pdd-sync-infrastructure}]
+CREATE TABLE pdd_databases (
+    database_id BIGINT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    last_updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE pdd_sync_history (
+    sync_id INTEGER PRIMARY KEY,
+    ecu_id INTEGER,
+    phase_id INTEGER,
+    sync_date TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    status VARCHAR(50) NOT NULL,
+    modules_count INTEGER DEFAULT 0,
+    pids_count INTEGER DEFAULT 0,
+    parameters_count INTEGER DEFAULT 0,
+    entity_changes TEXT,
+    executed_by BIGINT REFERENCES users(user_id),
+    FOREIGN KEY (ecu_id, phase_id) REFERENCES ecu_phases(ecu_id, phase_id)
+);
+\end{lstlisting}
+
+This infrastructure implements the external system registry pattern described by Hohpe and Woolf \cite{hohpe2002enterprise}, tracking available Parameter Definition Databases and their last update times. The detailed synchronization operations history implements the integration audit pattern, capturing what entities were affected and enabling traceability and data flow analysis between systems.
+
+The phase-based synchronization approach was selected after careful analysis of involved trade-offs. This approach simplifies query patterns by establishing direct relationships between parameters and release phases, enabling efficient retrieval without complex version reconstruction. It aligns naturally with the automotive development process, where each release phase represents a distinct development milestone, making the system more intuitive for domain experts \cite{staron2021automotive}.
+
+\subsection{Vehicle Configuration Database Exchange}
+\label{subsec:vcd-data-exchange}
+
+The database structure for vehicle configuration data includes tables for vehicles and associated codes:
+
+\begin{lstlisting}[language=SQL, caption={Vehicle Configuration Storage}, label={lst:vehicle-configuration}]
+    CREATE TABLE vcd_vehicles (
+        vehicle_id INTEGER PRIMARY KEY,
+        vcd_vehicle_id VARCHAR(100) UNIQUE NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        description TEXT,
+        is_active BOOLEAN DEFAULT true,
+        last_sync_at TIMESTAMP WITHOUT TIME ZONE,
+        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE vehicle_codes (
+        code_id INTEGER PRIMARY KEY,
+        vcd_code_id VARCHAR(100) UNIQUE,
+        code VARCHAR(50) NOT NULL,
+        vehicle_type VARCHAR(100),
+        description TEXT,
+        is_active BOOLEAN DEFAULT true,
+        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    );
+    
+    CREATE TABLE vehicle_code_mapping (
+        vehicle_id INTEGER REFERENCES vcd_vehicles(vehicle_id) 
+                     ON DELETE CASCADE,
+        code_id INTEGER REFERENCES vehicle_codes(code_id) 
+                  ON DELETE CASCADE,
+        created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (vehicle_id, code_id)
+    );
+    \end{lstlisting}
+    
+    This structure separates vehicles from codes with a mapping table, implementing the many-to-many relationship pattern described by Elmasri and Navathe \cite{elmasri2015fundamentals}. External identifiers (\texttt{vcd\_vehicle\_id}, \texttt{vcd\_code\_id}) link to the Vehicle Configuration Database system, implementing the integration reference pattern described by Hohpe and Woolf \cite{hohpe2002enterprise}.
+    
+    A critical component is the code rule evaluation engine, which determines when variants apply to specific vehicles. This engine implements a stack-based parsing approach to evaluate boolean expressions, handling complex boolean logic used in variant code rules. According to Molinaro \cite{molinaro2005sql}, this approach provides an efficient mechanism for processing complex conditions involving multiple operators and precedence rules.
+    
+    The vehicle data synchronization uses a JSON-based data transfer approach, implementing the document exchange pattern described by Kleppmann and Beresford \cite{kleppmann2017conflict}. UPSERT operations ensure idempotent synchronization that can be run multiple times without creating duplicate entities, supporting both initial loading and incremental updates.
+    
+    \subsection{Parameter File Generation Support}
+    \label{subsec:par-file-generation}
+    
+    The parameter file generation capability represents a core integration point between the version control system and vehicle testing infrastructure, transforming abstract parameter configurations into concrete binary files that can be loaded onto electronic control units:
+    
+    \begin{lstlisting}[language=SQL, caption={Parameter File Generation Records}, label={lst:par-file-records}]
+    CREATE TABLE par_files (
+        par_file_id BIGINT PRIMARY KEY,
+        vehicle_id INTEGER REFERENCES vcd_vehicles(vehicle_id),
+        ecu_id INTEGER,
+        phase_id INTEGER,
+        generated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        generated_by BIGINT REFERENCES users(user_id),
+        description TEXT,
+        FOREIGN KEY (ecu_id, phase_id) REFERENCES ecu_phases(ecu_id, phase_id)
+    );
+    \end{lstlisting}
+    
+    The parameter file generation process integrates version control capabilities with both vehicle configuration data and parameter definitions to produce vehicle-specific parameter configurations. According to Staron \cite{staron2021automotive}, this integration point is critical in automotive software development, transforming abstract parameter configurations into testable implementations that can be validated on actual hardware.
+    
+    The parameter file generation algorithm applies a sophisticated variant resolution process that evaluates code rules against vehicle configurations to determine which variants apply to a specific vehicle. This process implements the rule evaluation pattern described by Fowler \cite{fowler2003patterns}, applying a consistent rule evaluation algorithm to determine applicable parameter values. According to Broy \cite{broy2006challenges}, this rule-based configuration approach is essential in automotive software development, where vehicles may have thousands of possible configurations that must be handled systematically.
+    
+    \subsection{Integration Architecture Overview}
+    \label{subsec:integration-architecture}
+    
+    The integration architecture follows an enterprise integration pattern approach with clear separation between the core versioning system and external data sources. This separation is implemented through specialized data structures mapping between external identifiers and internal entities, enabling the system to maintain stable internal references even as external systems evolve.
+    
+    The asynchronous integration model allows VMAP to continue operating even when external systems are unavailable, implementing the loose coupling pattern described by Hohpe and Woolf \cite{hohpe2002enterprise}. According to Trovão \cite{trovao2024evolution}, this decoupling is particularly important in automotive development environments, where multiple systems from different vendors must collaborate without tight dependencies.
+    
+    The database architecture includes explicit tracking of integration operations, implementing the integration audit pattern. This comprehensive logging enables troubleshooting of integration issues, analysis of data flows between systems, and verification of synchronization completeness. According to Bhattacherjee et al. \cite{bhattacherjee2015principles}, this audit capability is essential for maintaining data integrity in integrated systems, where inconsistencies between systems can lead to significant quality issues.
+    
+    \section{Security Implementation}
+    \label{sec:security-implementation}
+    
+    The security implementation addresses critical requirements for protecting parameter data and enforcing appropriate access controls, ensuring users can only perform actions appropriate to their roles and responsibilities.
+    
+    \subsection{Role-Based Access Control}
+    \label{subsec:role-based-access-control}
+    
+    The core of the RBAC system is the permission verification function:
+    
+    \begin{lstlisting}[language=SQL, caption={Permission Verification Function}, label={lst:permission-verification}]
+    CREATE OR REPLACE FUNCTION has_permission(
+        p_user_id BIGINT,
+        p_permission_name VARCHAR
+    )
+    RETURNS BOOLEAN AS $$
+    DECLARE
+        v_has_permission BOOLEAN;
+    BEGIN
+        -- Check if user has the permission through any role
+        SELECT EXISTS (
+            SELECT 1
+            FROM user_roles ur
+            JOIN role_permissions rp ON ur.role_id = rp.role_id
+            JOIN permissions p ON rp.permission_id = p.permission_id
+            WHERE ur.user_id = p_user_id
+            AND p.name = p_permission_name
+        ) INTO v_has_permission;
+        
+        -- If not found in roles, check direct user permissions
+        IF NOT v_has_permission THEN
+            SELECT EXISTS (
+                SELECT 1
+                FROM user_permissions up
+                JOIN permissions p ON up.permission_id = p.permission_id
+                WHERE up.user_id = p_user_id
+                AND p.name = p_permission_name
+            ) INTO v_has_permission;
+        END IF;
+        
+        RETURN v_has_permission;
+    END;
+    $$ LANGUAGE plpgsql;
+    \end{lstlisting}
+    
+    This function implements a hybrid approach checking for permissions granted through roles and then falling back to direct user permissions if necessary. According to Ferraiolo et al. \cite{ferraiolo2011policy}, this dual-check approach provides flexibility for exceptional cases while maintaining the structural benefits of role-based access control. The implementation uses efficient EXISTS queries rather than retrieving complete permission records, optimizing performance for this high-frequency operation.
+    
+    Beyond basic permission checking, the system implements module-specific access control verification, combining role-based and module-based access control in a unified framework. This approach follows the principle of least privilege, allowing precise control over which modules a user can modify. Sandhu and Bhamidipati \cite{sandhu1997arbac97} note that this layered authorization approach is particularly valuable in complex development environments where responsibilities are divided among specialized teams.
+    
+    \subsection{Data Security Measures}
+    \label{subsec:data-security-measures}
+    
+    The implementation includes several key data security measures protecting parameter configuration integrity. The freeze mechanism implements strict enforcement of the read-only state for release phases that have reached development milestones. Database triggers enforce phase state restrictions at the database level, ensuring protection cannot be bypassed by application code. According to Date \cite{date2011sql}, this constraint enforcement approach provides a fundamental layer of data security operating independently of application logic.
+    
+    Parameter value validation enforces parameter-specific constraints, ensuring values remain within physically meaningful and safe ranges. This preventive validation pattern described by Karwin \cite{karwin2010sql} prevents invalid data from being stored in the database, maintaining data integrity throughout the system. Molinaro \cite{molinaro2005sql} notes that this approach to data validation is particularly important in safety-critical systems where incorrect parameter values could lead to system malfunctions.
+    
+    \subsection{Audit Trail Implementation}
+    \label{subsec:audit-trail-implementation}
+    
+    The audit trail implementation provides comprehensive tracking of all parameter data changes, supporting accountability and compliance requirements. This capability is particularly important in automotive software development, where regulatory frameworks often require detailed traceability of all configuration changes.
+    
+    Automatic change tracking is implemented through database triggers:
+    
+    \begin{lstlisting}[language=SQL, caption={Change History Trigger}, label={lst:change-history-trigger}]
+    CREATE OR REPLACE FUNCTION log_change()
+RETURNS TRIGGER AS $
+    DECLARE
+        transaction_id BIGINT;
+        change_type VARCHAR(50);
+        old_values JSONB;
+        new_values JSONB;
+        entity_id BIGINT;
+        phase_id INTEGER;
+        ecu_id INTEGER;
+    BEGIN
+        -- Get the current transaction ID or create a new one
+        SELECT COALESCE(NULLIF(current_setting('app.transaction_id', true), ''),
+                       nextval('change_history_transaction_id_seq')) 
+        INTO transaction_id;
+    
+    -- Determine entity_id and other values based on operation
+    -- [implementation details omitted for brevity]
+        
+        -- Capture entity states
+        IF TG_OP = 'INSERT' THEN
+            change_type := 'CREATE';
+            old_values := NULL;
+            new_values := to_jsonb(NEW);
+        ELSIF TG_OP = 'UPDATE' THEN
+            change_type := 'UPDATE';
+            old_values := to_jsonb(OLD);
+            new_values := to_jsonb(NEW);
+        ELSIF TG_OP = 'DELETE' THEN
+            change_type := 'DELETE';
+            old_values := to_jsonb(OLD);
+            new_values := NULL;
+        END IF;
+        
+        -- Insert into change_history
+        INSERT INTO change_history (
+            user_id, ecu_id, phase_id, entity_type, entity_id,
+            change_type, old_values, new_values, transaction_id
+        ) VALUES (
+            NULLIF(current_setting('app.user_id', true), '')::BIGINT,
+            ecu_id, phase_id, TG_TABLE_NAME, entity_id,
+            change_type, old_values, new_values, transaction_id
+        );
+        
+        RETURN NULL;
+    END;
+$ LANGUAGE plpgsql;
+    \end{lstlisting}
+    
+    This implementation applies change logging to all critical entities, implementing the universal auditing pattern described by Fowler \cite{fowler2003patterns}. It captures complete entity state rather than just modified fields, implementing the state snapshot pattern. By using JSONB for storing entity states, the implementation provides flexibility to accommodate different entity structures while enabling efficient querying of change details using PostgreSQL's JSON operators.
+    
+    The audit trail includes sophisticated analysis capabilities through specialized functions retrieving entity history and transaction changes. These functions implement the entity timeline pattern described by Fowler \cite{fowler2003patterns} and the transaction context pattern described by Date \cite{date2011sql}, providing both detailed and contextual views of system changes. According to Staron \cite{staron2021automotive}, these comprehensive audit capabilities are essential for meeting regulatory compliance requirements in automotive software development, where parameter changes must be traceable throughout the development lifecycle.
+    

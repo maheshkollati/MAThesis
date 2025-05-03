@@ -1,0 +1,24 @@
+% Define your symbols here. Do not use \chapter or \section here. If you want
+% to section your list of symbols do ONLY use \subsection*{<section title>}.
+% ---
+% You can use the code fragment below and add/remove columns by you own needs.
+% Currently, the table shows three columns: The first contains the symbol,
+% the second the symbol's unit and the third the symbols name/description.
+% The table's header will automatically appear in the document's main language.
+% The table automatically spans over multiple pages.
+
+% Use "siunitx" package for units
+
+\begin{center}
+	\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
+    	\endhead
+        \textbf{\IfLanguageName{ngerman}{Größe}{Symbol}} & \textbf{\IfLanguageName{ngerman}{Einheit}{Unit}} & \textbf{\IfLanguageName{ngerman}{Beschreibung}{Description}}\\
+        \midrule
+        $F_\text{N}$ & \si{\newton} & Force\\
+        \midrule
+        $\tau$ & \si[inter-unit-product =\ensuremath{}]{\newton\meter} & Torque\\
+        % Insert mathematic terms using the inline math environment $$ like in the example above.
+        % Use \midrule to separate parts of your symbols table.
+		% Enter \\ after every line.
+    \end{longtable}
+\end{center}

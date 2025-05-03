@@ -1,0 +1,97 @@
+%\RequirePackage{kvoptions-patch}	% required, do not delete 
+% --> not compatible with newer miktex versions, restriction on spelling keys and keyvalues 
+\documentclass[
+	language=en ,        	% choose between "de" or "en"
+	layout=twoside ,		% chose between "oneside" or "twoside"
+	titlepage=true ,		% include titlepage(s) (true) or not (false)
+	preamble=true ,			% include preamble (optional)
+	draftmode=false ,		% enable (true) or disable (false) draft mode
+]{sbmthesis}
+\setlength\headheight{30pt} % required, do not delete
+\pdfminorversion=7
+
+% +-----------------------------------------------------------------------------+
+% | Die Kopfseiten der Arbeit werden kurz vor Abgabe vom Betreuer ausgehändigt. |
+% +-----------------------------------------------------------------------------+
+
+% +----------------------------+
+% | Add hyphenation rules here |
+% +----------------------------+
+\hyphenation{
+    % In some special cases LaTeX is unable to correctly hyphenate a term. Thus 		you have to define a custom hypenation rule here using minus signs. This is 		the case when a term overlaps with the page margins. Separate multiple 				entries with white space.
+    % Examples: Doppel-kupplungs-ge-triebe Kupp-lungs-schlupf-reg-ler
+}
+
+% +-----------------------------------------------------+
+% | 			Include other packages here 			|
+% |							or 							|
+% | at the intended position in the cls file (prefered) |
+% +-----------------------------------------------------+
+\usepackage{rotating}
+\usepackage{pgfgantt}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{amssymb}
+\usepackage{float}
+\definecolor{NavyBlue}{rgb}{0.0, 0.0, 0.5}
+\definecolor{gray50}{gray}{0.5}
+\lstset{
+    language=SQL,
+    basicstyle=\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    commentstyle=\color{gray},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    breaklines=true
+}
+\lstdefinelanguage{CSharp}{
+  morekeywords={abstract, as, base, bool, break, byte, case, catch, char, checked, class, const, continue, decimal, default, delegate, do, double, else, enum, event, explicit, extern, false, finally, fixed, float, for, foreach, goto, if, implicit, in, int, interface, internal, is, lock, long, namespace, new, null, object, operator, out, override, params, private, protected, public, readonly, ref, return, sbyte, sealed, short, sizeof, stackalloc, static, string, struct, switch, this, throw, true, try, typeof, uint, ulong, unchecked, unsafe, ushort, using, virtual, void, volatile, while},
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]",
+  morestring=[b]'
+}
+
+% +-----------------------+
+% | Start of the document |
+% +-----------------------+
+\begin{document}   
+    \preliminaries
+    
+    % +----------------------------+
+    % | Include your chapters here |
+    % +----------------------------+
+    % Insert \cleardoublepage after every include
+    \include{chapters/Introduction}
+    \cleardoublepage
+    \include{chapters/Theoretical_Background}
+    \cleardoublepage
+    \include{chapters/StateoftheArt}
+    \cleardoublepage
+    \include{chapters/Methodology_and_Concept_Development}
+    \cleardoublepage
+    \include{chapters/Implementation}
+    \cleardoublepage
+    \include{chapters/Evaluation}
+    \cleardoublepage
+    %\include{<your second chapter>}
+    %\cleardoublepage
+    
+    % This includes the bibliography, use "references.bib" to manage the references
+    \references
+    
+    \appendix
+    % +---------------------------------------+
+    % | Include your appendix's chapters here |
+    % +---------------------------------------+
+    % Insert \cleardoublepage after every include
+    %\include{chapters/<your first appendix chapter>}
+    %\cleardoublepage
+    \include{chapters/TestCases}
+    \cleardoublepage
+    \include{chapters/VariantTestCases}
+    \cleardoublepage
+   
+
+\end{document}
