@@ -15,12 +15,12 @@ Test scenarios were developed based on actual automotive parameter management wo
 
 The test scenarios were categorized into functional areas corresponding to the primary system capabilities:
 
-\begin{align*}
-\text{User Management} &: \text{Authentication, authorization, role assignment, module access} \\
-\text{Release Management} &: \text{Phase transitions, freeze operations} \\
-\text{Variant Management} &: \text{Variant creation, segment modification} \\
-\text{Integration} &: \text{PDD synchronization, vehicle configuration}
-\end{align*}
+\begin{itemize}
+\item \textbf{User Management}: Authentication, authorization, role assignment, module access
+\item \textbf{Release Management}: Phase transitions, freeze operations, phase comparison
+\item \textbf{Variant Management}: Variant creation, segment modification, inheritance
+\item \textbf{Integration}: PDD synchronization, vehicle configuration
+\end{itemize}
 
 Each scenario was implemented as a structured test case with defined inputs, expected outcomes, and verification steps at both the application and database levels. The test design followed a modified version of Molinaro's approach to database validation \cite{molinaro2005sql}, with additional emphasis on traceability between requirements and test cases.
 
@@ -41,9 +41,9 @@ Functional testing validated the core capabilities of the VMAP system against th
 \subsection{User Management Validation}
 \label{subsec:user-management-validation}
 
-The user management and access control system was evaluated through a focused testing approach to verify the implementation of the hybrid role-permission model described in Section \ref{subsec:user-role-requirements}. The validation methodology applied a structured approach with distinct verification techniques including functional permission verification, access boundary testing, permission inheritance validation, and cross-role security verification. As Sandhu et al. \cite{sandhu1998role} emphasize, effective evaluation of role-based access control requires testing both positive permissions (granted access) and negative permissions (denied access) across role boundaries.
+The user management and access control system was evaluated to verify the implementation of the hybrid role-permission model described in Section \ref{subsec:user-role-requirements}. Testing focused on verifying that the implemented database schema and logic correctly enforced the defined access control rules for each user role. As Sandhu et al. \cite{sandhu1998role} emphasize, effective evaluation of role-based access control requires testing both positive permissions (granted access) and negative permissions (denied access) across role boundaries.
 
-A comprehensive yet efficient test matrix was developed encompassing 42 distinct test scenarios strategically distributed across four verification domains: role-based permissions, module-based access control, direct permission assignment, and phase-specific permissions. Each test case verified a specific permission boundary with separate validation at both service and database layers. This focused approach aligns with Molinaro's principles for database validation \cite{molinaro2005sql}, which emphasizes targeted verification of critical constraints over exhaustive testing.
+A test matrix was developed covering key permission boundaries: role-based permissions, module-based access control, direct permission assignment, and phase-specific permissions. Each test case verified a specific permission boundary with validation at both service and database layers. This focused approach aligns with Molinaro's principles for database validation \cite{molinaro2005sql}, which emphasizes targeted verification of critical constraints.
 
 Table \ref{tab:module-dev-test-cases} presents a representative sample of test cases that focus on the Module Developer role, illustrating the connection between functional requirements and verification scenarios.
 
@@ -91,11 +91,9 @@ var dbVariant = _database.QuerySingleOrDefault<Variant>(
 Assert.IsNull(dbVariant);
 \end{lstlisting}
 
-The module-based access control tests were particularly critical as they represent a departure from standard RBAC patterns as defined by Sandhu et al. \cite{sandhu1998role}, implementing instead a hybrid attribute-enhanced approach similar to that described by Kuhn et al. \cite{kuhn2010adding}. All ten module assignment validation tests passed successfully, confirming compliance with Ferraiolo et al.'s \cite{ferraiolo2011policy} recommendations for combining role-based and attribute-based access control models. The tests verified that write access was correctly limited to assigned modules for Module Developers while read access remained available for all modules, implementing the principle of least privilege as recommended by Sandhu and Bhamidipati \cite{sandhu1997arbac97}.
+The module-based access control tests verified that write access was correctly limited to assigned modules for Module Developers while read access remained available for all modules, implementing the principle of least privilege as recommended by Sandhu and Bhamidipati \cite{sandhu1997arbac97}. Direct permission assignment tests confirmed that user-specific permissions effectively overrode role defaults, a capability essential for supporting exception cases in complex organizational structures as noted by Hu et al. \cite{hu2015implementing}.
 
-Direct permission assignment tests confirmed that user-specific permissions effectively overrode role defaults in all test scenarios. This capability is essential for supporting exception cases in complex organizational structures as noted by Hu et al. \cite{hu2015implementing}. The six test cases targeting this area verified both the granting of additional permissions and the removal of permissions that would normally be inherited through role assignments.
-
-Phase-specific permission tests validated the interaction between the access control system and the phase management framework. All six test cases in this domain passed successfully, confirming that modifications to frozen phases were properly prevented while still allowing appropriate access for documentation purposes. This validation addresses a critical requirement for regulated development processes as described by Staron \cite{staron2021automotive}, where development milestone integrity must be preserved. Table \ref{tab:rbac-test-results} summarizes the key findings from user management testing across different test categories.
+Phase-specific permission tests validated the interaction between the access control system and the phase management framework, confirming that modifications to frozen phases were properly prevented while still allowing appropriate access for documentation purposes. This validation addresses a critical requirement for regulated development processes as described by Staron \cite{staron2021automotive}, where development milestone integrity must be preserved.
 
 \begin{table}[h]
     \centering
@@ -105,32 +103,41 @@ Phase-specific permission tests validated the interaction between the access con
     \hline
     \textbf{Test Category} & \textbf{Results} \\
     \hline
-    Role Permission Validation & All permissions correctly applied through roles (16/16 test cases) \\
+    Role Permission Validation & Core permissions correctly applied through roles \\
     \hline
-    Module-Based Access & Write access correctly limited to assigned modules (10/10 test cases) \\
+    Module-Based Access & Write access correctly limited to assigned modules \\
     \hline
-    Direct Permission Assignment & User-specific permissions overrode role defaults (6/6 test cases) \\
+    Direct Permission Assignment & User-specific permissions overrode role defaults \\
     \hline
-    Phase-Specific Permissions & Frozen phase protection enforced correctly (6/6 test cases) \\
-    \hline
-    Boundary Cases & Edge conditions handled appropriately (4/4 test cases) \\
+    Phase-Specific Permissions & Frozen phase protection enforced correctly \\
     \hline
     \end{tabular}
 \end{table}
 
-The complete set of test cases is documented in Appendix \ref{appendix:user-management-tests}, covering all access control aspects across different user roles, module assignments, and system states.
+The audit trail verification confirmed that security-related operations were properly logged with complete metadata, including the user making the change, timestamp, and specific permissions affected. This level of detail in the audit trail implements the recommendations of Ferraiolo et al. \cite{ferraiolo2011policy} for maintaining accountability in security-sensitive operations.
 
-Performance testing revealed that permission checks added less than 5ms overhead to typical database operations, even when executing multiple permission verifications in sequence. This aligns with Hu et al.'s \cite{hu2015implementing} recommendations for optimized permission validation in enterprise systems. The performance was achieved through strategic denormalization and view-based permission aggregation as described in Section \ref{subsec:database-schema-design}.
+\subsection{Module Access Impact on Performance}
+\label{subsec:module-access-impact}
 
-The audit trail verification confirmed that all security-related operations were properly logged with complete metadata, including the user making the change, timestamp, and specific permissions affected. This level of detail in the audit trail implements the recommendations of Ferraiolo et al. \cite{ferraiolo2011policy} for maintaining accountability in security-sensitive operations. A detailed analysis of 100 randomly selected security operations showed that 100\% were captured correctly in the change history table with complete before and after states.
+The impact of module-specific access checks on performance was evaluated as part of the access control testing. This analysis focused on understanding the performance overhead introduced by adding module-specific access verification to the standard permission checking process. Figure \ref{fig:module-access-impact} illustrates the measured performance difference between standard permission checks and combined permission and module access checks.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/module_access_impact.png}
+    \caption{Impact of Module-Specific Access Checks}
+    \label{fig:module-access-impact}
+\end{figure}
+
+The performance analysis reveals that adding module-specific access verification introduces an 88.2\% overhead for the traditional role-based approach (increasing from 1.7ms to 3.2ms) and a 45.8\% overhead for the hybrid approach (increasing from 2.4ms to 3.5ms). The lower relative impact on the hybrid approach suggests that the more complex permission model better accommodates additional access control dimensions, a finding that aligns with Ferraiolo's observations \cite{ferraiolo2011policy} regarding the scalability of attribute-enhanced RBAC models.
+
+Despite the performance overhead, both approaches maintain acceptable performance for interactive operations, with response times below 4ms for individual permission checks. This confirms that the implemented module-specific access control provides the required access granularity without introducing prohibitive performance penalties.
 
 \subsection{Release Management Validation}
 \label{subsec:release-management-validation}
 
 Release management testing evaluated the phase-based versioning approach that forms the foundation of the VMAP system. Testing focused on four key aspects: phase sequence validation, phase transition operations, freeze functionality, and phase comparison.
 
-Phase sequence validation confirmed that the system correctly enforced the defined sequence of development phases (Phase1 → Phase2 → Phase3 → Phase4) with successful validation across all 24 test cases. This sequential enforcement is essential for maintaining the structured development workflow described by Broy \cite{broy2006challenges} for automotive software development.
+Phase sequence validation confirmed that the system correctly enforced the defined sequence of development phases (Phase1 → Phase2 → Phase3 → Phase4) with successful validation of each phase transition. This sequential enforcement is essential for maintaining the structured development workflow described by Broy \cite{broy2006challenges} for automotive software development.
 
 Phase transition testing verified that parameter configurations were correctly copied between phases with complete preservation of parameter-variant-segment relationships. The test data revealed interesting patterns in development intensity across phases, as shown in Table \ref{tab:phase-transition-results}.
 
@@ -167,16 +174,16 @@ Phase3 → Phase4 & 1,000 & 209,103 & 0 & 0 & 12.89 \\
 
 The test results reveal a significant pattern in development intensity across phases, consistent with Staron's observations \cite{staron2021automotive} regarding automotive software development cycles. The data demonstrates that the majority of parameter configurations occur during Phase1, with substantial additions in Phase2. In contrast, Phase3 and Phase4 typically involve refinement and validation rather than introducing new parameters or variants. This concentration of development activity in early phases aligns with the V-model approach common in automotive software development \cite{pretschner2007software}, where early phases focus on implementation while later phases emphasize validation and verification.
 
-Phase transition performance characteristics showed only modest increases in execution time despite growing data volumes across phases. For the baseline dataset, transition times increased from 2.51s for Phase1→Phase2 to 2.96s for Phase2→Phase3 and 2.97s for Phase3→Phase4, demonstrating efficient scaling with increasing parameter counts. The slight increase in execution time between Phase2→Phase3 and Phase3→Phase4, despite no new variants or segments being added, suggests that total data volume remains the primary factor affecting transition performance. Comparing baseline to full dataset transitions reveals a performance difference, with transition times increasing from approximately 3 seconds to 13 seconds. This represents a sublinear scaling factor of approximately 4.3x for a dataset size increase of 5.6x (comparing segment counts), suggesting reasonable scaling characteristics but highlighting an area for potential optimization.
+Phase transition performance characteristics showed only modest increases in execution time despite growing data volumes across phases. For the baseline dataset, transition times increased from 2.51s for Phase1→Phase2 to 2.96s for Phase2→Phase3 and 2.97s for Phase3→Phase4, demonstrating efficient scaling with increasing parameter counts. Comparing baseline to full dataset transitions reveals a performance difference, with transition times increasing from approximately 3 seconds to 13 seconds. This represents a sublinear scaling factor of approximately 4.3x for a dataset size increase of 5.6x (comparing segment counts), suggesting reasonable scaling characteristics but highlighting an area for potential optimization.
 
-As noted by Trovão \cite{trovao2024evolution}, later phases in automotive parameter development typically focus on refinement rather than wholesale changes, with modifications targeting specific parameters based on testing feedback. This pattern is reflected in the test data, which shows significant additions in early phases but no new variants or segments in Phase3 and Phase4. While the test data might suggest that phase transition time increases gradually as development progresses, in real-world scenarios, the creation of new variants and segments is not always proportional to phase progression. Instead, existing variants and segments are often updated based on phase-specific requirements without necessarily creating new entities. This observation supports the architectural decision to optimize the phase transition mechanism for selective propagation of changes rather than complete data replication.
+As noted by Trovão \cite{trovao2024evolution}, later phases in automotive parameter development typically focus on refinement rather than wholesale changes, with modifications targeting specific parameters based on testing feedback. This pattern is reflected in the test data, which shows significant additions in early phases but no new variants or segments in Phase3 and Phase4 phases. 
 
-Phase freezing functionality was validated through ten specific test cases targeting both database-level constraints and service-layer restrictions. These tests verified the system's ability to protect frozen phases from modification while maintaining appropriate read access. Table \ref{tab} details the specific test cases and their results.
+Phase freezing functionality was validated through test cases targeting both database-level constraints and service-layer restrictions. These tests verified the system's ability to protect frozen phases from modification while maintaining appropriate read access. Table \ref{tab:phase-freeze-cases} details representative test cases and their results.
 
 \begin{table}[H]
 \centering
 \caption{Phase Freeze Protection Test Cases}
-\label{tab}
+\label{tab:phase-freeze-cases}
 \begin{tabular}{|p{0.7cm}|p{4.1cm}|p{3.5cm}|p{3.5cm}|c|}
 \hline
 \textbf{ID} & \textbf{Test Case} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Result} \\
@@ -185,33 +192,25 @@ FRZ-01 & Direct SQL INSERT on variants & Execute INSERT statement on frozen phas
 \hline
 FRZ-02 & Direct SQL UPDATE on segments & Execute UPDATE statement on frozen phase & Operation blocked with error message & Pass \\
 \hline
-FRZ-03 & Direct SQL DELETE on variants & Execute DELETE statement on frozen phase & Operation blocked with error message & Pass \\
+FRZ-03 & VariantService. CreateVariant() & Attempt to create variant in frozen phase & PhaseFreezed Exception thrown & Pass \\
 \hline
-FRZ-04 & VariantService. CreateVariant() & Attempt to create variant in frozen phase & PhaseFreezed Exception thrown & Pass \\
+FRZ-04 & SegmentService. CreateSegment() & Attempt to create segment in frozen phase & PhaseFreezed Exception thrown & Pass \\
 \hline
-FRZ-05 & VariantService. UpdateVariant() & Attempt to update variant in frozen phase & PhaseFreezed Exception thrown & Pass \\
+FRZ-05 & DocumentationService. CreateSnapshot() & Create documentation snapshot of frozen phase & Snapshot created successfully & Pass \\
 \hline
-FRZ-06 & SegmentService. CreateSegment() & Attempt to create segment in frozen phase & PhaseFreezed Exception thrown & Pass \\
-\hline
-FRZ-07 & SegmentService. UpdateSegment() & Attempt to update segment in frozen phase & PhaseFreezed Exception thrown & Pass \\
-\hline
-FRZ-08 & SegmentService. DeleteSegment() & Attempt to delete segment in frozen phase & PhaseFreezed Exception thrown & Pass \\
-\hline
-FRZ-09 & DocumentationService. CreateSnapshot() & Create documentation snapshot of frozen phase & Snapshot created successfully & Pass \\
-\hline
-FRZ-10 & ParFileService. GenerateParFile() & Generate parameter file from frozen phase & Parameter file generated successfully & Pass \\
+FRZ-06 & ParFileService. GenerateParFile() & Generate parameter file from frozen phase & Parameter file generated successfully & Pass \\
 \hline
 \end{tabular}
 \end{table}
 
-For each write operation test case (FRZ-01 through FRZ-08), verification included both confirmation that the expected exception was thrown and that no database changes occurred, maintaining data integrity. The read operation test cases (FRZ-09 and FRZ-10) verified that read access remained available with minimal performance impact (<5ms overhead). Across 150 test operations targeting frozen phases, the system successfully prevented all modification attempts while maintaining appropriate read access, implementing the controlled milestone management required for regulated development environments as described by Staron \cite{staron2021automotive}.
+For each write operation test case (FRZ-01 through FRZ-04), verification included both confirmation that the expected exception was thrown and that no database changes occurred, maintaining data integrity. The read operation test cases (FRZ-05 and FRZ-06) verified that read access remained available with minimal performance impact. The system successfully prevented modification attempts while maintaining appropriate read access, implementing the controlled milestone management required for regulated development environments as described by Staron \cite{staron2021automotive}.
 
 \subsection{Variant Management Validation}
 \label{subsec:variant-management-validation}
 
-Variant management validation focused on assessing the system's capabilities for handling parameter customization through variants and segments. Testing employed a methodical approach across two interrelated domains: variant creation and segment modification workflows. Each testing domain was evaluated using both the baseline dataset (188 variants, 28,776 segments) and the production-scale dataset (830 variants, 167,990 segments) to analyze functionality and performance under varying data volumes.
+Variant management validation focused on assessing the system's capabilities for handling parameter customization through variants and segments. Testing employed an approach covering variant creation and segment modification workflows, using both the baseline dataset (188 variants, 28,776 segments) and the production-scale dataset (830 variants, 167,990 segments) to analyze functionality and performance under varying data volumes.
 
-Variant creation validation encompassed 18 distinct test cases designed to exercise the full spectrum of variant operations. These tests verified proper implementation of domain constraints as defined in the conceptual architecture (Section \ref{subsec:entity-relationship-model}). For variant creation, test cases included validation of unique name constraints within PIDs, verification of proper code rule storage, and confirmation of correct relationship establishment between variants and their parent PIDs. All test cases passed successfully for both scalar and complex parameters, with constraint enforcement consistently preventing invalid operations. As Karwin \cite{karwin2010sql} notes, constraint-based validation provides a robust foundation for maintaining data integrity in complex relational systems.
+Variant creation testing verified proper implementation of domain constraints as defined in the conceptual architecture (Section \ref{sec:entity-relationship-model}). Test cases included validation of unique name constraints within PIDs, verification of proper code rule storage, and confirmation of correct relationship establishment between variants and their parent PIDs. All test cases passed successfully for both scalar and complex parameters, with constraint enforcement consistently preventing invalid operations. As Karwin \cite{karwin2010sql} notes, constraint-based validation provides a robust foundation for maintaining data integrity in complex relational systems.
 
 The testing methodology included both black-box functional testing and white-box database state verification as shown in Listing \ref{lst:variant-creation-verification}.
 
@@ -235,14 +234,7 @@ ORDER BY
 LIMIT 1;
 \end{lstlisting}
 
-Audit trail analysis revealed comprehensive capture of variant operations, with 100\% of test operations correctly recorded in the change history with complete metadata as shown in \ref{fig:variant-change-history}. The audit trail included proper attribution of each change to specific users, accurate timestamps, and complete before/after state capture for modified entities. This implementation aligns with Bhattacherjee's recommendations \cite{bhattacherjee2015principles} for maintaining comprehensive provenance information in versioned datasets.
-
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=0.95\textwidth]{figures/change_history_variants.png}
-    \caption{Variant Modification Audit Trail}
-    \label{fig:variant-change-history}
-\end{figure}
+Audit trail analysis confirmed proper recording of variant operations in the change history with complete metadata. The audit trail included proper attribution of each change to specific users, accurate timestamps, and complete before/after state capture for modified entities. This implementation aligns with Bhattacherjee's recommendations \cite{bhattacherjee2015principles} for maintaining comprehensive provenance information in versioned datasets.
 
 Performance analysis of variant operations revealed consistent response times across different variant complexities. Table \ref{tab:variant-operation-performance} details performance measurements for key variant operations under different data volumes.
 
@@ -265,40 +257,13 @@ Variant Listing (per PID) & 38ms & 68ms & 1.79x \\
 \end{tabular}
 \end{table}
 
-The sublinear scaling characteristics observed in these measurements validate the effectiveness of the database schema design and indexing strategy described in Section \ref{subsec:database-schema-design}. As noted by Obe and Hsu \cite{obe2017postgresql}, properly designed covering indexes significantly improve query performance for entity retrieval operations, particularly when filtering by composite attributes.
+The observed scaling characteristics validate the effectiveness of the database schema design and indexing strategy described in Section \ref{subsec:indexing-implementation}. With only two data points available (baseline and production datasets), a definitive conclusion about scaling characteristics is limited. However, the relatively small increase in execution time despite a 5x increase in data volume suggests efficient handling of larger datasets, with all operations remaining well under the 200ms threshold for interactive operations. As noted by Obe and Hsu \cite{obe2017postgresql}, properly designed covering indexes can significantly improve query performance for entity retrieval operations, particularly when filtering by composite attributes.
 
-Segment modification validation employed a systematic testing approach that covered one-dimensional (arrays), two-dimensional (matrices), and three-dimensional parameter representations. Testing focused on three key aspects: dimensional integrity preservation, valid index range enforcement, and segment value consistency. The database schema design proved particularly effective for managing these complex data structures, with the parameter dimensions table correctly maintaining dimensional metadata while the segments table stored modified values.
+Segment modification testing employed a systematic approach covering one-dimensional (arrays), two-dimensional (matrices), and three-dimensional parameter representations. Testing focused on three key aspects: dimensional integrity preservation, valid index range enforcement, and segment value consistency. The database schema design proved effective for managing these complex data structures, with the parameter dimensions table correctly maintaining dimensional metadata while the segments table stored modified values.
 
-Segment boundary testing revealed robust constraint enforcement, with the system correctly rejecting segment modifications with invalid dimension indices in 100\% of test cases (24/24). As Molinaro \cite{molinaro2005sql} notes, enforceable domain constraints represent a critical advantage of database-driven approaches over spreadsheet implementations for managing complex structured data. Performance analysis for segment operations showed moderate overhead for multi-dimensional parameters compared to scalar parameters, with operations on 3D parameters requiring approximately 18-22\% more processing time than equivalent operations on scalar values—a reasonable performance characteristic given the additional complexity involved.
+Segment boundary testing revealed robust constraint enforcement, with the system correctly rejecting segment modifications with invalid dimension indices. Performance analysis for segment operations showed moderate overhead for multi-dimensional parameters compared to scalar parameters, with operations on 3D parameters requiring approximately 18-22\% more processing time than equivalent operations on scalar values—a reasonable performance characteristic given the additional complexity involved.
 
-The system's handling of segment modifications was evaluated through 32 distinct test cases covering creation, updating, and deletion operations across different parameter types. Each operation was verified at both the application service layer and database level to ensure complete data integrity. Test cases for segment modification included:
-
-\begin{table}[h]
-\centering
-\caption{Segment Modification Test Cases}
-\label{tab:segment-test-cases}
-\begin{tabular}{|p{0.7cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|c|}
-\hline
-\textbf{ID} & \textbf{Description} & \textbf{Test Action} & \textbf{Expected Outcome} & \textbf{Result} \\
-\hline
-SEG-01 & Create Segment (Scalar) & Create new segment for scalar parameter & Segment created successfully & Pass \\
-\hline
-SEG-02 & Create Segment (Array) & Create new segment for array element & Segment created successfully & Pass \\
-\hline
-SEG-03 & Create Segment (Invalid Dimension) & Attempt to create segment with invalid dimension index & Validation error thrown & Pass \\
-\hline
-SEG-04 & Update Segment Value & Modify existing segment decimal value & Segment updated successfully & Pass \\
-\hline
-SEG-05 & Delete Segment & Remove existing segment & Segment deleted successfully & Pass \\
-\hline
-SEG-06 & Update Out-of-Range Value & Attempt to set segment value outside valid range & Validation error thrown & Pass \\
-\hline
-\end{tabular}
-\end{table}
-
-Validation tests also included verification of proper cascading delete behavior when variants were removed, confirming that all associated segments were correctly deleted to maintain referential integrity. Boundary condition testing verified handling of extreme parameter values, including very large and very small decimals, confirming the system's ability to maintain numeric precision across the full range of automotive parameter values.
-
-Performance analysis for segment operations revealed consistent response times with moderate scaling across different dataset sizes as shown in Table \ref{tab:segment-performance}. The performance measurements were taken for segment creation, update, deletion, and retrieval operations across both the baseline and production datasets.
+Performance analysis for segment operations revealed consistent response times with moderate scaling across different dataset sizes as shown in Table \ref{tab:segment-performance}.
 
 \begin{table}[h]
 \centering
@@ -319,12 +284,12 @@ Segment Retrieval & 32ms & 58ms & 1.81x \\
 \end{tabular}
 \end{table}
 
-The observed performance characteristics validate the efficiency of the database schema design described in Section \ref{subsec:database-schema-design}. Of particular note is the implementation of the segments table, which provides efficient storage for parameter modifications without requiring storage of unchanged values. As noted by Bhattacherjee et al. \cite{bhattacherjee2015principles}, this approach strikes an effective balance between storage efficiency and query performance for versioned datasets.
+The observed performance characteristics validate the efficiency of the database schema design described in Section \ref{sec:entity-relationship-model}. Of particular note is the implementation of the segments table, which provides efficient storage for parameter modifications without requiring storage of unchanged values. As noted by Bhattacherjee et al. \cite{bhattacherjee2015principles}, this approach strikes an effective balance between storage efficiency and query performance for versioned datasets.
 
 \section{Performance Analysis}
 \label{sec:performance-analysis}
 
-Beyond functional validation, comprehensive performance analysis was conducted to assess the system's efficiency and scalability under various operational conditions. This section presents the key findings related to query performance, concurrent access, and data volume scaling.
+Beyond functional validation, performance analysis was conducted to assess the system's efficiency and scalability under various operational conditions. This section presents the key findings related to query performance and data volume scaling.
 
 \subsection{Query Performance Assessment}
 \label{subsec:query-performance-assessment}
@@ -352,62 +317,48 @@ History Retrieval & 110ms & 220ms & 2.0x \\
 \end{tabular}
 \end{table}
 
-Most common operations demonstrated sublinear scaling with increasing data volumes, indicating effective indexing and query optimization. However, complex operations like phase comparison showed higher scaling factors, suggesting opportunities for further optimization. These results align with Molinaro's observations \cite{molinaro2005sql} regarding query performance optimization for complex relational operations.
+With the limited data points available, it appears that most common operations maintain reasonable performance with increasing data volumes. The system maintained interactive response times (below 200ms) for most operations even with the full dataset, ensuring a responsive user experience. The phase comparison operation, which involves complex joins across multiple tables, demonstrated longer execution times and might benefit from optimization for larger datasets.
 
-Analysis of query execution plans revealed that the implemented indexing strategy was effective for most common access patterns, with appropriate use of index-only scans for frequent operations. However, several potential improvements were identified for complex queries:
+The execution of a limited set of queries with and without indexes demonstrated the critical importance of the indexing strategy described in Section \ref{subsec:indexing-implementation}. Without proper indexes, response times increased by factors of 6.5x to 21.8x depending on the query type, with most operations exceeding the interactive response threshold without indexes.
 
-\begin{lstlisting}[language=SQL, caption={Optimized Phase Comparison Query}, label={lst:optimized-phase-comparison}]
-EXPLAIN ANALYZE
-WITH source_variants AS (
-    SELECT v.variant_id, v.pid_id, v.name, v.code_rule
-    FROM variants v
-    WHERE v.ecu_id = 3 AND v.phase_id = 12
-),
-target_variants AS (
-    SELECT v.variant_id, v.pid_id, v.name, v.code_rule
-    FROM variants v
-    WHERE v.ecu_id = 3 AND v.phase_id = 15
-)
-SELECT 
-    p.name AS parameter_name,
-    sv.name AS source_variant,
-    tv.name AS target_variant,
-    CASE 
-        WHEN sv.variant_id IS NULL THEN 'Added'
-        WHEN tv.variant_id IS NULL THEN 'Removed'
-        WHEN sv.code_rule <> tv.code_rule THEN 'Modified'
-        ELSE 'Unchanged'
-    END AS status
-FROM 
-    pids p
-    LEFT JOIN source_variants sv ON p.pid_id = sv.pid_id
-    LEFT JOIN target_variants tv ON p.pid_id = tv.pid_id
-WHERE 
-    p.ecu_id = 3
-    AND (sv.variant_id IS NOT NULL OR tv.variant_id IS NOT NULL)
-    AND (sv.variant_id IS NULL OR tv.variant_id IS NULL OR sv.code_rule <> tv.code_rule);
-\end{lstlisting}
+\subsection{Index Performance Analysis}
+\label{subsec:index-performance-analysis}
 
-The optimized query approach shown above uses Common Table Expressions (CTEs) to pre-filter variants by phase, reducing the complexity of the subsequent comparison operation. This optimization improved phase comparison performance by approximately 40\% for the full dataset.
+The implementation of strategic indexing proved critical for maintaining acceptable query performance with large parameter sets. Figure \ref{fig:index-performance} illustrates the performance impact of indexes on common query operations.
 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/index_performance_comparison.png}
+    \caption{Query Performance With and Without Indexes}
+    \label{fig:index-performance}
+\end{figure}
+
+The performance measurements demonstrate dramatic improvements with properly designed indexes, with response times reduced by 6.5x to 21.8x depending on the query type. Without indexes, most operations exceed the interactive response threshold (200ms), with some operations requiring multiple seconds. This performance differential underscores the importance of the indexing strategy described in Section \ref{subsec:indexing-implementation}.
+
+The performance gains from indexing come at a storage cost, as indexes consume approximately 22.5\% of the total database size. However, this storage overhead represents an optimal tradeoff given the substantial performance benefits. As noted by Schwartz et al. \cite{schwartz2012high}, the storage cost of indexes is typically justified when query performance improvements exceed 5x, a threshold easily surpassed by all indexed operations in the VMAP system.
+
+Analysis of query execution plans revealed particularly effective use of covering indexes for common operations. For parameter retrieval by PID, the system consistently used index-only scans on the \texttt{idx\_parameters\_pid\_phase} index, avoiding table access entirely for these frequent operations. Similarly, variant listing operations leveraged the \texttt{idx\_variants\_pid\_phase} index for efficient retrieval without requiring table access. These index-only scan patterns align with the recommendations of Obe and Hsu \cite{obe2017postgresql} for optimizing PostgreSQL performance through strategic index design.
 
 \subsection{Storage Requirements Analysis}
 \label{subsec:storage-requirements-analysis}
 
-Storage requirements were analyzed to assess database size and growth patterns with increasing parameter counts. Table \ref{tab} presents the storage allocation across different entity types for the full dataset, as illustrated in Figure \ref{fig:storage-analysis}.
+Storage requirements were analyzed to assess database size and growth patterns with increasing parameter counts. Figure \ref{fig:storage-analysis} presents the storage allocation across different entity types for the full dataset.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.95\textwidth]{figures/storage_analysis.png}
-    \caption{Storage allocation across different entity types for the full dataset.}
+    \includegraphics[width=0.8\textwidth]{figures/storage_distribution.png}
+    \caption{Storage Distribution by Entity Type}
     \label{fig:storage-analysis}
 \end{figure}
 
+The analysis reveals that the change history table dominates the database storage allocation, accounting for approximately 60.8\% of the total database size. This distribution significantly exceeds the storage requirements of the current data state, aligning with Bhattacherjee's observations \cite{bhattacherjee2015principles} regarding versioning and audit systems, where historical record storage typically surpasses active data by a substantial margin. Notably, while there are only 3,617 variants in the current state, the system maintains over 3.2 million change history records, reflecting the comprehensive auditing approach implemented in the system.
+
+The storage allocation analysis identified the following key distribution of database size across entity types:
 
 \begin{table}[h]
 \centering
 \caption{Storage Requirements Analysis}
-\label{tab}
+\label{tab:storage-requirements}
 \begin{tabular}{|l|r|r|}
 \hline
 \textbf{Entity Type} & \textbf{Record Count} & \textbf{Storage Size (MB)} \\
@@ -435,13 +386,35 @@ Indexes & - & 513.7 \\
 \end{tabular}
 \end{table}
 
-The change history table dominates the database storage allocation, accounting for approximately 60.8\% of the total database size. This distribution significantly exceeds the storage requirements of the current data state, aligning with Bhattacherjee's observations \cite{bhattacherjee2015principles} regarding versioning and audit systems, where historical record storage typically surpasses active data by a substantial margin. Notably, while there are only 3,617 variants in the current state, the system maintains over 3.2 million change history records, reflecting the comprehensive auditing approach implemented in the system.
-
 Another significant observation is the relationship between segments and snapshot segments. Despite having only 7 documentation snapshots, the system maintains over 1 million snapshot segments, exceeding the count of active segments. This indicates that documentation snapshots capture extensive parameter configurations at specific time points, creating substantial storage requirements for historical state preservation. This implementation of the snapshot pattern described by Fowler \cite{fowler2003patterns} provides comprehensive historical records at the cost of increased storage utilization.
 
-The index structures consume approximately 22.5\% of the total storage, reflecting the sophisticated indexing strategy described in Section \ref{subsec:indexing-strategy}. While this represents significant overhead, it provides essential performance benefits for query operations, particularly for the complex filtering and joining operations common in parameter management workflows.
+The index structures consume approximately 22.5\% of the total storage, reflecting the sophisticated indexing strategy described in Section \ref{subsec:indexing-implementation}. While this represents significant overhead, it provides essential performance benefits for query operations, particularly for the complex filtering and joining operations common in parameter management workflows.
+
+The actual active data—parameters, variants, and segments—consumes only 6.3\% of the total database size, with the majority of storage dedicated to audit trails, snapshots, and indexes. This distribution aligns with the requirements for regulated development environments described by Staron \cite{staron2021automotive}, where comprehensive traceability and historical record maintenance are essential for compliance and quality assurance.
 
 Projection of storage requirements based on observed growth patterns indicates that with the current data volume of 2.28GB, the database size would reach approximately 9.1GB after one year of active use in a production environment. While significantly larger than initially projected, this remains well within the capacity of modern database systems. The implementation of table partitioning for the change history table, as described in Section \ref{subsec:partitioning-implementation}, provides an effective mechanism for managing this growth while maintaining query performance. According to Obe and Hsu \cite{obe2017postgresql}, partitioned tables allow efficient archiving of older history records to lower-cost storage while maintaining rapid access to recent changes.
+
+\subsection{Versioning Approach Performance}
+\label{subsec:versioning-approach-performance}
+
+The performance characteristics of the phase-based parameter versioning approach selected in Chapter \ref{chap:methodology} were evaluated against the alternative change-based approach. This analysis aimed to validate the architectural decision to implement explicit phase copies rather than a delta-based versioning model.
+
+Figure \ref{fig:versioning-approach-comparison} presents the performance comparison between the two approaches for parameter retrieval operations across different data volumes, along with the storage requirements for each approach.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/vmap_versioning_approaches_simplified.png}
+    \caption{Version-based vs. Phase-based Parameter Management Comparison}
+    \label{fig:versioning-approach-comparison}
+\end{figure}
+
+The performance analysis demonstrates that the phase-based approach offers better query performance, particularly as parameter counts increase. For the tested parameter counts, the phase-based approach remains below 100ms for parameter retrieval operations, while the version-based approach shows nonlinear growth with increasing parameter counts.
+
+The storage requirements analysis confirms that the phase-based approach consumes more storage than the version-based approach, with approximately 51\% higher storage requirements across all phases. However, this storage difference represents a reasonable tradeoff given the performance benefits for query operations. As noted by Bhattacherjee et al. \cite{bhattacherjee2015principles}, the recreation/storage tradeoff in dataset versioning should prioritize operation frequency, with frequently accessed data favoring a storage-intensive approach that minimizes recreation costs.
+
+The phase-based approach also simplifies the implementation of phase transitions and comparison operations, which are fundamental to the automotive development process as described by Pretschner et al. \cite{pretschner2007software}. The explicit phase model aligns naturally with the mental model of automotive development engineers, who conceptualize parameter evolution in terms of distinct development phases rather than continuous time.
+
+These findings validate the architectural decision to implement a phase-based versioning approach for the VMAP system. While consuming more storage than a version-based approach, the phase model provides performance benefits, implementation simplicity, and alignment with domain concepts—advantages that outweigh the additional storage requirements.
 
 \section{Integration Testing}
 \label{sec:integration-testing}
@@ -451,15 +424,43 @@ Integration testing evaluated the system's interaction with external enterprise 
 \subsection{Parameter Definition Database Synchronization}
 \label{subsec:pdd-synchronization-testing}
 
-Parameter Definition Database synchronization testing verified the system's ability to import parameter definitions from the enterprise database. The synchronization process was tested with various scenarios, including initial loading, incremental updates, and conflict resolution.
+Parameter Definition Database synchronization testing verified the system's ability to import parameter definitions from the enterprise database. The synchronization process was tested with various scenarios, including initial loading, incremental updates, and conflict resolution. Figure \ref{fig:pdd-sync-time} illustrates the synchronization time trends observed during testing.
 
-Initial loading tests confirmed that the system could successfully import complete parameter sets for ECUs, with correct establishment of relationships between ECUs, modules, PIDs, and parameters. The system maintained proper relationship cardinality and enforced referential integrity constraints throughout the import process.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/pdd_sync_time_graph.png}
+    \caption{Parameter Definition Database Synchronization Time Trends}
+    \label{fig:pdd-sync-time}
+\end{figure}
 
-Incremental update testing verified that the system could correctly identify and process changes to parameter definitions.
+The synchronization performance analysis revealed an increasing trend in execution time over successive synchronization operations. Initial synchronization operations required approximately 15 minutes for the tested ECUs, with execution times increasing to around 30 minutes after 10 synchronization cycles. This gradual increase aligns with the observations of Mueller and Müller \cite{mueller2018conception} regarding database synchronization in complex engineering environments, where synchronization complexity tends to increase as the data history grows.
+
+The incremental update testing verified that the system could correctly identify and process changes to parameter definitions. Table \ref{tab:pdd-sync-results} presents the success rates for different types of parameter changes during synchronization operations.
+
+\begin{table}[h]
+\centering
+\caption{Parameter Definition Database Synchronization Results}
+\label{tab:pdd-sync-results}
+\begin{tabular}{|l|c|c|c|}
+\hline
+\textbf{Change Type} & \textbf{Processed} & \textbf{Succeeded} & \textbf{Success Rate} \\
+\hline
+New Parameters & 5,218 & 5,218 & 100\% \\
+\hline
+Modified Parameters & 3,764 & 3,691 & 98.1\% \\
+\hline
+New Modules & 12 & 12 & 100\% \\
+\hline
+New PIDs & 67 & 67 & 100\% \\
+\hline
+Removed Parameters & 42 & 42 & 100\% \\
+\hline
+\end{tabular}
+\end{table}
 
 The system successfully processed all types of parameter changes, with slightly reduced success for modified parameters due to complexity in handling data type changes. The audit system maintained complete records of all synchronization operations, enabling detailed analysis of data flows between systems.
 
-Conflict resolution testing evaluated the system's behavior when parameters were modified in both systems. The system correctly identified conflicts and provided appropriate resolution options, following the integration patterns described by Hohpe and Woolf \cite{hohpe2002enterprise}.
+Based on the observed synchronization performance trends, the projected synchronization time for the 20th cycle would reach approximately 45 minutes. While still acceptable for the typical synchronization frequency (weekly or bi-weekly), this suggests that synchronization performance optimization would be beneficial for long-term system maintenance. Possible approaches for optimization include implementing a more selective synchronization approach, enhancing the change detection algorithm to reduce comparison overhead, or implementing parallel processing for independent ECUs.
 
 \subsection{Vehicle Configuration Integration}
 \label{subsec:vehicle-configuration-testing}
@@ -468,17 +469,14 @@ Vehicle Configuration Database integration testing verified the system's ability
 
 Vehicle configuration data import testing confirmed that the system could correctly import and store vehicle configuration codes, with proper mapping between codes and vehicles. The system maintained referential integrity and handled incremental updates correctly, with complete audit logging of all import operations.
 
-Code rule validation testing verified that the system could evaluate complex boolean expressions against vehicle configurations. Test expressions ranged from simple conditions to complex nested expressions with multiple operators. The evaluation engine demonstrated 100\% accuracy across all test categories, correctly interpreting both simple logical operators and complex nested expressions with precedence rules. Performance analysis showed that even the most complex expressions with multiple nested conditions were evaluated in under 15ms, well within acceptable ranges for interactive operations.
+Code rule validation testing verified that the system could evaluate boolean expressions against vehicle configurations. Test expressions ranged from simple conditions to complex nested expressions with multiple operators. The evaluation engine correctly interpreted both simple logical operators and complex nested expressions with precedence rules.
 
 Parameter file generation testing confirmed that the system could produce valid parameter files for vehicle testing, with correct application of variant selection logic based on vehicle configuration codes. The generated files included all required parameters with appropriate values, providing a complete configuration for ECU testing and validation.
 
-\section{Comparison with Excel-Based Approach}
-\label{sec:comparison-with-excel}
+\section{Feature Comparison with Excel-Based Approach}
+\label{sec:feature-comparison-excel}
 
-To assess the improvements provided by the VMAP system, a comparative analysis was conducted against the Excel-based approach currently used for parameter management. The comparison evaluated feature coverage, performance, data integrity, and usability aspects.
-
-\subsection{Feature Comparison}
-\label{subsec:feature-comparison}
+To assess the improvements provided by the VMAP system, a feature comparison was conducted against the Excel-based approach currently used for parameter management. This comparison focused on capability coverage rather than performance metrics, providing a qualitative assessment of system improvements.
 
 Table \ref{tab:feature-comparison} presents a comparison of key features between the VMAP system and the Excel-based approach.
 
@@ -511,23 +509,19 @@ Integration & Automated & Manual \\
 
 The VMAP system provides significant advantages in all feature categories, with particular improvements in multi-user support, change tracking, and access control. These improvements address the limitations identified in the requirements analysis phase, providing a more robust and scalable solution for automotive parameter management.
 
-\subsection{Performance Comparison}
-\label{subsec:performance-comparison}
+\subsection{Data Integrity Improvements}
+\label{subsec:data-integrity-improvements}
 
-Performance measurements demonstrated substantial improvements in common operations compared to the Excel-based approach. Figure \ref{fig:performance-comparison} illustrates the relative performance for key operations.
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.85\textwidth]{figures/performance_comparison.png}
-\caption{Performance Comparison with Excel-Based Approach}
-\label{fig:performance-comparison}
-\end{figure}
-
-The most significant improvements were observed for operations involving large parameter sets, where the Excel approach suffered from linear scaling limitations. Parameter retrieval operations were 8-12 times faster in the VMAP system, while variant creation and modification operations showed 5-7 times improvement. These performance enhancements directly impact user productivity, particularly for module developers working with extensive parameter sets.
-
-\subsection{Data Integrity Comparison}
-\label{subsec:data-integrity-comparison}
-
-Data integrity was evaluated through controlled fault injection testing, where both systems were subjected to various error conditions including invalid values, constraint violations, and concurrent modifications. The VMAP system demonstrated superior data integrity protection, with 97\% of error conditions detected and prevented compared to 38\% for the Excel-based approach.
+Data integrity was evaluated through a set of controlled test cases where both systems were subjected to various validation scenarios including invalid values, constraint violations, and relationship consistency. The VMAP system demonstrated superior data integrity protection, correctly preventing invalid operations through database constraints and business rule validation.
 
 The database-level constraints and validation mechanisms provide a robust defense against data corruption, implementing the comprehensive validation approach described in Section \ref{sec:validation-mechanisms}. This represents a significant improvement over the Excel approach, where validation relies primarily on user vigilance and manual checks.
+
+\subsection{Development Process Impact}
+\label{subsec:development-process-impact}
+
+Beyond technical improvements, the VMAP system introduces significant enhancements to the automotive parameter development process. The centralized database approach enables concurrent work by multiple engineers, eliminating the file sharing bottlenecks common in the Excel-based approach. The role-based access control ensures that engineers can modify only their assigned modules, preventing accidental changes to other areas.
+
+The phase-based versioning approach aligns naturally with the automotive development lifecycle, supporting the structured progression from initial development through testing to final release. The explicit phase transitions provide clear development milestones, while the freezing mechanism ensures configuration stability at critical points.
+
+The comprehensive change tracking and documentation features address regulatory compliance requirements, providing complete traceability for all parameter modifications. This capability is increasingly important in the context of functional safety standards like ISO 26262, which require rigorous configuration management and change documentation.
+
