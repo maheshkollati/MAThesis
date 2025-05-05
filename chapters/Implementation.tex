@@ -20,7 +20,7 @@ CREATE TABLE ecus (
     description TEXT,
     byte_order VARCHAR(50),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    external_id INTEGER UNIQUE -- PDD reference ID
+    external_id INTEGER UNIQUE -- \ac{PDD}reference ID
 );
 
 CREATE TABLE modules (
@@ -29,7 +29,7 @@ CREATE TABLE modules (
     name VARCHAR(255) NOT NULL,
     kind VARCHAR(255),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    external_id INTEGER UNIQUE -- PDD reference ID
+    external_id INTEGER UNIQUE -- \ac{PDD}reference ID
 );
 
 CREATE TABLE ecu_modules (
@@ -59,12 +59,12 @@ CREATE TABLE parameters (
     unit VARCHAR(50),
     bias_offset DECIMAL,
     is_active BOOLEAN DEFAULT true,
-    external_id INTEGER, -- PDD reference ID
+    external_id INTEGER, -- \ac{PDD}reference ID
     FOREIGN KEY (ecu_id, phase_id) REFERENCES ecu_phases(ecu_id, phase_id)
 );
 \end{lstlisting}
 
-The parameter table incorporates a form of strategic denormalization by including direct references to \texttt{ecu\_id} and \texttt{phase\_id} alongside the PID foreign key. While this introduces some redundancy, this approach aims to improve query execution for parameter queries filtered by release phase, a critical operation in the system. Bhattacherjee et al. \cite{bhattacherjee2015principles} note that such denormalization can be justified when query performance benefits outweigh the overhead of maintaining consistency, especially for frequently accessed paths in the data model.
+The parameter table incorporates a form of strategic denormalization by including direct references to \texttt{ecu\_id} and \texttt{phase\_id} alongside the\ac{PID}foreign key. While this introduces some redundancy, this approach aims to improve query execution for parameter queries filtered by release phase, a critical operation in the system. Bhattacherjee et al. \cite{bhattacherjee2015principles} note that such denormalization can be justified when query performance benefits outweigh the overhead of maintaining consistency, especially for frequently accessed paths in the data model.
 
 A particularly challenging aspect of the implementation was supporting multi-dimensional parameters, which are common in automotive applications for representing lookup tables and characteristic curves \cite{kiencke2000automotive}. This was addressed through a specialized table structure:
 
@@ -74,7 +74,7 @@ CREATE TABLE parameter_dimensions (
     parameter_id BIGINT REFERENCES parameters(parameter_id) ON DELETE CASCADE,
     dimension_index INTEGER NOT NULL,
     default_value NUMERIC NOT NULL,
-    external_id INTEGER, -- PDD reference ID
+    external_id INTEGER, -- \ac{PDD}reference ID
     UNIQUE (parameter_id, dimension_index)
 );
 \end{lstlisting}
@@ -230,7 +230,7 @@ CREATE TABLE segments (
 );
 \end{lstlisting}
 
-Each variant is associated with a specific PID, ECU, and phase, creating a three-way relationship that places the variant in both functional and temporal contexts. The uniqueness constraints prevent duplicate variant names or code rules within the same PID and phase, enforcing a critical business rule identified during requirements analysis. The \texttt{code\_rule} field stores boolean expressions determining when a variant applies based on vehicle configuration codes, implementing a domain-specific rule language for variant applicability.
+Each variant is associated with a specific PID, ECU, and phase, creating a three-way relationship that places the variant in both functional and temporal contexts. The uniqueness constraints prevent duplicate variant names or code rules within the same\ac{PID}and phase, enforcing a critical business rule identified during requirements analysis. The \texttt{code\_rule} field stores boolean expressions determining when a variant applies based on vehicle configuration codes, implementing a domain-specific rule language for variant applicability.
 
 Segments form the foundation of parameter customization, linking parameters to variants and storing modified values. The canonical decimal representation for all parameter values, regardless of native data type, implements the canonical model pattern described by Hohpe and Woolf \cite{hohpe2002enterprise}, simplifying data manipulation while ensuring consistent value handling.
 
@@ -596,7 +596,7 @@ BEGIN
   FROM 
     parameters p
   JOIN 
-    pids pid ON p.pid_id = pid.pid_id
+    pids\ac{PID}ON p.pid_id = pid.pid_id
   JOIN 
     modules m ON pid.module_id = m.module_id
   JOIN 
@@ -778,7 +778,7 @@ BEGIN
               AND ss.dimension_index = st.dimension_index
         )
     )
-    -- Return PIDs with change indicators
+    -- Return\acp{PID} with change indicators
     SELECT 
         cp.pid_id,
         cp.name,
@@ -788,7 +788,7 @@ BEGIN
     FROM 
         common_pids cp
     WHERE
-        -- Only return PIDs that have at least one type of change
+        -- Only return\acp{PID} that have at least one type of change
         cp.pid_id IN (SELECT pid_id FROM param_changes)
         OR cp.pid_id IN (SELECT pid_id FROM variant_changes)
         OR cp.pid_id IN (SELECT pid_id FROM segment_changes)

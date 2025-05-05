@@ -24,9 +24,9 @@ All modifications require comprehensive logging with user information, timestamp
 \subsection{Integration with External Systems}
 \label{subsec:integration-external-systems}
 
-The stakeholder interviews and process analysis revealed that\ac{VMAP} must integrate with two critical external enterprise systems: the Parameter Definition Database (PDD) and the Vehicle Configuration Database (VCD).
+The stakeholder interviews and process analysis revealed that\ac{VMAP} must integrate with two critical external enterprise systems: the \ac{PDD} and the \ac{VCD}.
 
-The Parameter Definition Database (PDD) serves as the authoritative source for the hierarchical structure of automotive electronic systems, containing definitions of \acp{ECU}, Modules, PIDs, and baseline parameter configurations. As noted by Pretschner et al. \cite{pretschner2007software}, maintaining this hierarchical structure is essential for automotive software development. The workshops with domain experts confirmed that while\ac{VMAP} will manage parameter variants and customizations, it must rely on PDD for the underlying parameter definitions and structural relationships, requiring a robust synchronization mechanism to maintain consistency between the systems.
+The Parameter Definition Database (PDD) serves as the authoritative source for the hierarchical structure of automotive electronic systems, containing definitions of \acp{ECU}, Modules,\acp{PID}, and baseline parameter configurations. As noted by Pretschner et al. \cite{pretschner2007software}, maintaining this hierarchical structure is essential for automotive software development. The workshops with domain experts confirmed that while\ac{VMAP} will manage parameter variants and customizations, it must rely on \ac{PDD}for the underlying parameter definitions and structural relationships, requiring a robust synchronization mechanism to maintain consistency between the systems.
 
 The Vehicle Configuration Database (VCD) contains comprehensive vehicle specifications and configuration codes that determine which parameter variants apply to specific vehicle configurations. Integration with this system is necessary for two critical functions: validating the boolean code rules associated with parameter variants to ensure they reference valid vehicle codes, and supporting parameter file generation for specific vehicle configurations by resolving the applicable parameter variants based on vehicle codes. This integration requirement aligns with Staron's analysis of automotive software architectures, which emphasizes the importance of configuration management in supporting variant-rich vehicle platforms \cite{staron2021automotive}.
 
@@ -249,7 +249,7 @@ User management entities include Users, Roles, Permissions, and their relationsh
 
 Release management entities encompass Releases, Release Phases, and \ac{ECU} Phase mappings, providing the foundation for the phase-based version control approach. These entities support the automotive development cycle with its distinct phases and milestones.
 
-Parameter structure entities include \acp{ECU}, Modules, PIDs, Parameters, and Parameter Dimensions, representing the hierarchical organization of vehicle electronic systems as described by Staron \cite{staron2021automotive}. These entities capture both the structure and characteristics of parameters, including multi-dimensional parameters like maps and tables.
+Parameter structure entities include \acp{ECU}, Modules,\acp{PID}, Parameters, and Parameter Dimensions, representing the hierarchical organization of vehicle electronic systems as described by Staron \cite{staron2021automotive}. These entities capture both the structure and characteristics of parameters, including multi-dimensional parameters like maps and tables.
 
 Variant management entities comprise Variants, Segments, and their relationships to parameters, implementing the core parameter customization functionality. These entities support the creation of parameter variations for different vehicle configurations and operating conditions.
 
@@ -264,7 +264,7 @@ Audit entities encompass Change History, Transaction Records, and Phase Copy His
 
 The relationships between entities in the ER model reflect the complex interactions between different aspects of automotive parameter management. Key relationships include:
 
-Hierarchical relationships between \acp{ECU}, Modules, PIDs, and Parameters, representing the structural organization of automotive electronic systems. These relationships enforce the domain-specific hierarchy while supporting navigation from higher-level entities to their components.
+Hierarchical relationships between \acp{ECU}, Modules,\acp{PID}, and Parameters, representing the structural organization of automotive electronic systems. These relationships enforce the domain-specific hierarchy while supporting navigation from higher-level entities to their components.
 
 Many-to-many relationships between parameters and phases, implemented through direct association rather than temporal versioning. This structure supports the phase-based versioning approach, allowing efficient retrieval of parameters for specific phases.
 

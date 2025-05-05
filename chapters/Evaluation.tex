@@ -19,7 +19,7 @@ The test scenarios were categorized into functional areas corresponding to the p
 \item \textbf{User Management}: Authentication, authorization, role assignment, module access
 \item \textbf{Release Management}: Phase transitions, freeze operations, phase comparison
 \item \textbf{Variant Management}: Variant creation, segment modification, inheritance
-\item \textbf{Integration}: PDD synchronization, vehicle configuration
+\item \textbf{Integration}: \ac{PDD}synchronization, vehicle configuration
 \end{itemize}
 
 Each scenario was implemented as a structured test case with defined inputs, expected outcomes, and verification steps at both the application and database levels. The test design followed a modified version of Molinaro's approach to database validation \cite{molinaro2005sql}, with additional emphasis on traceability between requirements and test cases.
@@ -210,7 +210,7 @@ For each write operation test case (FRZ-01 through FRZ-04), verification include
 
 Variant management validation focused on assessing the system's capabilities for handling parameter customization through variants and segments. Testing employed an approach covering variant creation and segment modification workflows, using both the baseline dataset (188 variants, 28,776 segments) and the production-scale dataset (830 variants, 167,990 segments) to analyze functionality and performance under varying data volumes.
 
-Variant creation testing verified proper implementation of domain constraints as defined in the conceptual architecture (Section \ref{sec:entity-relationship-model}). Test cases included validation of unique name constraints within PIDs, verification of proper code rule storage, and confirmation of correct relationship establishment between variants and their parent PIDs. All test cases passed successfully for both scalar and complex parameters, with constraint enforcement consistently preventing invalid operations. As Karwin \cite{karwin2010sql} notes, constraint-based validation provides a robust foundation for maintaining data integrity in complex relational systems.
+Variant creation testing verified proper implementation of domain constraints as defined in the conceptual architecture (Section \ref{sec:entity-relationship-model}). Test cases included validation of unique name constraints within\acp{PID}, verification of proper code rule storage, and confirmation of correct relationship establishment between variants and their parent\acp{PID}. All test cases passed successfully for both scalar and complex parameters, with constraint enforcement consistently preventing invalid operations. As Karwin \cite{karwin2010sql} notes, constraint-based validation provides a robust foundation for maintaining data integrity in complex relational systems.
 
 The testing methodology included both black-box functional testing and white-box database state verification as shown in Listing \ref{lst:variant-creation-verification}.
 
@@ -451,7 +451,7 @@ Modified Parameters & 3,764 & 3,691 & 98.1\% \\
 \hline
 New Modules & 12 & 12 & 100\% \\
 \hline
-New PIDs & 67 & 67 & 100\% \\
+New\acp{PID} & 67 & 67 & 100\% \\
 \hline
 Removed Parameters & 42 & 42 & 100\% \\
 \hline
