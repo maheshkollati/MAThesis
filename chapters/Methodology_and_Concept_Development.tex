@@ -13,7 +13,7 @@ The foundation of the\ac{VMAP} system design was a comprehensive requirements an
 
 The primary functional requirements were derived from direct observation of engineers' current Excel-based workflow combined with semi-structured interviews conducted with module developers and documentation specialists. Through this process, several critical requirements emerged for the\ac{VMAP} system.
 
-The system must support the hierarchical organization of parameters within Electronic Control Units (ECUs), Modules, and Parameter IDs (PIDs), mirroring the domain-specific structure of automotive electronic systems as described by Staron \cite{staron2021automotive}. This hierarchical organization is essential for maintaining the logical structure of vehicle parameters and aligning with established engineering practices.
+The system must support the hierarchical organization of parameters within \acp{ECU}, Modules, and Parameter IDs (PIDs), mirroring the domain-specific structure of automotive electronic systems as described by Staron \cite{staron2021automotive}. This hierarchical organization is essential for maintaining the logical structure of vehicle parameters and aligning with established engineering practices.
 
 Users must be able to create variants for parameters with specific code rules determining their applicability, and define segments representing modified parameter values. If no segment exists, the system must default to Parameter Definition Database values—an approach that allows efficient storage by tracking only modifications rather than duplicating unchanged parameters, aligning with Bhattacherjee's principles of dataset versioning \cite{bhattacherjee2015principles}.
 
