@@ -1,7 +1,12 @@
 % Enter your abstract in German language here. Use paragraphs to section
 % your content. Do not use \chapter or \section.
-
-
+Moderne Nutzfahrzeuge basieren auf hochentwickelten elektronischen Steuergeräten (ECUs), die tausende konfigurierbare Parameter zur Steuerung von Antriebsstrangfunktionen benötigen. Der derzeitige Excel-basierte Ansatz für das Parametermanagement in der Automobilsoftwareentwicklung birgt erhebliche Risiken, darunter Dateninkonsistenzen, Versionskonflikte und eingeschränkte Nachvollziehbarkeit \cite{trovao2024evolution}. Diese Arbeit adressiert diese Herausforderungen durch die Entwicklung einer umfassenden Datenbankarchitektur für Variantenmanagement und Parametrisierung (VMAP) in PostgreSQL.
+	
+Die Forschung implementiert einen phasenbasierten Versionierungsansatz, der an den Entwicklungszyklen der Automobilindustrie ausgerichtet ist und gegenüber traditionellen änderungsbasierten Versionierungsmodellen erhebliche Leistungsvorteile bietet, während die Datenintegrität gewährleistet bleibt. Empirische Tests zeigen, dass dieser Ansatz Abfrageantwortzeiten unter 100ms selbst bei Datensätzen mit über 100.000 Parametern erzielt, bei akzeptabler Speichereffizienz \cite{bhattacherjee2015principles}. Das hybride Rollen-Berechtigungszugriffsmodell des Systems kombiniert rollenbasierte Sicherheit mit modulspezifischen Zugriffskontrollen, was durch umfangreiche Benutzervalidierung mit realen Engineering-Workflows verifiziert wurde.
+	
+Die Integration mit Unternehmenssystemen ermöglicht synchronisierte Parameterdefinitionen und Fahrzeugkonfigurationsdaten, entsprechend den von Hohpe und Woolf \cite{hohpe2002enterprise} beschriebenen Enterprise-Integration-Patterns. Die Leistungsanalyse ergab, dass die Datenbank interaktive Antwortzeiten für die meisten Operationen auch bei Produktionsdatensätzen mit 830 Varianten und 167.990 Segmenten beibehält, wobei bestimmte komplexe Operationen wie Phasenvergleiche eine suboptimale Skalierung aufweisen, die von weiterer Optimierung profitieren würden.
+	
+Das resultierende System bietet eine 6,5- bis 21,8-fache Leistungsverbesserung gegenüber nicht-indexierten Implementierungen und löst kritische Einschränkungen des Excel-basierten Ansatzes, einschließlich gleichzeitigem Mehrbenutzer-Zugriff, automatisierter Validierung und umfassender Änderungsverfolgung. Die Leistungsanalyse zeigt, dass, obwohl Änderungshistoriendatensätze den Speicherbedarf dominieren (60,8% der Datenbankgröße), der Kompromiss zwischen Speicher und Leistung die Auditanforderungen in regulierten Automobilentwicklungsumgebungen effektiv unterstützt \cite{staron2021automotive}.
 
 
 

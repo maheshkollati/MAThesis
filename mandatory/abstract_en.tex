@@ -1,6 +1,12 @@
 % Enter your abstract in English language here. Use paragraphs to section
 % your content. Do not use \chapter or \section.
-
+Modern commercial vehicles rely on sophisticated electronic control units (ECUs) that require thousands of configurable parameters to manage powertrain functions. The current Excel-based approach to parameter management in automotive software development introduces significant risks including data inconsistency, version conflicts, and limited traceability \cite{trovao2024evolution}. This thesis addresses these challenges through the development of a comprehensive database architecture for variant management and parametrization (VMAP) in PostgreSQL. 
+	
+The research implements a phase-based versioning approach aligned with automotive development cycles, providing significant performance advantages over traditional change-based versioning models while maintaining data integrity. Empirical testing demonstrates that this approach yields query response times below 100ms even with datasets exceeding 100,000 parameters, while maintaining acceptable storage efficiency \cite{bhattacherjee2015principles}. The system's hybrid role-permission access control model combines role-based security with module-specific access controls, verified through extensive user management validation with real-world engineering workflows.
+	
+Integration with enterprise systems enables synchronized parameter definitions and vehicle configuration data, implementing the enterprise integration patterns described by Hohpe and Woolf \cite{hohpe2002enterprise}. Performance analysis revealed that the database maintains interactive response times for most operations even with production-scale datasets containing 830 variants and 167,990 segments, though certain complex operations like phase comparison exhibit suboptimal scaling that would benefit from further optimization.
+	
+The resulting system provides a 6.5x-21.8x performance improvement over non-indexed implementations and resolves critical limitations of the Excel-based approach, including multi-user concurrent access, automated validation, and comprehensive change tracking. Performance analysis demonstrates that while change history records dominate storage requirements (60.8\% of database size), the storage-performance tradeoff effectively supports the audit requirements common in regulated automotive development environments \cite{staron2021automotive}.
 
 
 
