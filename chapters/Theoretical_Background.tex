@@ -1,19 +1,83 @@
 \chapter{Theoretical Background}
 \label{chap:theoretical-background}
 
-This chapter establishes the theoretical foundation necessary for understanding the design and implementation of the Variant Management and Parametrization (VMAP) database system. It begins with an overview of database systems and their types, followed by an examination of database design methodologies, including entity-relationship modeling. The chapter then explores software development models relevant to automotive parameter management, particularly the V-Model that underpins the release management approach. Finally, it discusses role-based access control systems, version control concepts, and temporal database management, which are critical for the parameter versioning requirements of automotive software development.
+This chapter establishes the theoretical foundation necessary for understanding the design and implementation of the Variant Management and Parametrization (VMAP) database system. It begins with an overview of automotive electronic control systems and parameter management, explaining the fundamental concepts that drive the requirements for the VMAP system. The chapter then explores database management systems, database design methodologies, and access control models relevant to the implementation. Finally, it discusses version control concepts and temporal database management approaches, which are critical for the parameter versioning requirements in automotive software development.
+
+\section{Automotive Electronic Control Systems}
+\label{sec:automotive-electronic-systems}
+
+Modern commercial vehicles contain dozens of Electronic Control Units (ECUs) that manage various vehicle subsystems. Each ECU is a specialized computing device that controls specific functions through software parameters \cite{staron2021automotive}. Understanding the structure and organization of these systems is essential for designing an effective parameter management solution.
+
+\subsection{ECU Hierarchy and Parameter Organization}
+\label{subsec:ecu-hierarchy}
+
+Automotive electronic systems follow a hierarchical organization that structures parameters into logical groupings. At the top level, Electronic Control Units (ECUs) represent distinct hardware components controlling specific vehicle functions such as engine management, transmission control, or brake systems \cite{kiencke2000automotive}. Within each ECU, modules represent functional software units that implement specific capabilities such as cruise control, adaptive power steering, diagnosis. Each module contains Parameter IDs (PIDs) that group related parameters, and finally, individual parameters define specific configuration values that affect system behavior \cite{staron2021autosar}.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[height=0.4\textheight]{figures/ecu_hierarchy.png}
+    \caption{Hierarchical Organization of Automotive Electronic Systems}
+    \label{fig:ecu-hierarchy}
+\end{figure}
+
+This hierarchical structure is not merely organizational but reflects the actual architecture of automotive electronic systems, where software components are modularized for maintainability, reusability, and functional separation. The Common Powertrain Controller (CPC), a central ECU in modern trucks, manages critical powertrain functions through thousands of configurable parameters organized into this hierarchical structure \cite{staron2021automotive}.
+
+Parameters themselves have complex characteristics beyond simple values. They can be scalar values, one-dimensional arrays (curves), or multi-dimensional arrays (maps or tables). Each parameter has specific attributes defining its data type, valid range, engineering units, scale factors, and default values \cite{pretschner2007software}. For instance, an engine timing map might be represented as a two-dimensional array where engine speed and load are the independent variables, and ignition timing angle is the dependent variable. This complexity in parameter structure creates specific requirements for the database system designed to manage them.
+
+\subsection{Parameter Variants and Customization}
+\label{subsec:parameter-variants}
+
+A fundamental challenge in automotive parameter management is supporting multiple parameter configurations for different vehicle variants, regional requirements, and operating conditions. Rather than maintaining separate complete parameter sets for each configuration, which would lead to significant redundancy, automotive systems implement a variant mechanism that allows selective overriding of parameter values based on specific conditions \cite{staron2021automotive}.
+
+In this approach, each parameter has a default value defined in the baseline configuration. Variants are created to represent specific vehicle configurations or conditions, and segments define modified parameter values within these variants. If no segment exists for a particular parameter in an applicable variant, the default value is used. This approach minimizes redundancy by storing only the modified values rather than complete parameter sets for each configuration \cite{broy2006challenges}.
+
+\begin{figure}[ht]
+    \centering
+    %\includegraphics[width=0.85\textwidth]{figures/variant_concept.png}
+    \caption{Parameter Variant and Segment Concept}
+    \label{fig:variant-concept}
+\end{figure}
+
+Variants are associated with code rules—boolean expressions that determine when a variant applies based on vehicle configuration codes. For example, a variant might apply only to vehicles with a specific engine type and transmission combination, or to vehicles destined for a particular market with unique regulatory requirements. The code rule evaluation process selects the appropriate variants for a specific vehicle configuration during parameter file generation \cite{staron2021autosar}.
+
+This variant approach creates specific requirements for the database system, which must efficiently store and retrieve variant definitions and segment values while maintaining the relationships between parameters, variants, and segments. The system must also implement a parameter resolution process that correctly applies variants based on vehicle configuration codes, ensuring that the right parameter values are used for each specific vehicle.
+
+\subsection{Release and Phase Management}
+\label{subsec:release-phase-management}
+
+Automotive software development follows a structured release process with well-defined phases representing increasing levels of maturity and stability \cite{broy2006challenges}. For parameter management, this translates into a phase-based development process where parameter configurations evolve through sequential stages before being released for production.
+
+The typical release cycle in automotive parameter development consists of bi-annual releases (e.g., "24.1" and "24.3" for first and third quarters of 2024), with each release progressing through four sequential phases: Initial, PreTest1, PreTest2, and Final \cite{pretschner2007software}. Different ECUs may progress through these phases at different rates, requiring the parameter management system to support concurrent work on multiple phases.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/release_cycle.png}
+    \caption{Automotive Parameter Release Cycle}
+    \label{fig:release-cycle}
+\end{figure}
+
+Each phase represents a milestone in the development process with specific activities and quality gates. The Initial phase involves the creation of new parameters and initial configuration. PreTest1 and PreTest2 phases involve refinement based on testing feedback, with increasing levels of validation. The Final phase represents the completed configuration ready for production release \cite{staron2021automotive}.
+
+When a phase transitions to the next stage, parameter configurations are copied forward, establishing a new baseline for continued development. Changes made in earlier phases should propagate to later phases unless explicitly overridden, creating a complex versioning requirement for the parameter management system \cite{pretschner2007software}. Additionally, at specific development milestones, phases may be "frozen" to create stable reference points for documentation and testing, requiring the parameter management system to enforce read-only access to frozen phases while still allowing continued development in active phases.
+
+This phase-based release process establishes specific requirements for the database system's versioning model, which must maintain distinct parameter configurations for each phase while supporting phase transitions, change propagation, and selective freezing. The versioning approach must align with this development process rather than implementing a generic temporal model, ensuring that the system supports the actual workflows used in automotive parameter development.
+
 
 \section{Database Management Systems}
 \label{sec:database-management-systems}
 
-Database management systems (DBMS) serve as the foundation for structured information storage and retrieval. They provide mechanisms for storing, organizing, and accessing data while ensuring integrity, security, and concurrent access \cite{elmasri2015fundamentals}. The choice of database system significantly impacts the design and capabilities of applications built upon it, making it a critical architectural decision for any information system. The basic division is made into two categories: relational and non-relational.
+Database management systems (DBMS) serve as the foundation for structured information storage and retrieval. They provide mechanisms for storing, organizing, and accessing data while ensuring integrity, security, and concurrent access \cite{elmasri2015fundamentals}. For the VMAP system, selecting an appropriate database approach is critical for meeting the complex requirements of automotive parameter management.
 
 \subsection{Relational Database Management Systems}
 \label{subsec:relational-database-management-systems}
 
 Relational Database Management Systems (RDBMS) organize data into structured tables composed of rows and columns, based on the relational model proposed by E.F. Codd in 1970 \cite{codd1970relational}. The relational model establishes a mathematical foundation for representing data as relations (tables) with well-defined operations for data manipulation. This approach has dominated database technology for decades due to its solid theoretical foundation and practical advantages for structured data management.
 
-In relational databases, tables adhere to predefined schemas that specify the structure, data types, and constraints applicable to the data. Each table typically includes a primary key that uniquely identifies each row, while foreign keys establish relationships between tables, implementing the referential integrity that ensures consistency across related data. Figure \ref{fig:relational-schema} illustrates a simple relational schema.
+In relational databases, tables adhere to predefined schemas that specify the structure, data types, and constraints applicable to the data. Each table typically includes a primary key that uniquely identifies each row, while foreign keys establish relationships between tables, implementing the referential integrity that ensures consistency across related data \cite{elmasri2015fundamentals}.
+
+A key strength of relational databases is their adherence to ACID properties (Atomicity, Consistency, Isolation, Durability), which ensure reliable transaction processing. Atomicity guarantees that transactions are treated as indivisible units that either complete entirely or have no effect. Consistency ensures that transactions maintain database integrity by transforming the database from one valid state to another. Isolation prevents interference between concurrent transactions, making them appear as if executed sequentially. Durability ensures that committed transactions persist even after system failures \cite{elmasri2015fundamentals}.
+
+ACID compliance makes relational databases particularly suitable for automotive parameter management, where data integrity and consistency are paramount. Incorrect parameter values could potentially affect vehicle safety and performance, making the strong consistency guarantees of relational databases essential for maintaining data integrity \cite{staron2021automotive}. Additionally, the hierarchical structure of automotive parameter systems—with well-defined relationships between ECUs, modules, PIDs, and parameters—aligns naturally with the relational model's representation of structured data and relationships.
 
 \begin{figure}[ht]
     \centering
@@ -22,16 +86,16 @@ In relational databases, tables adhere to predefined schemas that specify the st
     \label{fig:relational-schema}
 \end{figure}
 
-A key strength of relational databases is their adherence to ACID properties (Atomicity, Consistency, Isolation, Durability), which ensure reliable transaction processing. Atomicity guarantees that transactions are treated as indivisible units that either complete entirely or have no effect. Consistency ensures that transactions maintain database integrity by transforming the database from one valid state to another. Isolation prevents interference between concurrent transactions, making them appear as if executed sequentially. Durability ensures that committed transactions persist even after system failures.
-
-ACID compliance makes relational databases particularly suitable for applications where data integrity and consistency are paramount, such as financial systems, healthcare records, and automotive parameter management where configuration errors could lead to safety issues \cite{staron2021automotive}. For the VMAP system, where incorrect parameter values could potentially affect vehicle safety and performance, the strong consistency guarantees of relational databases provide essential safeguards against data corruption or inconsistency.
-
 \subsection{Non-Relational Database Systems}
 \label{subsec:non-relational-database-systems}
 
 Non-relational databases, often referred to as NoSQL (Not Only SQL) databases, emerged as alternatives to the relational model, particularly for use cases involving large-scale distributed systems, unstructured data, or schema flexibility requirements. Unlike relational databases, NoSQL systems typically sacrifice some aspects of ACID compliance in favor of scalability, flexibility, and performance characteristics suited to specific application domains \cite{bhattacherjee2015principles}.
 
-NoSQL databases can be categorized into several types based on their data models. Document databases such as MongoDB and CouchDB store semi-structured data as documents, typically in formats like JSON or XML, allowing flexible schema evolution. Key-value stores like Redis and DynamoDB provide simple data access through key-based lookups, optimized for high-throughput operations. Column-family stores such as Cassandra and HBase organize data in column families for efficient storage and retrieval of large datasets. Graph databases like Neo4j and Amazon Neptune optimize the storage and traversal of highly connected data structures.
+NoSQL databases can be categorized into several types based on their data models: document databases (MongoDB, CouchDB), key-value stores (Redis, DynamoDB), column-family stores (Cassandra, HBase), and graph databases (Neo4j, Amazon Neptune). Many NoSQL systems follow the BASE principle (Basically Available, Soft state, Eventually consistent) rather than ACID, prioritizing availability and partition tolerance over immediate consistency \cite{brewer2000robust}.
+
+While NoSQL databases excel in specific domains such as high-volume web applications, real-time analytics, and social networks, they present challenges for applications requiring complex transactions, strict data integrity, or sophisticated query capabilities across related entities \cite{kleppmann2017conflict}. For automotive parameter management, these limitations make NoSQL systems generally less suitable than relational databases.
+
+The potential for eventual consistency rather than immediate consistency in many NoSQL systems could lead to incorrect parameter configurations being used during development or testing, creating significant risks for vehicle performance and safety. Additionally, the hierarchical nature of automotive electronic systems, with well-defined relationships between entities, aligns naturally with the relational model's approach to representing structured data and relationships. The ability to enforce these relationships through foreign key constraints provides important safeguards against data inconsistency that would be more difficult to implement in many NoSQL systems.
 
 \begin{figure}[ht]
     \centering
@@ -40,82 +104,22 @@ NoSQL databases can be categorized into several types based on their data models
     \label{fig:nosql-types}
 \end{figure}
 
-Many NoSQL systems follow the BASE principle (Basically Available, Soft state, Eventually consistent) rather than ACID, prioritizing availability and partition tolerance over immediate consistency. This approach aligns with the CAP theorem proposed by Brewer \cite{brewer2000robust}, which states that distributed systems can guarantee at most two of the following three properties: Consistency, Availability, and Partition tolerance.
-
-While NoSQL databases excel in specific domains such as high-volume web applications, real-time analytics, and social networks, they present challenges for applications requiring complex transactions, strict data integrity, or sophisticated query capabilities across related entities \cite{kleppmann2017conflict}. For automotive parameter management, where data integrity and complex relationships between parameters, variants, and configurations are essential, the trade-offs presented by NoSQL systems make them less suitable than relational databases. The potential for eventual consistency rather than immediate consistency could lead to incorrect parameter configurations being used during development or testing, creating significant risks for vehicle performance and safety.
-
-Additionally, the hierarchical nature of automotive electronic systems, with ECUs containing modules, PIDs, and parameters in well-defined relationships, aligns naturally with the relational model's approach to representing structured data and relationships. The ability to enforce these relationships through foreign key constraints provides important safeguards against data inconsistency that would be more difficult to implement in many NoSQL systems.
-
-\subsection{Database Normalization}
-\label{subsec:database-normalization}
-
-Database normalization is a systematic approach to reduce data redundancy and improve data integrity in relational database design. Developed by E.F. Codd alongside the relational model, normalization organizes data into progressively more structured forms through a series of normal forms \cite{codd1970relational}. Each normal form addresses specific types of anomalies that could occur in database operations.
-
-First Normal Form (1NF) eliminates repeating groups by ensuring atomic values in each column. Second Normal Form (2NF) removes partial dependencies on primary keys. Third Normal Form (3NF) eliminates transitive dependencies between non-key attributes. Boyce-Codd Normal Form (BCNF) addresses anomalies not resolved by 3NF in cases with multiple candidate keys. Fourth and Fifth Normal Forms (4NF, 5NF) address multi-valued dependencies and join dependencies, respectively.
-
-Normalization significantly reduces data redundancy, thereby minimizing update anomalies and improving data integrity. However, for complex applications like automotive parameter management, a balance must be struck between full normalization and performance considerations. Denormalization—the deliberate introduction of controlled redundancy—may be employed to optimize specific query patterns while maintaining overall data integrity \cite{elmasri2015fundamentals}.
-
-For the VMAP system, normalization principles guide the design of core entities and relationships, while strategic denormalization is applied to support performance-critical operations such as parameter retrieval and variant resolution. This balanced approach ensures data integrity while providing the performance characteristics needed for interactive use in automotive development environments.
-
 \section{Database Design Methodologies}
 \label{sec:database-design-methodologies}
 
-Effective database design is crucial for ensuring that a database system meets its functional requirements while maintaining performance, scalability, and maintainability. Several methodologies have been developed to guide the database design process, each with its own strengths and applicability to different problem domains.
+Database design methodologies provide structured approaches to creating efficient, reliable database systems. These methodologies help translate real-world information needs into technical implementations that can store and manage data effectively. This section explores fundamental approaches that form the theoretical foundation for database design, presented in a sequence that follows the natural progression from user requirements to technical implementation.
 
-\subsection{Entity-Relationship Modeling}
-\label{subsec:entity-relationship-modeling}
+\subsection{Use Case Modeling}
+\label{subsec:use-case-modeling}
 
-Entity-Relationship (ER) modeling is a conceptual approach to database design that focuses on identifying the entities, attributes, and relationships in a domain. Proposed by Peter Chen in 1976 \cite{chen1976entity}, ER modeling provides a graphical notation for representing database structures that is both intuitive for stakeholders and precise enough for technical implementation.
+Before designing a database structure, it is essential to understand how users will interact with the system. Use case modeling provides a technique for capturing user requirements by identifying who will use the system (actors) and what they need to accomplish (use cases). Developed by Ivar Jacobson, use case modeling has become a cornerstone of requirements analysis in system development \cite{jacobson2004use}.
 
-The key components of ER modeling include entities, which represent distinct objects or concepts in the domain (e.g., ECUs, Modules, Parameters); attributes, which describe properties of entities (e.g., name, description, value); relationships, which depict associations between entities, specifying cardinality (e.g., one-to-one, one-to-many, many-to-many); and constraints, which define rules that data must satisfy (e.g., uniqueness, referential integrity).
+A use case represents a specific goal that an actor wishes to achieve using the system. Actors can be human users with different roles (such as administrators or regular users) or external systems that interact with the database. The collection of all use cases defines the system's functional boundaries—what it must do to satisfy user needs \cite{jacobson2004use}.
 
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/er_diagram.png}
-    \caption{Entity-Relationship Diagram for Core VMAP Entities \cite{RelationalData}}
-    \label{fig:er-diagram}
-\end{figure}
+Use case diagrams provide a visual representation of these relationships, showing actors as stick figures and use cases as ovals, with lines connecting actors to their associated use cases. This visual format makes the system's purpose accessible to non-technical stakeholders, facilitating communication between developers and users. As noted by Jacobson, "Use cases bridge the gap between the users' and the developers' views of the system" \cite{jacobson2004use}.
 
-ER modeling provides several advantages for database design: it focuses on domain understanding before implementation details, facilitates communication between technical and non-technical stakeholders, and provides a clear pathway to logical and physical database design \cite{elmasri2015fundamentals}. For complex domains like automotive parameter management, where intricate relationships exist between different entities, ER modeling offers a structured approach to capturing and representing these complexities.
+For automotive parameter management systems, use case modeling helps identify the different ways in which engineers, documentation specialists, administrators, and other stakeholders need to interact with parameter data. These use cases then inform the database design, ensuring that the resulting structure effectively supports all required operations.
 
-The VMAP system utilizes ER modeling as the primary approach for database design, providing a conceptual framework that captures the complex relationships between ECUs, modules, PIDs, parameters, variants, and segments, as well as the temporal relationships introduced by the phase-based versioning model.
-
-\subsection{Object-Relational Mapping}
-\label{subsec:object-relational-mapping}
-
-Object-Relational Mapping (ORM) bridges the gap between object-oriented programming and relational database systems by mapping objects in code to relational database structures. This approach addresses the "impedance mismatch" between object-oriented design and relational data models, allowing developers to work with database entities using the object-oriented paradigm \cite{ireland2009classification}.
-
-ORM frameworks provide several benefits for application development: they reduce boilerplate code for database operations, abstract database-specific syntax, support database-agnostic application development, and integrate with application-level validation and business logic. However, ORM approaches can introduce performance overhead and may obscure complex query optimizations. For performance-critical applications like automotive parameter management, a balanced approach combining ORM for routine operations with direct SQL for complex queries often provides the best results \cite{ireland2009classification}.
-
-The VMAP system employs a hybrid approach, using the Dapper micro-ORM framework to balance the convenience of object mapping with the performance advantages of direct SQL queries for complex operations involving parameter versioning and variant resolution. This approach provides the benefits of object-oriented development while maintaining the performance characteristics needed for a responsive parameter management system.
-
-\section{Software Development Methodologies for Automotive Systems}
-\label{sec:software-development-methodologies}
-
-The development of automotive software systems follows specialized methodologies that address the unique challenges of safety-critical embedded systems. These methodologies incorporate aspects of systems engineering, software engineering, and quality assurance to ensure that automotive software meets stringent requirements for reliability, safety, and compliance.
-
-% \subsection{V-Model for Automotive Development}
-% \label{subsec:v-model}
-
-% The V-Model is widely adopted in automotive software development due to its emphasis on validation and verification at each development stage \cite{broy2006challenges}. This model establishes a systematic approach to development, where each phase on the descending side of the "V" has a corresponding validation activity on the ascending side, as illustrated in Figure \ref{fig:v-model}.
-
-% \begin{figure}[ht]
-%     \centering
-%     %\includegraphics[width=0.85\textwidth]{figures/v_model.png}
-%     \caption{V-Model for Automotive Software Development}
-%     \label{fig:v-model}
-% \end{figure}
-
-% The V-Model includes phases such as requirements analysis, system design, detailed design, implementation, component testing, integration testing, system testing, and acceptance testing. In automotive development, this model is often extended to include safety analysis, formal verification, and compliance verification steps. The structured nature of the V-Model aligns well with the parameter development process in automotive systems, where each parameter configuration must progress through defined stages of development, testing, and validation before release \cite{staron2021automotive}.
-
-% The release phases in automotive parameter development (Phase1, Phase1, Phase1, Phase1) correspond to stages in the V-Model, providing a structured framework for parameter evolution throughout the development lifecycle. This alignment between the parameter versioning model and the overall development methodology ensures consistency in the development process and facilitates compliance with automotive standards such as ISO 26262 \cite{staron2021automotive}.
-
-% The VMAP system's phase-based versioning approach directly supports this development model, enabling parameter configurations to progress through the defined development stages with appropriate controls and validation at each transition. This alignment between the database architecture and the automotive development methodology ensures that the system supports established development practices while providing the technical capabilities needed for effective parameter management.
-
-\subsection{Use Case Driven Development}
-\label{subsec:use-case-driven-development}
-
-Use Case Driven Development focuses on defining system functionality from the perspective of user interactions. This approach begins with the identification of actors (users or external systems) and the definition of use cases that describe how these actors interact with the system to achieve specific goals \cite{jacobson2004use}.
 
 \begin{figure}[ht]
     \centering
@@ -124,64 +128,81 @@ Use Case Driven Development focuses on defining system functionality from the pe
     \label{fig:use-case-diagram}
 \end{figure}
 
-Use cases provide several advantages for system development: they focus on user needs rather than technical implementation, establish a common understanding between stakeholders, provide a foundation for requirements validation and testing, and help identify system boundaries and external interfaces. In automotive parameter management, use cases help define the specific workflows for different user roles (Module Developers, Documentation Team, Administrators, Read-Only Users), ensuring that the system addresses the actual needs of development teams while maintaining appropriate access controls and security boundaries \cite{sandhu1998role}.
+\subsection{Entity-Relationship Modeling}
+\label{subsec:entity-relationship-modeling}
 
-The VMAP system's database design is influenced by use case analysis, with database structures and operations aligned with the specific needs of different user roles and their interactions with parameter data. This alignment ensures that the database provides efficient support for common workflows while maintaining appropriate security boundaries and access controls.
+After understanding user requirements through use cases, the next step is to model the data itself. Entity-Relationship (ER) modeling provides a conceptual framework for representing the data structure needed to support the identified use cases. Introduced by Peter Chen in 1976, ER modeling has become the most widely used approach for conceptual database design \cite{chen1976entity}.
 
-\section{Access Control and Security Models}
-\label{sec:access-control-security-models}
+ER modeling identifies three main components:
 
-Access control is a critical aspect of database systems, particularly for automotive parameter management where different user roles have distinct responsibilities and permissions. Several models have been developed to address access control requirements, each with its own approach to defining and enforcing permissions.
+Entities represent the objects or concepts about which information needs to be stored. In an automotive context, these might include vehicles, electronic control units (ECUs), parameters, and users. Entities are represented as rectangles in ER diagrams.
 
-\subsection{Role-Based Access Control}
-\label{subsec:role-based-access-control}
+Attributes describe the specific properties or characteristics of each entity. For example, a parameter entity might have attributes like name, value, unit, and description. Attributes are shown as ovals connected to their entity.
 
-Role-Based Access Control (RBAC) organizes access permissions around roles rather than individual users, simplifying security administration and aligning access rights with organizational structures \cite{sandhu1998role}. In RBAC, users are assigned to roles, and roles are granted permissions for specific operations on system resources.
+Relationships describe the associations between entities. For instance, "ECUs contain parameters" expresses a relationship between ECU and parameter entities. Relationships are shown as diamonds connecting the related entities, with cardinality notations indicating how many instances of each entity can participate in the relationship \cite{elmasri2015fundamentals}.
 
-The core components of RBAC include users (individuals who need access to system resources), roles (collections of permissions that correspond to job functions), permissions (defined operations on specific resources), and sessions (temporary bindings between users and their assigned roles).
+ER modeling is particularly valuable for complex domains like automotive systems because it provides a visual representation that stakeholders can understand while being precise enough to guide database implementation. Chen explains that "the entity-relationship model adopts the more natural view that the real world consists of entities and relationships" \cite{chen1976entity}, making it an intuitive approach for modeling real-world systems.
 
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.85\textwidth]{figures/rbac_model.png}
-    \caption{Role-Based Access Control Model \cite{sandhu1998role}}
-    \label{fig:rbac-model}
+    \includegraphics[width=0.85\textwidth]{figures/er_diagram.png}
+    \caption{Entity-Relationship Diagram for Core VMAP Entities \cite{RelationalData}}
+    \label{fig:er-diagram}
 \end{figure}
 
-The separation between users and permissions through roles provides several advantages: it simplifies security administration, as permissions are managed at the role level; reduces the risk of permission errors, as roles are defined based on job functions; supports the principle of least privilege, giving users only the permissions needed for their responsibilities; and facilitates compliance with regulatory requirements through structured assignment of permissions.
+\subsection{Database Normalization}
+\label{subsec:database-normalization}
 
-For automotive parameter management, RBAC provides an effective framework for managing the complex access requirements of different user groups. By defining roles that align with specific responsibilities in the parameter development process (e.g., Module Developer, Documentation Specialist), the system can enforce appropriate access controls while supporting collaborative development activities \cite{ferraiolo2011policy}.
+Once the conceptual model is established through ER modeling, database normalization helps refine this model into an efficient, consistent structure. Normalization is a systematic process developed by E.F. Codd that organizes data to minimize redundancy and avoid update anomalies \cite{codd1970relational}.
 
-The VMAP system implements RBAC as the primary access control model, with roles defined for Module Developers, Documentation Team members, Administrators, and Read-Only Users, each with specific permissions aligned with their responsibilities in the parameter development process. This role-based approach provides a clear and manageable security model that supports the collaborative nature of automotive parameter development while maintaining appropriate access controls.
+Normalization proceeds through several "normal forms," each addressing specific types of data inconsistencies:
 
-\subsection{Attribute-Based Access Control}
-\label{subsec:attribute-based-access-control}
+First Normal Form (1NF) requires that each cell in a table contains only a single value, not a list of values. For example, storing multiple phone numbers in a single field would violate 1NF. This ensures that data is atomic (indivisible) and can be manipulated consistently.
 
-Attribute-Based Access Control (ABAC) extends beyond role-based approaches by making access decisions based on attributes of users, resources, actions, and environment \cite{hu2015implementing}. This more flexible approach allows fine-grained access control based on multiple factors rather than predefined roles.
+Second Normal Form (2NF) builds on 1NF by requiring that all non-key attributes depend on the entire primary key, not just part of it. This prevents situations where changing one piece of data requires multiple updates in different places.
 
-ABAC components typically include subject attributes (properties of the user, such as department, job title, clearance level), resource attributes (properties of the accessed resource, such as module, classification, owner), action attributes (properties of the operation being performed), and environment attributes (contextual information such as time, location, system status).
+Third Normal Form (3NF) further refines the structure by requiring that non-key attributes depend only on the primary key, not on other non-key attributes. This eliminates transitive dependencies that can lead to update anomalies \cite{elmasri2015fundamentals}.
 
-ABAC offers greater flexibility than RBAC but requires more complex policy definition and evaluation. For systems with dynamic access requirements or where permissions depend on contextual factors, ABAC provides advantages over purely role-based approaches \cite{xu2014specification}. In automotive parameter management, a hybrid approach combining RBAC with attribute-based extensions often provides the best balance, using roles for general permission assignment while incorporating attribute-based rules for module-specific access control or phase-specific permissions \cite{sandhu1997arbac97}.
+For most practical applications, achieving 3NF provides a good balance between data integrity and system performance. As explained by Date, "Third normal form is considered adequate for most practical purposes; further normalization is usually performed only when necessary" \cite{date2011sql}.
 
-The VMAP system extends the basic RBAC model with attribute-based elements, particularly for module-specific access control. This hybrid approach allows Module Developers to be granted write access to specific modules rather than all modules, implementing the principle of least privilege while maintaining the overall role-based security structure. This combination provides both manageability and flexibility, addressing the specific security requirements of automotive parameter management.
+In automotive parameter management, normalization helps organize complex data about ECUs, modules, and parameters into a structure that maintains consistency while supporting efficient access. For example, normalizing parameter data ensures that when a parameter value changes, that change only needs to be recorded in one place, eliminating the risk of inconsistent values across the database.
 
-\section{Version Control and Temporal Database Concepts}
-\label{sec:version-control-temporal-concepts}
+\subsection{Role-Based Access Control Models}
+\label{subsec:role-based-access-control}
 
-Version control is essential for managing the evolution of software artifacts, including database content. For automotive parameter management, where parameters evolve through multiple development phases and variants, sophisticated versioning approaches are required to maintain traceability and consistency.
+Database systems often contain sensitive information that should not be accessible to all users. Role-Based Access Control (RBAC) provides a structured approach to managing permissions within a database system. Introduced by David Ferraiolo and Richard Kuhn in the 1990s, RBAC has become the predominant model for access control in enterprise systems due to its balance of security and administrative simplicity \cite{sandhu1998role}.
 
-\subsection{Traditional Version Control Systems}
-\label{subsec:traditional-version-control}
+The core concept of RBAC is that permissions are associated with roles, and users are assigned to appropriate roles rather than being granted permissions directly. A role represents a specific function within an organization, such as ``administrator,'' ``engineer,'' or ``analyst.'' Each role is granted a set of permissions that allow users assigned to that role to perform specific operations on database objects like reading, creating, updating, or deleting records \cite{ferraiolo2011policy}.
 
-Traditional Version Control Systems (VCS) focus on tracking changes to files over time, providing mechanisms for branching, merging, and maintaining change history \cite{tichy1985rcs}. These systems typically use either a centralized model (e.g., Subversion) or a distributed model (e.g., Git) for managing repositories.
+This structure provides several important advantages over direct permission assignment. First, it simplifies administration by allowing permissions to be managed at the role level rather than the individual user level. When a new user joins the organization, they can simply be assigned to the appropriate roles rather than requiring configuration of individual permissions. Second, it improves security by implementing the principle of least privilege, ensuring that users have only the permissions necessary for their specific responsibilities which reduces the risk of unauthorized access or accidental data modifications \cite{sandhu1998role}.
 
-Key features of traditional VCS include change tracking with commit history, branching and merging for parallel development, tagging for marking significant versions, and conflict detection and resolution mechanisms. While these systems excel at managing textual content like source code, they face limitations when dealing with structured data in databases. The file-centric nature of traditional VCS does not align well with the relational structure of databases, leading to challenges in tracking changes to individual records or maintaining relationships between related entities during version evolution \cite{bhattacherjee2015principles}.
+The theoretical foundation of RBAC includes several key components: users (individuals who need access to the system), roles (collections of permissions that correspond to job functions), permissions (defined operations on specific resources), and sessions (temporary bindings between users and their assigned roles). These components provide a flexible framework for implementing access control policies tailored to specific organizational needs while maintaining a clear separation between users and permissions through the role abstraction \cite{sandhu1997arbac97}.
 
-For automotive parameter management, where complex relationships exist between parameters, variants, and configurations, specialized versioning approaches are needed that address the unique requirements of structured data evolution. The VMAP system addresses these requirements through a phase-based versioning model that explicitly represents development stages and their relationships, combined with comprehensive change tracking mechanisms that maintain a complete audit trail of parameter modifications.
+
+\subsection{Version Control for Databases}
+\label{subsec:database-versioning}
+
+Version control for databases addresses the challenge of tracking changes to data structures and content over time. Unlike traditional file-based version control systems designed for source code, database versioning must maintain complex relationships between entities while preserving historical states and supporting evolution through distinct development stages \cite{bhattacherjee2015principles}.
+
+Several approaches have emerged for implementing version control in database systems. The snapshot approach captures complete database states at specific points in time, providing simple retrieval of historical states but potentially consuming significant storage resources. The change-based approach records only modifications to database content, reducing storage requirements but requiring reconstruction of historical states through the application of change records \cite{bhattacherjee2015principles}.
+
+The temporal approach extends traditional database structures with time dimensions, enabling direct querying of historical states through time-based predicates. This approach typically introduces valid time (when facts are true in the real world) and transaction time (when facts are recorded in the database) dimensions, allowing sophisticated historical analysis but adding complexity to schema design and query formulation \cite{snodgrass1999developing}.
+
+Phase-based versioning represents a domain-specific approach that aligns database versioning with development phases rather than continuous time. This approach explicitly models development stages as first-class entities in the database schema, associating data with specific phases rather than temporal timestamps. According to Bhattacherjee et al., "Domain-specific versioning approaches often provide better performance and usability than generic temporal database techniques when tailored to specific application requirements" \cite{bhattacherjee2015principles}.
+
 
 \subsection{Temporal Database Concepts}
-\label{subsec:temporal-database-concepts}
+\label{subsec}
 
-Temporal databases extend traditional database systems with explicit support for time-varying data, allowing queries based on time dimensions and maintaining historical states \cite{kulkarni2012temporal}. These systems typically support two time dimensions: valid time (when facts are true in the modeled reality) and transaction time (when facts are recorded in the database). Databases that support both dimensions are known as bi-temporal databases, providing a comprehensive framework for tracking both when changes occurred in the system and when they became effective in the real world \cite{bohlen2018database}.
+Many applications, including automotive parameter management, need to track how data changes over time. Temporal database concepts address these requirements by providing mechanisms for managing time-varying data. Unlike traditional databases that store only the current state, temporal databases maintain historical states and support queries based on time dimensions \cite{snodgrass1999developing}.
+
+Temporal databases typically support two key time dimensions. Valid time represents when facts are true in the modeled reality—for example, when a particular parameter configuration becomes active in a vehicle. Transaction time represents when facts are recorded in the database—for example, when a parameter value was updated in the system. Databases that support both dimensions are known as bi-temporal databases \cite{kulkarni2012temporal}.
+
+Temporal database implementations often use specialized table structures called temporal tables. These tables extend traditional table structures with additional timestamp columns that define the time periods during which each record is valid. For example, a temporal parameter table might include ValidFrom and ValidTo columns that define when each parameter value is applicable, allowing the database to maintain a complete history of parameter changes \cite{salzberg1999comparison}.
+
+Kulkarni and Michels explain that "temporal tables provide a systematic way to track and query historical data without requiring application-level version management" \cite{kulkarni2012temporal}. This capability is particularly valuable in regulated industries like automotive development, where traceability and auditability of parameter changes are essential for compliance and quality assurance.
+
+In automotive parameter management, temporal database concepts can support critical requirements such as tracking parameter evolution throughout the development lifecycle, maintaining historical records for diagnostic and compliance purposes, and enabling historical analysis to understand how parameter configurations have evolved over time. These capabilities form an important theoretical foundation for designing systems that manage time-sensitive data in complex domains.
 
 \begin{figure}[ht]
     \centering
@@ -190,22 +211,28 @@ Temporal databases extend traditional database systems with explicit support for
     \label{fig:temporal-database}
 \end{figure}
 
-Temporal database concepts provide several advantages for version management: automatic preservation of historical states, support for as-of-date queries across different time points, simplified auditing and compliance reporting, and consistent handling of time-based business rules. However, temporal databases also introduce complexities in schema design, query formulation, and performance optimization. For automotive parameter management, where versioning requirements align with specific development phases rather than continuous time, a domain-specific approach combining elements of temporal databases with phase-based versioning often provides the most effective solution \cite{bhattacherjee2015principles}.
+\subsection{Strategic Denormalization}
+\label{subsec:strategic-denormalization}
 
-The VMAP system adopts a hybrid approach to versioning, using explicit phase associations rather than temporal timestamps as the primary versioning dimension. This approach aligns more directly with the automotive development process, where parameters progress through discrete development phases rather than evolving continuously over time. The phase-based approach simplifies queries for specific development stages while maintaining the version history needed for traceability and compliance.
+While normalization provides a theoretical foundation for database integrity, practical database design often requires balancing normalization principles with performance considerations. Strategic denormalization involves deliberately introducing controlled redundancy to improve performance for specific operations \cite{bhattacherjee2015principles}.
 
-\subsection{Database Versioning Approaches}
-\label{subsec:database-versioning-approaches}
+Consider a fully normalized database where information about parameters, their modules, and their ECUs is stored in separate tables. To retrieve a parameter with its associated module and ECU information would require joining all three tables—an operation that becomes increasingly expensive as the database grows. In cases where this retrieval happens frequently, storing the module and ECU names directly in the parameter table (introducing controlled redundancy) could significantly improve performance \cite{schwartz2012high}.
 
-Several approaches have been developed for managing database versioning, each with its own trade-offs in terms of complexity, query performance, and storage requirements. Schema versioning tracks changes to database structure through migration scripts or schema evolution mechanisms \cite{curino2009automating}. Tuple versioning maintains multiple versions of each row (tuple) with validity periods, supporting time-travel queries but potentially increasing storage requirements \cite{saracco2010matter}. Snapshot isolation creates complete copies of data at specific points in time, simplifying retrieval of historical states but increasing storage overhead \cite{bhattacherjee2015principles}. Change logging records all modifications in an audit trail, providing complete change history while minimizing storage overhead for unchanged data \cite{bhattacherjee2015principles}.
+Molinaro emphasizes that "denormalization is not about abandoning normalization principles, but about making strategic exceptions for performance reasons" \cite{molinaro2005sql}. These exceptions should be carefully documented and justified based on specific performance requirements.
 
-% \begin{figure}[ht]
-%     \centering
-%     %\includegraphics[width=0.85\textwidth]{figures/versioning_approaches.png}
-%     \caption{Comparison of Database Versioning Approaches}
-%     \label{fig:versioning-approaches}
-% \end{figure}
+For automotive systems, where both data integrity and query performance are critical, finding the right balance between normalization and strategic denormalization is essential. This balance ensures that parameter data maintains consistency while providing the performance needed for engineering workflows.
 
-For automotive parameter management, where parameters evolve through distinct development phases, a combination of these approaches often provides the most effective solution. The VMAP system implements a phase-based versioning approach with explicit association between parameters and development phases, supplemented by comprehensive change logging for auditability. This combined approach addresses the versioning requirements of automotive parameter management while maintaining acceptable performance characteristics \cite{broy2006challenges}.
+\subsection{Conceptual, Logical, and Physical Design Levels}
+\label{subsec:design-levels}
 
-The phase-based approach aligns directly with the automotive development process, making the version model more intuitive for users while simplifying common operations such as parameter retrieval and phase transition. The comprehensive change logging provides the detailed audit trail needed for compliance and traceability, recording who made each change, when it was made, and what was modified. This combination of phase-based versioning and detailed change logging provides the versioning capabilities needed for automotive parameter management while avoiding the complexity of full temporal database implementations.
+Database design typically proceeds through three levels of abstraction, allowing designers to manage complexity by focusing on different aspects at each stage:
+
+Conceptual design focuses on what data needs to be stored, without concern for implementation details. The ER model created at this stage captures entities, attributes, and relationships from a business perspective, providing a foundation that both technical and non-technical stakeholders can understand \cite{elmasri2015fundamentals}.
+
+Logical design transforms the conceptual model into structures specific to the chosen database model (typically relational), defining tables, columns, keys, and relationships. This stage applies normalization principles to refine the structure, independent of any specific database system \cite{elmasri2015fundamentals}.
+
+Physical design addresses how the logical design will be implemented in a specific database management system, considering factors like storage structures, indexing strategies, and access methods. This stage optimizes the design for performance based on anticipated usage patterns \cite{obe2017postgresql}.
+
+Moving through these levels allows database designers to progressively refine the database structure, addressing different concerns at each stage. As Elmasri and Navathe observe, "The separation of conceptual, logical, and physical design allows database designers to focus on the appropriate level of abstraction at each stage" \cite{elmasri2015fundamentals}.
+
+For automotive parameter management, this layered approach helps manage the complexity of the domain, ensuring that the resulting database effectively supports both the business requirements (storing and managing parameter configurations) and the technical requirements (performance, scalability, and maintainability).
