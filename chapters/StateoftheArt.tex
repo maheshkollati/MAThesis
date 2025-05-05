@@ -1,7 +1,7 @@
 \chapter{State of the Art}
 \label{chap:state-of-art}
 
-This chapter examines the current state of the art in database version control systems and automotive parameter management. It begins by analyzing existing approaches to software configuration management in the automotive industry, followed by an evaluation of database versioning techniques and their applicability to parameter management systems. The chapter also explores role-based access control models and integration strategies for enterprise systems, establishing the theoretical foundation for the VMAP system design.
+This chapter examines the current state of the art in database version control systems and automotive parameter management. It begins by analyzing existing approaches to software configuration management in the automotive industry, followed by an evaluation of database versioning techniques and their applicability to parameter management systems. The chapter also explores role-based access control models and integration strategies for enterprise systems, establishing the theoretical foundation for the\ac{VMAP} system design.
 
 \section{Parameter Management in Automotive Software Development}
 \label{sec:parameter-management}
@@ -13,9 +13,9 @@ The complexity of automotive software has grown exponentially in recent decades,
 
 Parameter management in automotive systems has evolved from simple calibration tables to sophisticated configuration frameworks managing thousands of parameters across multiple vehicle variants. Broy \cite{broy2006challenges} describes the fundamental challenges in automotive software engineering, highlighting that software complexity is driven by the need to address multiple variants, market requirements, and technical functions. The parameter configuration problem is specifically identified as one of the key challenges in this domain.
 
-Early approaches to parameter management relied on specialized tools provided by ECU suppliers, which typically stored parameters in proprietary formats with limited version control capabilities. Pretschner et al. \cite{pretschner2007software} note that these tools evolved from simple memory editors to more sophisticated calibration environments, but remained focused on individual ECUs rather than system-wide parameter management.
+Early approaches to parameter management relied on specialized tools provided by \ac{ECU} suppliers, which typically stored parameters in proprietary formats with limited version control capabilities. Pretschner et al. \cite{pretschner2007software} note that these tools evolved from simple memory editors to more sophisticated calibration environments, but remained focused on individual \acp{ECU} rather than system-wide parameter management.
 
-Staron \cite{staron2021automotive} describes how AUTOSAR (Automotive Open System Architecture) has contributed to more structured parameter management by defining standard interfaces and component models that separate parameters from implementation. However, the practical implementation of these standards varies across organizations and ECU suppliers, creating integration challenges for comprehensive parameter management.
+Staron \cite{staron2021automotive} describes how AUTOSAR (Automotive Open System Architecture) has contributed to more structured parameter management by defining standard interfaces and component models that separate parameters from implementation. However, the practical implementation of these standards varies across organizations and \ac{ECU} suppliers, creating integration challenges for comprehensive parameter management.
 
 \subsection{Challenges in Automotive Parameter Management}
 \label{subsec:challenges-parameter-management}
@@ -165,4 +165,4 @@ The RBAC models described by Sandhu et al. \cite{sandhu1998role} and Ferraiolo e
 
 Integration approaches documented by Hohpe and Woolf \cite{hohpe2002enterprise} and Mueller and Müller \cite{mueller2018conception} provide general patterns for system integration but do not specifically address the challenges of integrating parameter management systems with automotive-specific enterprise systems such as parameter definition databases and vehicle configuration databases.
 
-These research gaps highlight the need for domain-specific solutions that combine insights from database version control, access control models, and enterprise integration patterns with specialized knowledge of automotive development processes. The VMAP system addresses these gaps by developing a database architecture tailored to the specific requirements of automotive parameter management, as will be detailed in subsequent chapters.
+These research gaps highlight the need for domain-specific solutions that combine insights from database version control, access control models, and enterprise integration patterns with specialized knowledge of automotive development processes. The\ac{VMAP} system addresses these gaps by developing a database architecture tailored to the specific requirements of automotive parameter management, as will be detailed in subsequent chapters.

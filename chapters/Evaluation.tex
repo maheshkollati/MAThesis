@@ -1,12 +1,12 @@
 \chapter{Evaluation and Validation}
 \label{chap:evaluation}
 
-This chapter presents the systematic evaluation and validation of the VMAP database system. Following the implementation described in Chapter \ref{chap:implementation}, a comprehensive testing strategy was developed to assess the system's functionality, performance, and compliance with requirements. The evaluation process focused on four key areas: user management, release management, parameter versioning, and variant management, using both controlled test scenarios and production-scale data volumes. Rather than an exhaustive documentation of all tests, this chapter highlights representative test cases and key findings that demonstrate the system's capabilities and limitations.
+This chapter presents the systematic evaluation and validation of the\ac{VMAP} database system. Following the implementation described in Chapter \ref{chap:implementation}, a comprehensive testing strategy was developed to assess the system's functionality, performance, and compliance with requirements. The evaluation process focused on four key areas: user management, release management, parameter versioning, and variant management, using both controlled test scenarios and production-scale data volumes. Rather than an exhaustive documentation of all tests, this chapter highlights representative test cases and key findings that demonstrate the system's capabilities and limitations.
 
 \section{Validation Methodology}
 \label{sec:validation-methodology}
 
-The validation methodology followed a structured approach combining functional testing, performance analysis, and integration verification. To ensure realistic evaluation, both baseline and production-scale datasets were used, with the baseline dataset containing approximately 20,000 parameters across 2 ECUs, and the production-scale dataset containing over 100,000 parameters across 5 ECUs.
+The validation methodology followed a structured approach combining functional testing, performance analysis, and integration verification. To ensure realistic evaluation, both baseline and production-scale datasets were used, with the baseline dataset containing approximately 20,000 parameters across 2 \acp{ECU}, and the production-scale dataset containing over 100,000 parameters across 5 \acp{ECU}.
 
 \subsection{Test Scenario Development}
 \label{subsec:test-scenario-development}
@@ -36,7 +36,7 @@ The measurement methodology employed automated test scripts with integrated timi
 \section{Functional Testing Results}
 \label{sec:functional-testing-results}
 
-Functional testing validated the core capabilities of the VMAP system against the requirements defined in Chapter \ref{chap:methodology}. This section presents the key findings for each functional area, focusing on representative test cases and critical system behaviors.
+Functional testing validated the core capabilities of the\ac{VMAP} system against the requirements defined in Chapter \ref{chap:methodology}. This section presents the key findings for each functional area, focusing on representative test cases and critical system behaviors.
 
 \subsection{User Management Validation}
 \label{subsec:user-management-validation}
@@ -135,7 +135,7 @@ Despite the performance overhead, both approaches maintain acceptable performanc
 \subsection{Release Management Validation}
 \label{subsec:release-management-validation}
 
-Release management testing evaluated the phase-based versioning approach that forms the foundation of the VMAP system. Testing focused on four key aspects: phase sequence validation, phase transition operations, freeze functionality, and phase comparison.
+Release management testing evaluated the phase-based versioning approach that forms the foundation of the\ac{VMAP} system. Testing focused on four key aspects: phase sequence validation, phase transition operations, freeze functionality, and phase comparison.
 
 Phase sequence validation confirmed that the system correctly enforced the defined sequence of development phases (Phase1 → Phase2 → Phase3 → Phase4) with successful validation of each phase transition. This sequential enforcement is essential for maintaining the structured development workflow described by Broy \cite{broy2006challenges} for automotive software development.
 
@@ -335,7 +335,7 @@ The implementation of strategic indexing proved critical for maintaining accepta
 
 The performance measurements demonstrate dramatic improvements with properly designed indexes, with response times reduced by 6.5x to 21.8x depending on the query type. Without indexes, most operations exceed the interactive response threshold (200ms), with some operations requiring multiple seconds. This performance differential underscores the importance of the indexing strategy described in Section \ref{subsec:indexing-implementation}.
 
-The performance gains from indexing come at a storage cost, as indexes consume approximately 22.5\% of the total database size. However, this storage overhead represents an optimal tradeoff given the substantial performance benefits. As noted by Schwartz et al. \cite{schwartz2012high}, the storage cost of indexes is typically justified when query performance improvements exceed 5x, a threshold easily surpassed by all indexed operations in the VMAP system.
+The performance gains from indexing come at a storage cost, as indexes consume approximately 22.5\% of the total database size. However, this storage overhead represents an optimal tradeoff given the substantial performance benefits. As noted by Schwartz et al. \cite{schwartz2012high}, the storage cost of indexes is typically justified when query performance improvements exceed 5x, a threshold easily surpassed by all indexed operations in the\ac{VMAP} system.
 
 Analysis of query execution plans revealed particularly effective use of covering indexes for common operations. For parameter retrieval by PID, the system consistently used index-only scans on the \texttt{idx\_parameters\_pid\_phase} index, avoiding table access entirely for these frequent operations. Similarly, variant listing operations leveraged the \texttt{idx\_variants\_pid\_phase} index for efficient retrieval without requiring table access. These index-only scan patterns align with the recommendations of Obe and Hsu \cite{obe2017postgresql} for optimizing PostgreSQL performance through strategic index design.
 
@@ -414,7 +414,7 @@ The storage requirements analysis confirms that the phase-based approach consume
 
 The phase-based approach also simplifies the implementation of phase transitions and comparison operations, which are fundamental to the automotive development process as described by Pretschner et al. \cite{pretschner2007software}. The explicit phase model aligns naturally with the mental model of automotive development engineers, who conceptualize parameter evolution in terms of distinct development phases rather than continuous time.
 
-These findings validate the architectural decision to implement a phase-based versioning approach for the VMAP system. While consuming more storage than a version-based approach, the phase model provides performance benefits, implementation simplicity, and alignment with domain concepts—advantages that outweigh the additional storage requirements.
+These findings validate the architectural decision to implement a phase-based versioning approach for the\ac{VMAP} system. While consuming more storage than a version-based approach, the phase model provides performance benefits, implementation simplicity, and alignment with domain concepts—advantages that outweigh the additional storage requirements.
 
 \section{Integration Testing}
 \label{sec:integration-testing}
@@ -433,7 +433,7 @@ Parameter Definition Database synchronization testing verified the system's abil
     \label{fig:pdd-sync-time}
 \end{figure}
 
-The synchronization performance analysis revealed an increasing trend in execution time over successive synchronization operations. Initial synchronization operations required approximately 15 minutes for the tested ECUs, with execution times increasing to around 30 minutes after 10 synchronization cycles. This gradual increase aligns with the observations of Mueller and Müller \cite{mueller2018conception} regarding database synchronization in complex engineering environments, where synchronization complexity tends to increase as the data history grows.
+The synchronization performance analysis revealed an increasing trend in execution time over successive synchronization operations. Initial synchronization operations required approximately 15 minutes for the tested \acp{ECU}, with execution times increasing to around 30 minutes after 10 synchronization cycles. This gradual increase aligns with the observations of Mueller and Müller \cite{mueller2018conception} regarding database synchronization in complex engineering environments, where synchronization complexity tends to increase as the data history grows.
 
 The incremental update testing verified that the system could correctly identify and process changes to parameter definitions. Table \ref{tab:pdd-sync-results} presents the success rates for different types of parameter changes during synchronization operations.
 
@@ -460,7 +460,7 @@ Removed Parameters & 42 & 42 & 100\% \\
 
 The system successfully processed all types of parameter changes, with slightly reduced success for modified parameters due to complexity in handling data type changes. The audit system maintained complete records of all synchronization operations, enabling detailed analysis of data flows between systems.
 
-Based on the observed synchronization performance trends, the projected synchronization time for the 20th cycle would reach approximately 45 minutes. While still acceptable for the typical synchronization frequency (weekly or bi-weekly), this suggests that synchronization performance optimization would be beneficial for long-term system maintenance. Possible approaches for optimization include implementing a more selective synchronization approach, enhancing the change detection algorithm to reduce comparison overhead, or implementing parallel processing for independent ECUs.
+Based on the observed synchronization performance trends, the projected synchronization time for the 20th cycle would reach approximately 45 minutes. While still acceptable for the typical synchronization frequency (weekly or bi-weekly), this suggests that synchronization performance optimization would be beneficial for long-term system maintenance. Possible approaches for optimization include implementing a more selective synchronization approach, enhancing the change detection algorithm to reduce comparison overhead, or implementing parallel processing for independent \acp{ECU}.
 
 \subsection{Vehicle Configuration Integration}
 \label{subsec:vehicle-configuration-testing}
@@ -471,14 +471,14 @@ Vehicle configuration data import testing confirmed that the system could correc
 
 Code rule validation testing verified that the system could evaluate boolean expressions against vehicle configurations. Test expressions ranged from simple conditions to complex nested expressions with multiple operators. The evaluation engine correctly interpreted both simple logical operators and complex nested expressions with precedence rules.
 
-Parameter file generation testing confirmed that the system could produce valid parameter files for vehicle testing, with correct application of variant selection logic based on vehicle configuration codes. The generated files included all required parameters with appropriate values, providing a complete configuration for ECU testing and validation.
+Parameter file generation testing confirmed that the system could produce valid parameter files for vehicle testing, with correct application of variant selection logic based on vehicle configuration codes. The generated files included all required parameters with appropriate values, providing a complete configuration for \ac{ECU} testing and validation.
 
 \section{Feature Comparison with Excel-Based Approach}
 \label{sec:feature-comparison-excel}
 
-To assess the improvements provided by the VMAP system, a feature comparison was conducted against the Excel-based approach currently used for parameter management. This comparison focused on capability coverage rather than performance metrics, providing a qualitative assessment of system improvements.
+To assess the improvements provided by the\ac{VMAP} system, a feature comparison was conducted against the Excel-based approach currently used for parameter management. This comparison focused on capability coverage rather than performance metrics, providing a qualitative assessment of system improvements.
 
-Table \ref{tab:feature-comparison} presents a comparison of key features between the VMAP system and the Excel-based approach.
+Table \ref{tab:feature-comparison} presents a comparison of key features between the\ac{VMAP} system and the Excel-based approach.
 
 \begin{table}[h]
 \centering
@@ -507,19 +507,19 @@ Integration & Automated & Manual \\
 \end{tabular}
 \end{table}
 
-The VMAP system provides significant advantages in all feature categories, with particular improvements in multi-user support, change tracking, and access control. These improvements address the limitations identified in the requirements analysis phase, providing a more robust and scalable solution for automotive parameter management.
+The\ac{VMAP} system provides significant advantages in all feature categories, with particular improvements in multi-user support, change tracking, and access control. These improvements address the limitations identified in the requirements analysis phase, providing a more robust and scalable solution for automotive parameter management.
 
 \subsection{Data Integrity Improvements}
 \label{subsec:data-integrity-improvements}
 
-Data integrity was evaluated through a set of controlled test cases where both systems were subjected to various validation scenarios including invalid values, constraint violations, and relationship consistency. The VMAP system demonstrated superior data integrity protection, correctly preventing invalid operations through database constraints and business rule validation.
+Data integrity was evaluated through a set of controlled test cases where both systems were subjected to various validation scenarios including invalid values, constraint violations, and relationship consistency. The\ac{VMAP} system demonstrated superior data integrity protection, correctly preventing invalid operations through database constraints and business rule validation.
 
 The database-level constraints and validation mechanisms provide a robust defense against data corruption, implementing the comprehensive validation approach described in Section \ref{sec:validation-mechanisms}. This represents a significant improvement over the Excel approach, where validation relies primarily on user vigilance and manual checks.
 
 \subsection{Development Process Impact}
 \label{subsec:development-process-impact}
 
-Beyond technical improvements, the VMAP system introduces significant enhancements to the automotive parameter development process. The centralized database approach enables concurrent work by multiple engineers, eliminating the file sharing bottlenecks common in the Excel-based approach. The role-based access control ensures that engineers can modify only their assigned modules, preventing accidental changes to other areas.
+Beyond technical improvements, the\ac{VMAP} system introduces significant enhancements to the automotive parameter development process. The centralized database approach enables concurrent work by multiple engineers, eliminating the file sharing bottlenecks common in the Excel-based approach. The role-based access control ensures that engineers can modify only their assigned modules, preventing accidental changes to other areas.
 
 The phase-based versioning approach aligns naturally with the automotive development lifecycle, supporting the structured progression from initial development through testing to final release. The explicit phase transitions provide clear development milestones, while the freezing mechanism ensures configuration stability at critical points.
 

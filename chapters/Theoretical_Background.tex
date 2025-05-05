@@ -1,17 +1,17 @@
 \chapter{Theoretical Background}
 \label{chap:theoretical-background}
 
-This chapter establishes the theoretical foundation necessary for understanding the design and implementation of the Variant Management and Parametrization (VMAP) database system. It begins with an overview of automotive electronic control systems and parameter management, explaining the fundamental concepts that drive the requirements for the VMAP system. The chapter then explores database management systems, database design methodologies, and access control models relevant to the implementation. Finally, it discusses version control concepts and temporal database management approaches, which are critical for the parameter versioning requirements in automotive software development.
+This chapter establishes the theoretical foundation necessary for understanding the design and implementation of the Variant Management and Parametrization (VMAP) database system. It begins with an overview of automotive electronic control systems and parameter management, explaining the fundamental concepts that drive the requirements for the\ac{VMAP} system. The chapter then explores database management systems, database design methodologies, and access control models relevant to the implementation. Finally, it discusses version control concepts and temporal database management approaches, which are critical for the parameter versioning requirements in automotive software development.
 
 \section{Automotive Electronic Control Systems}
 \label{sec:automotive-electronic-systems}
 
-Modern commercial vehicles contain dozens of Electronic Control Units (ECUs) that manage various vehicle subsystems. Each ECU is a specialized computing device that controls specific functions through software parameters \cite{staron2021automotive}. Understanding the structure and organization of these systems is essential for designing an effective parameter management solution.
+Modern commercial vehicles contain dozens of Electronic Control Units (ECUs) that manage various vehicle subsystems. Each \ac{ECU} is a specialized computing device that controls specific functions through software parameters \cite{staron2021automotive}. Understanding the structure and organization of these systems is essential for designing an effective parameter management solution.
 
 \subsection{ECU Hierarchy and Parameter Organization}
 \label{subsec:ecu-hierarchy}
 
-Automotive electronic systems follow a hierarchical organization that structures parameters into logical groupings. At the top level, Electronic Control Units (ECUs) represent distinct hardware components controlling specific vehicle functions such as engine management, transmission control, or brake systems \cite{kiencke2000automotive}. Within each ECU, modules represent functional software units that implement specific capabilities such as cruise control, adaptive power steering, diagnosis. Each module contains Parameter IDs (PIDs) that group related parameters, and finally, individual parameters define specific configuration values that affect system behavior \cite{staron2021autosar}.
+Automotive electronic systems follow a hierarchical organization that structures parameters into logical groupings. At the top level, Electronic Control Units (ECUs) represent distinct hardware components controlling specific vehicle functions such as engine management, transmission control, or brake systems \cite{kiencke2000automotive}. Within each \ac{ECU}, modules represent functional software units that implement specific capabilities such as cruise control, adaptive power steering, diagnosis. Each module contains Parameter IDs (PIDs) that group related parameters, and finally, individual parameters define specific configuration values that affect system behavior \cite{staron2021autosar}.
 
 \begin{figure}[ht]
     \centering
@@ -20,7 +20,7 @@ Automotive electronic systems follow a hierarchical organization that structures
     \label{fig:ecu-hierarchy}
 \end{figure}
 
-This hierarchical structure is not merely organizational but reflects the actual architecture of automotive electronic systems, where software components are modularized for maintainability, reusability, and functional separation. The Common Powertrain Controller (CPC), a central ECU in modern trucks, manages critical powertrain functions through thousands of configurable parameters organized into this hierarchical structure \cite{staron2021automotive}.
+This hierarchical structure is not merely organizational but reflects the actual architecture of automotive electronic systems, where software components are modularized for maintainability, reusability, and functional separation. The Common Powertrain Controller (CPC), a central \ac{ECU} in modern trucks, manages critical powertrain functions through thousands of configurable parameters organized into this hierarchical structure \cite{staron2021automotive}.
 
 Parameters themselves have complex characteristics beyond simple values. They can be scalar values, one-dimensional arrays (curves), or multi-dimensional arrays (maps or tables). Each parameter has specific attributes defining its data type, valid range, engineering units, scale factors, and default values \cite{pretschner2007software}. For instance, an engine timing map might be represented as a two-dimensional array where engine speed and load are the independent variables, and ignition timing angle is the dependent variable. This complexity in parameter structure creates specific requirements for the database system designed to manage them.
 
@@ -47,7 +47,7 @@ This variant approach creates specific requirements for the database system, whi
 
 Automotive software development follows a structured release process with well-defined phases representing increasing levels of maturity and stability \cite{broy2006challenges}. For parameter management, this translates into a phase-based development process where parameter configurations evolve through sequential stages before being released for production.
 
-The typical release cycle in automotive parameter development consists of bi-annual releases (e.g., "24.1" and "24.3" for first and third quarters of 2024), with each release progressing through four sequential phases: Initial, PreTest1, PreTest2, and Final \cite{pretschner2007software}. Different ECUs may progress through these phases at different rates, requiring the parameter management system to support concurrent work on multiple phases.
+The typical release cycle in automotive parameter development consists of bi-annual releases (e.g., "24.1" and "24.3" for first and third quarters of 2024), with each release progressing through four sequential phases: Initial, PreTest1, PreTest2, and Final \cite{pretschner2007software}. Different \acp{ECU} may progress through these phases at different rates, requiring the parameter management system to support concurrent work on multiple phases.
 
 \begin{figure}[ht]
     \centering
@@ -66,7 +66,7 @@ This phase-based release process establishes specific requirements for the datab
 \section{Database Management Systems}
 \label{sec:database-management-systems}
 
-Database management systems (DBMS) serve as the foundation for structured information storage and retrieval. They provide mechanisms for storing, organizing, and accessing data while ensuring integrity, security, and concurrent access \cite{elmasri2015fundamentals}. For the VMAP system, selecting an appropriate database approach is critical for meeting the complex requirements of automotive parameter management.
+Database management systems (DBMS) serve as the foundation for structured information storage and retrieval. They provide mechanisms for storing, organizing, and accessing data while ensuring integrity, security, and concurrent access \cite{elmasri2015fundamentals}. For the\ac{VMAP} system, selecting an appropriate database approach is critical for meeting the complex requirements of automotive parameter management.
 
 \subsection{Relational Database Management Systems}
 \label{subsec:relational-database-management-systems}
@@ -77,7 +77,7 @@ In relational databases, tables adhere to predefined schemas that specify the st
 
 A key strength of relational databases is their adherence to ACID properties (Atomicity, Consistency, Isolation, Durability), which ensure reliable transaction processing. Atomicity guarantees that transactions are treated as indivisible units that either complete entirely or have no effect. Consistency ensures that transactions maintain database integrity by transforming the database from one valid state to another. Isolation prevents interference between concurrent transactions, making them appear as if executed sequentially. Durability ensures that committed transactions persist even after system failures \cite{elmasri2015fundamentals}.
 
-ACID compliance makes relational databases particularly suitable for automotive parameter management, where data integrity and consistency are paramount. Incorrect parameter values could potentially affect vehicle safety and performance, making the strong consistency guarantees of relational databases essential for maintaining data integrity \cite{staron2021automotive}. Additionally, the hierarchical structure of automotive parameter systems—with well-defined relationships between ECUs, modules, PIDs, and parameters—aligns naturally with the relational model's representation of structured data and relationships.
+ACID compliance makes relational databases particularly suitable for automotive parameter management, where data integrity and consistency are paramount. Incorrect parameter values could potentially affect vehicle safety and performance, making the strong consistency guarantees of relational databases essential for maintaining data integrity \cite{staron2021automotive}. Additionally, the hierarchical structure of automotive parameter systems—with well-defined relationships between \acp{ECU}, modules, PIDs, and parameters—aligns naturally with the relational model's representation of structured data and relationships.
 
 \begin{figure}[ht]
     \centering
@@ -139,14 +139,14 @@ Entities represent the objects or concepts about which information needs to be s
 
 Attributes describe the specific properties or characteristics of each entity. For example, a parameter entity might have attributes like name, value, unit, and description. Attributes are shown as ovals connected to their entity.
 
-Relationships describe the associations between entities. For instance, "ECUs contain parameters" expresses a relationship between ECU and parameter entities. Relationships are shown as diamonds connecting the related entities, with cardinality notations indicating how many instances of each entity can participate in the relationship \cite{elmasri2015fundamentals}.
+Relationships describe the associations between entities. For instance, "ECUs contain parameters" expresses a relationship between \ac{ECU} and parameter entities. Relationships are shown as diamonds connecting the related entities, with cardinality notations indicating how many instances of each entity can participate in the relationship \cite{elmasri2015fundamentals}.
 
 ER modeling is particularly valuable for complex domains like automotive systems because it provides a visual representation that stakeholders can understand while being precise enough to guide database implementation. Chen explains that "the entity-relationship model adopts the more natural view that the real world consists of entities and relationships" \cite{chen1976entity}, making it an intuitive approach for modeling real-world systems.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.85\textwidth]{figures/er_diagram.png}
-    \caption{Entity-Relationship Diagram for Core VMAP Entities \cite{RelationalData}}
+    \caption{Entity-Relationship Diagram for Core\ac{VMAP} Entities \cite{RelationalData}}
     \label{fig:er-diagram}
 \end{figure}
 
@@ -165,7 +165,7 @@ Third Normal Form (3NF) further refines the structure by requiring that non-key 
 
 For most practical applications, achieving 3NF provides a good balance between data integrity and system performance. As explained by Date, "Third normal form is considered adequate for most practical purposes; further normalization is usually performed only when necessary" \cite{date2011sql}.
 
-In automotive parameter management, normalization helps organize complex data about ECUs, modules, and parameters into a structure that maintains consistency while supporting efficient access. For example, normalizing parameter data ensures that when a parameter value changes, that change only needs to be recorded in one place, eliminating the risk of inconsistent values across the database.
+In automotive parameter management, normalization helps organize complex data about \acp{ECU}, modules, and parameters into a structure that maintains consistency while supporting efficient access. For example, normalizing parameter data ensures that when a parameter value changes, that change only needs to be recorded in one place, eliminating the risk of inconsistent values across the database.
 
 \subsection{Role-Based Access Control Models}
 \label{subsec:role-based-access-control}
@@ -216,7 +216,7 @@ In automotive parameter management, temporal database concepts can support criti
 
 While normalization provides a theoretical foundation for database integrity, practical database design often requires balancing normalization principles with performance considerations. Strategic denormalization involves deliberately introducing controlled redundancy to improve performance for specific operations \cite{bhattacherjee2015principles}.
 
-Consider a fully normalized database where information about parameters, their modules, and their ECUs is stored in separate tables. To retrieve a parameter with its associated module and ECU information would require joining all three tables—an operation that becomes increasingly expensive as the database grows. In cases where this retrieval happens frequently, storing the module and ECU names directly in the parameter table (introducing controlled redundancy) could significantly improve performance \cite{schwartz2012high}.
+Consider a fully normalized database where information about parameters, their modules, and their \acp{ECU} is stored in separate tables. To retrieve a parameter with its associated module and \ac{ECU} information would require joining all three tables—an operation that becomes increasingly expensive as the database grows. In cases where this retrieval happens frequently, storing the module and \ac{ECU} names directly in the parameter table (introducing controlled redundancy) could significantly improve performance \cite{schwartz2012high}.
 
 Molinaro emphasizes that "denormalization is not about abandoning normalization principles, but about making strategic exceptions for performance reasons" \cite{molinaro2005sql}. These exceptions should be carefully documented and justified based on specific performance requirements.
 
