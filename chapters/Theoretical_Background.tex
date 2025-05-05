@@ -20,7 +20,7 @@ Automotive electronic systems follow a hierarchical organization that structures
     \label{fig:ecu-hierarchy}
 \end{figure}
 
-This hierarchical structure is not merely organizational but reflects the actual architecture of automotive electronic systems, where software components are modularized for maintainability, reusability, and functional separation. The Common Powertrain Controller (CPC), a central \ac{ECU} in modern trucks, manages critical powertrain functions through thousands of configurable parameters organized into this hierarchical structure \cite{staron2021automotive}.
+This hierarchical structure is not merely organizational but reflects the actual architecture of automotive electronic systems, where software components are modularized for maintainability, reusability, and functional separation. The Common Powertrain Controller (\ac{CPC}), a central \ac{ECU} in modern trucks, manages critical powertrain functions through thousands of configurable parameters organized into this hierarchical structure \cite{staron2021automotive}.
 
 Parameters themselves have complex characteristics beyond simple values. They can be scalar values, one-dimensional arrays (curves), or multi-dimensional arrays (maps or tables). Each parameter has specific attributes defining its data type, valid range, engineering units, scale factors, and default values \cite{pretschner2007software}. For instance, an engine timing map might be represented as a two-dimensional array where engine speed and load are the independent variables, and ignition timing angle is the dependent variable. This complexity in parameter structure creates specific requirements for the database system designed to manage them.
 
