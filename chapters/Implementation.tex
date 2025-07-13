@@ -1,7 +1,7 @@
 \chapter{Implementation}
 \label{chap:implementation}
 
-This chapter presents the technical implementation of the\ac{VMAP} system conceptual architecture described in Chapter \ref{chap:methodology}. The discussion focuses on key architectural components and technical decisions that enable efficient parameter versioning in automotive software development, with concrete implementation details demonstrating how theoretical concepts translate to practical solutions.
+This chapter presents the technical implementation of the \ac{VMAP} system conceptual architecture described in Chapter \ref{chap:methodology}. The discussion focuses on key architectural components and technical decisions that enable efficient parameter versioning in automotive software development, with concrete implementation details demonstrating how theoretical concepts translate to practical solutions.
 
 \section{Database Structure Implementation}
 \label{sec:database-structure-implementation}
@@ -11,7 +11,7 @@ Following the comparative analysis of database systems presented in Chapter \ref
 \subsection{Core Data Entities}
 \label{subsec:core-data-entities}
 
-The hierarchical structure of automotive electronic systems is implemented through four primary entity types: \acp{ECU}, Modules, PIDs, and Parameters. The \ac{ECU} and Module entities form the top levels of the hierarchy, with a many-to-many relationship reflecting the reality that modules can exist across multiple \acp{ECU}. This structure aligns with the domain model described by Staron \cite{staron2021automotive}, where logical groupings of software functions must be maintained across different hardware configurations.
+The hierarchical structure of automotive electronic systems is implemented through four primary entity types: \acp{ECU}, Modules, \acp{PID}, and Parameters. The \ac{ECU} and Module entities form the top levels of the hierarchy, with a many-to-many relationship reflecting the reality that modules can exist across multiple \acp{ECU}. This structure aligns with the domain model described by Staron \cite{staron2021automotive}, where logical groupings of software functions must be maintained across different hardware configurations.
 
 \begin{lstlisting}[language=SQL, caption={ECU and Module Table Implementation}, label={lst:ecu-module-tables}]
 CREATE TABLE ecus (
@@ -42,7 +42,7 @@ CREATE TABLE ecu_modules (
 
 The junction table \texttt{ecu\_modules} implements the many-to-many relationship using foreign key constraints as described by Elmasri and Navathe \cite{elmasri2015fundamentals}. Each entity includes an \texttt{external\_id} attribute to maintain mapping with the Parameter Definition Database (PDD), facilitating integration through persistent identifier correlation as recommended by Hohpe and Woolf \cite{hohpe2002enterprise}.
 
-PIDs (Parameter IDs) and parameters constitute the lower levels of the hierarchy, with PIDs grouping related parameters for specific modules. The parameter table implements additional attributes for handling the complexity of automotive parameter specifications:
+\acp{PID} and parameters constitute the lower levels of the hierarchy, with PIDs grouping related parameters for specific modules. The parameter table implements additional attributes for handling the complexity of automotive parameter specifications:
 
 \begin{lstlisting}[language=SQL, caption={Parameter Table Implementation}, label={lst:parameter-table}]
 CREATE TABLE parameters (
@@ -64,7 +64,7 @@ CREATE TABLE parameters (
 );
 \end{lstlisting}
 
-The parameter table incorporates a form of strategic denormalization by including direct references to \texttt{ecu\_id} and \texttt{phase\_id} alongside the\ac{PID}foreign key. While this introduces some redundancy, this approach aims to improve query execution for parameter queries filtered by release phase, a critical operation in the system. Bhattacherjee et al. \cite{bhattacherjee2015principles} note that such denormalization can be justified when query performance benefits outweigh the overhead of maintaining consistency, especially for frequently accessed paths in the data model.
+The parameter table incorporates a form of strategic denormalization by including direct references to \texttt{ecu\_id} and \texttt{phase\_id} alongside the \ac{PID} foreign key. While this introduces some redundancy, this approach aims to improve query execution for parameter queries filtered by release phase, a critical operation in the system. Bhattacherjee et al. \cite{bhattacherjee2015principles} note that such denormalization can be justified when query performance benefits outweigh the overhead of maintaining consistency, especially for frequently accessed paths in the data model.
 
 A particularly challenging aspect of the implementation was supporting multi-dimensional parameters, which are common in automotive applications for representing lookup tables and characteristic curves \cite{kiencke2000automotive}. This was addressed through a specialized table structure:
 
@@ -84,7 +84,7 @@ This implementation follows a modified entity-attribute-value (EAV) pattern whil
 \subsection{Version Control Implementation}
 \label{subsec:version-control-implementation}
 
-The version control implementation is a defining feature of the\ac{VMAP} system, enabling parameter evolution management across different development phases. After evaluating multiple approaches described in Chapter \ref{chap:methodology}, the phase-based versioning model was implemented, creating explicit relationships between parameters and development phases rather than using a generic temporal approach.
+The version control implementation is a defining feature of the \ac{VMAP} system, enabling parameter evolution management across different development phases. After evaluating multiple approaches described in Chapter \ref{chap:methodology}, the phase-based versioning model was implemented, creating explicit relationships between parameters and development phases rather than using a generic temporal approach.
 
 \begin{lstlisting}[language=SQL, caption={Release and Phase Management Implementation}, label={lst:release-phase-tables}]
 CREATE TABLE releases (
@@ -200,7 +200,7 @@ This implementation provides an atomic transaction for phase transition, copying
 \subsection{Variant and Segment Management}
 \label{subsec:variant-segment-management}
 
-The variant and segment management implementation realizes the core parameter customization capabilities of the\ac{VMAP} system:
+The variant and segment management implementation realizes the core parameter customization capabilities of the \ac{VMAP} system:
 
 \begin{lstlisting}[language=SQL, caption={Variant and Segment Implementation}, label={lst:variant-segment-tables}]
 CREATE TABLE variants (
@@ -230,7 +230,7 @@ CREATE TABLE segments (
 );
 \end{lstlisting}
 
-Each variant is associated with a specific PID, ECU, and phase, creating a three-way relationship that places the variant in both functional and temporal contexts. The uniqueness constraints prevent duplicate variant names or code rules within the same\ac{PID}and phase, enforcing a critical business rule identified during requirements analysis. The \texttt{code\_rule} field stores boolean expressions determining when a variant applies based on vehicle configuration codes, implementing a domain-specific rule language for variant applicability.
+Each variant is associated with a specific PID, ECU, and phase, creating a three-way relationship that places the variant in both functional and temporal contexts. The uniqueness constraints prevent duplicate variant names or code rules within the same \ac{PID} and phase, enforcing a critical business rule identified during requirements analysis. The \texttt{code\_rule} field stores boolean expressions determining when a variant applies based on vehicle configuration codes, implementing a domain-specific rule language for variant applicability.
 
 Segments form the foundation of parameter customization, linking parameters to variants and storing modified values. The canonical decimal representation for all parameter values, regardless of native data type, implements the canonical model pattern described by Hohpe and Woolf \cite{hohpe2002enterprise}, simplifying data manipulation while ensuring consistent value handling.
 
@@ -377,7 +377,7 @@ The access control implementation realizes the hybrid role-permission model desc
 \subsection{Role-Based Permission Model}
 \label{subsec:role-based-permission-model}
 
-The core RBAC implementation follows the structure defined by Sandhu et al. \cite{sandhu1998role}, with tables for users, roles, permissions, and their relationships:
+The core \ac{RBAC} implementation follows the structure defined by Sandhu et al. \cite{sandhu1998role}, with tables for users, roles, permissions, and their relationships:
 
 \begin{lstlisting}[language=SQL, caption={Core RBAC Implementation}, label={lst:rbac-implementation}]
 CREATE TABLE roles (
@@ -507,7 +507,7 @@ END;
 $$ LANGUAGE plpgsql;
 \end{lstlisting}
 
-This implementation combines role-based and attribute-based access control approaches, creating what Ferraiolo et al. describe as policy-enhanced RBAC \cite{ferraiolo2011policy}. The function first checks for administrator privileges, which bypass module-specific restrictions, then verifies specific module access rights if necessary.
+This implementation combines role-based and attribute-based access control approaches, creating what Ferraiolo et al. describe as policy-enhanced \ac{RBAC} \cite{ferraiolo2011policy}. The function first checks for administrator privileges, which bypass module-specific restrictions, then verifies specific module access rights if necessary.
 
 \section{Query Optimization Implementation}
 \label{sec:query-optimization-implementation}
@@ -979,7 +979,7 @@ This function provides a comprehensive view of how a parameter has evolved over 
 \subsection{Partitioning Implementation}
 \label{subsec:partitioning-implementation}
 
-To address the potential performance and management challenges associated with the growing change history table, a partitioning strategy was implemented based on the phase model that forms the foundation of the\ac{VMAP} system. PostgreSQL's declarative partitioning capabilities provide an efficient mechanism for dividing the large change\_history table into smaller, more manageable segments based on logical boundaries \cite{obe2017postgresql}.
+To address the potential performance and management challenges associated with the growing change history table, a partitioning strategy was implemented based on the phase model that forms the foundation of the \ac{VMAP} system. PostgreSQL's declarative partitioning capabilities provide an efficient mechanism for dividing the large change\_history table into smaller, more manageable segments based on logical boundaries \cite{obe2017postgresql}.
 
 \subsubsection{Partition Design}
 \label{subsubsec:partition-design}
@@ -1151,7 +1151,7 @@ The partitioning implementation is particularly noteworthy for its attention to 
 \subsubsection{Query Performance Implications}
 \label{subsubsec:query-performance-implications}
 
-The phase-based partitioning approach has significant performance implications for change history queries. For queries that include a phase\_id filter criterion—a dominant pattern in the\ac{VMAP} system—PostgreSQL can use partition pruning to eliminate irrelevant partitions from consideration. Salzberg and Tsotras \cite{salzberg1999comparison} note that with effective partitioning, query performance can improve by an order of magnitude for large temporal datasets.
+The phase-based partitioning approach has significant performance implications for change history queries. For queries that include a phase\_id filter criterion—a dominant pattern in the \ac{VMAP} system—PostgreSQL can use partition pruning to eliminate irrelevant partitions from consideration. Salzberg and Tsotras \cite{salzberg1999comparison} note that with effective partitioning, query performance can improve by an order of magnitude for large temporal datasets.
 
 This performance benefit is particularly valuable for the most common access patterns in the system. When comparing parameters between phases, queries can focus exclusively on the relevant phase partitions. When auditing a user's activity within a specific phase, queries can be efficiently directed to the appropriate partition. When retrieving the modification history for a specific entity within a phase, partition pruning significantly reduces the search space.
 
@@ -1172,12 +1172,12 @@ At defined archive thresholds, typically when a release including multiple phase
 \section{Integration Implementation}
 \label{sec:integration-implementation}
 
-The integration implementation connects\ac{VMAP} with external enterprise systems providing parameter definitions and vehicle configuration data. Two primary integration points were implemented: synchronization with the Parameter Definition Database and communication with the Vehicle Configuration Database.
+The integration implementation connects \ac{VMAP} with external enterprise systems providing parameter definitions and vehicle configuration data. Two primary integration points were implemented: synchronization with the \ac{PDD} and communication with the Vehicle Configuration Database.
 
 \subsection{Parameter Definition Database Synchronization}
 \label{subsec:pdd-synchronization}
 
-Synchronization with the Parameter Definition Database (PDD) was implemented through a structured process that maintains parameter definitions across different release phases. The database structure for tracking synchronization includes:
+Synchronization with the \ac{PDD} was implemented through a structured process that maintains parameter definitions across different release phases. The database structure for tracking synchronization includes:
 
 \begin{lstlisting}[language=SQL, caption={Synchronization Tracking Implementation}, label={lst:sync-tracking}]
 CREATE TABLE pdd_sync_history (
@@ -1278,7 +1278,7 @@ This bulk loading approach uses temporary tables and JSON parsing to efficiently
 \subsection{Vehicle Configuration Database Integration}
 \label{subsec:vcd-integration}
 
-The Vehicle Configuration Database (VCD) integration enables validation of variant code rules and supports parameter file generation for specific vehicle configurations. The database structure includes tables for vehicles and their associated configuration codes:
+The \ac{VCD} integration enables validation of variant code rules and supports parameter file generation for specific vehicle configurations. The database structure includes tables for vehicles and their associated configuration codes:
 
 \begin{lstlisting}[language=SQL, caption={Vehicle Configuration Tables}, label={lst:vehicle-configuration}]
 CREATE TABLE vcd_vehicles (

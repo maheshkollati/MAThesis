@@ -1,7 +1,7 @@
 \chapter{Evaluation and Validation}
 \label{chap:evaluation}
 
-This chapter presents the systematic evaluation and validation of the\ac{VMAP} database system. Following the implementation described in Chapter \ref{chap:implementation}, a comprehensive testing strategy was developed to assess the system's functionality, performance, and compliance with requirements. The evaluation process focused on four key areas: user management, release management, parameter versioning, and variant management, using both controlled test scenarios and production-scale data volumes. Rather than an exhaustive documentation of all tests, this chapter highlights representative test cases and key findings that demonstrate the system's capabilities and limitations.
+This chapter presents the systematic evaluation and validation of the \ac{VMAP} database system. Following the implementation described in Chapter \ref{chap:implementation}, a comprehensive testing strategy was developed to assess the system's functionality, performance, and compliance with requirements. The evaluation process focused on four key areas: user management, release management, parameter versioning, and variant management, using both controlled test scenarios and production-scale data volumes. Rather than an exhaustive documentation of all tests, this chapter highlights representative test cases and key findings that demonstrate the system's capabilities and limitations.
 
 \section{Validation Methodology}
 \label{sec:validation-methodology}
@@ -36,7 +36,7 @@ The measurement methodology employed automated test scripts with integrated timi
 \section{Functional Testing Results}
 \label{sec:functional-testing-results}
 
-Functional testing validated the core capabilities of the\ac{VMAP} system against the requirements defined in Chapter \ref{chap:methodology}. This section presents the key findings for each functional area, focusing on representative test cases and critical system behaviors.
+Functional testing validated the core capabilities of the \ac{VMAP} system against the requirements defined in Chapter \ref{chap:methodology}. This section presents the key findings for each functional area, focusing on representative test cases and critical system behaviors.
 
 \subsection{User Management Validation}
 \label{subsec:user-management-validation}
@@ -135,7 +135,7 @@ Despite the performance overhead, both approaches maintain acceptable performanc
 \subsection{Release Management Validation}
 \label{subsec:release-management-validation}
 
-Release management testing evaluated the phase-based versioning approach that forms the foundation of the\ac{VMAP} system. Testing focused on four key aspects: phase sequence validation, phase transition operations, freeze functionality, and phase comparison.
+Release management testing evaluated the phase-based versioning approach that forms the foundation of the \ac{VMAP} system. Testing focused on four key aspects: phase sequence validation, phase transition operations, freeze functionality, and phase comparison.
 
 Phase sequence validation confirmed that the system correctly enforced the defined sequence of development phases (Phase1 → Phase2 → Phase3 → Phase4) with successful validation of each phase transition. This sequential enforcement is essential for maintaining the structured development workflow described by Broy \cite{broy2006challenges} for automotive software development.
 
@@ -294,55 +294,45 @@ Beyond functional validation, performance analysis was conducted to assess the s
 \subsection{Query Performance Assessment}
 \label{subsec:query-performance-assessment}
 
-Query performance was evaluated for common database operations across different data volumes. Table \ref{tab:query-performance-comparison} presents performance measurements for key query types between the baseline dataset (20,000 parameters) and full dataset (100,000 parameters).
-
-\begin{table}[h]
-\centering
-\caption{Query Performance Comparison}
-\label{tab:query-performance-comparison}
-\begin{tabular}{|l|c|c|c|}
-\hline
-\textbf{Operation Type} & \textbf{Baseline Dataset} & \textbf{Full Dataset} & \textbf{Scaling Factor} \\
-\hline
-Parameter Retrieval & 80ms & 120ms & 1.5x \\
-\hline
-Variant Listing & 65ms & 105ms & 1.6x \\
-\hline
-Segment Modification & 95ms & 160ms & 1.7x \\
-\hline
-Phase Comparison & 2.8s & 12.4s & 4.4x \\
-\hline
-History Retrieval & 110ms & 220ms & 2.0x \\
-\hline
-\end{tabular}
-\end{table}
-
-With the limited data points available, it appears that most common operations maintain reasonable performance with increasing data volumes. The system maintained interactive response times (below 200ms) for most operations even with the full dataset, ensuring a responsive user experience. The phase comparison operation, which involves complex joins across multiple tables, demonstrated longer execution times and might benefit from optimization for larger datasets.
-
-The execution of a limited set of queries with and without indexes demonstrated the critical importance of the indexing strategy described in Section \ref{subsec:indexing-implementation}. Without proper indexes, response times increased by factors of 6.5x to 21.8x depending on the query type, with most operations exceeding the interactive response threshold without indexes.
-
-\subsection{Index Performance Analysis}
-\label{subsec:index-performance-analysis}
-
-The implementation of strategic indexing proved critical for maintaining acceptable query performance with large parameter sets. Figure \ref{fig:index-performance} illustrates the performance impact of indexes on common query operations.
+Query performance was evaluated for common database operations across different data volumes. Figure~\ref{fig:query-performance-comparison} presents performance measurements for key query types between the baseline dataset (20,000 parameters) and full dataset (100,000 parameters).
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.8\textwidth]{figures/index_performance_comparison.png}
-    \caption{Query Performance With and Without Indexes}
-    \label{fig:index-performance}
+    \includegraphics[width=0.8\textwidth]{figures/query_performance_comparison.png}
+    \caption{Query Performance Comparison}
+    \label{fig:query-performance-comparison}
 \end{figure}
 
-The performance measurements demonstrate dramatic improvements with properly designed indexes, with response times reduced by 6.5x to 21.8x depending on the query type. Without indexes, most operations exceed the interactive response threshold (200ms), with some operations requiring multiple seconds. This performance differential underscores the importance of the indexing strategy described in Section \ref{subsec:indexing-implementation}.
+The performance analysis reveals that most common operations maintain reasonable performance with increasing data volumes. The system maintained interactive response times (below 200ms) for most operations even with the full dataset, ensuring a responsive user experience for typical user interactions. Parameter retrieval operations showed a scaling factor of 1.5x when moving from the baseline to full dataset, while variant listing demonstrated a slightly higher factor of 1.6x. History retrieval operations exhibited the highest scaling factor among standard queries at 2.0x, reflecting the additional processing required when retrieving records from the substantially larger audit history tables.
 
-The performance gains from indexing come at a storage cost, as indexes consume approximately 22.5\% of the total database size. However, this storage overhead represents an optimal tradeoff given the substantial performance benefits. As noted by Schwartz et al. \cite{schwartz2012high}, the storage cost of indexes is typically justified when query performance improvements exceed 5x, a threshold easily surpassed by all indexed operations in the\ac{VMAP} system.
+The phase comparison operation, which involves complex joins across multiple tables, demonstrated longer execution times and suboptimal scaling, with execution times increasing from 2.8s for the baseline dataset to 12.4s for the full dataset—a scaling factor of 4.4x. This operation exceeds the interactive response threshold for larger datasets, identifying it as a candidate for future optimization. As noted by Obe and Hsu~\cite{obe2017postgresql}, complex join operations with large result sets often benefit from specialized optimization techniques such as materialized views or query restructuring.
 
-Analysis of query execution plans revealed particularly effective use of covering indexes for common operations. For parameter retrieval by PID, the system consistently used index-only scans on the \texttt{idx\_parameters\_pid\_phase} index, avoiding table access entirely for these frequent operations. Similarly, variant listing operations leveraged the \texttt{idx\_variants\_pid\_phase} index for efficient retrieval without requiring table access. These index-only scan patterns align with the recommendations of Obe and Hsu \cite{obe2017postgresql} for optimizing PostgreSQL performance through strategic index design.
+The execution of a limited set of queries with and without indexes demonstrated the critical importance of the indexing strategy described in Section~\ref{subsec:indexing-implementation}. Without proper indexes, response times increased by factors of 6.5x to 21.8x depending on the query type, with most operations exceeding the interactive response threshold without indexes.
+
+\subsection{Variant Operation Performance}
+\label{subsec:variant-operation-performance}
+
+Variant operation performance was assessed across different data volumes to evaluate the system's handling of core parameter customization workflows. Figure~\ref{fig:variant-performance} illustrates the performance of variant operations under different data volumes.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{figures/variant_performance.png}
+    \caption{Variant Operation Performance}
+    \label{fig:variant-performance}
+\end{figure}
+
+The analysis reveals consistent response times across different operation types, with scaling factors ranging from 1.03x for variant creation to 1.79x for variant listing when comparing baseline and full datasets.
+
+Variant creation operations demonstrated excellent scaling characteristics (1.03x), showing minimal performance impact despite the five-fold increase in dataset size. This efficiency can be attributed to the well-designed primary key and constraint implementation, allowing new records to be inserted with minimal overhead regardless of existing data volume. As Schwartz et al.~\cite{schwartz2012high} note, insert operations that don't require extensive index restructuring typically maintain near-constant performance as table sizes increase.
+
+Variant update and retrieval operations showed moderate scaling factors of 1.44x and 1.60x respectively, while variant listing operations exhibited the highest scaling factor at 1.79x. The average scaling factor across all variant operations was approximately 1.47x, indicating that these operations scale efficiently with increasing data volumes. All variant operations maintained response times under 125ms for the full dataset, well within the acceptable range for interactive operations.
+
+These findings validate the effectiveness of the database schema design and indexing strategy described in Section~\ref{subsec:indexing-implementation}. With only two data points available (baseline and production datasets), a definitive conclusion about asymptotic scaling characteristics is limited. However, the relatively small increase in execution time despite a 5x increase in data volume suggests efficient handling of larger datasets.
 
 \subsection{Storage Requirements Analysis}
 \label{subsec:storage-requirements-analysis}
 
-Storage requirements were analyzed to assess database size and growth patterns with increasing parameter counts. Figure \ref{fig:storage-analysis} presents the storage allocation across different entity types for the full dataset.
+Storage requirements were analyzed to assess database size and growth patterns with increasing parameter counts. Figure~\ref{fig:storage-analysis} presents the storage allocation across different entity types for the full dataset.
 
 \begin{figure}[h]
     \centering
@@ -351,7 +341,7 @@ Storage requirements were analyzed to assess database size and growth patterns w
     \label{fig:storage-analysis}
 \end{figure}
 
-The analysis reveals that the change history table dominates the database storage allocation, accounting for approximately 60.8\% of the total database size. This distribution significantly exceeds the storage requirements of the current data state, aligning with Bhattacherjee's observations \cite{bhattacherjee2015principles} regarding versioning and audit systems, where historical record storage typically surpasses active data by a substantial margin. Notably, while there are only 3,617 variants in the current state, the system maintains over 3.2 million change history records, reflecting the comprehensive auditing approach implemented in the system.
+The analysis reveals that the change history table dominates the database storage allocation, accounting for approximately 60.8\% of the total database size. This distribution significantly exceeds the storage requirements of the current data state, aligning with Bhattacherjee's observations~\cite{bhattacherjee2015principles} regarding versioning and audit systems, where historical record storage typically surpasses active data by a substantial margin. Notably, while there are only 3,617 variants in the current state, the system maintains over 3.2 million change history records, reflecting the comprehensive auditing approach implemented in the system.
 
 The storage allocation analysis identified the following key distribution of database size across entity types:
 
@@ -386,20 +376,20 @@ Indexes & - & 513.7 \\
 \end{tabular}
 \end{table}
 
-Another significant observation is the relationship between segments and snapshot segments. Despite having only 7 documentation snapshots, the system maintains over 1 million snapshot segments, exceeding the count of active segments. This indicates that documentation snapshots capture extensive parameter configurations at specific time points, creating substantial storage requirements for historical state preservation. This implementation of the snapshot pattern described by Fowler \cite{fowler2003patterns} provides comprehensive historical records at the cost of increased storage utilization.
+Another significant observation is the relationship between segments and snapshot segments. Despite having only 7 documentation snapshots, the system maintains over 1 million snapshot segments, exceeding the count of active segments. This indicates that documentation snapshots capture extensive parameter configurations at specific time points, creating substantial storage requirements for historical state preservation. This implementation of the snapshot pattern described by Fowler~\cite{fowler2003patterns} provides comprehensive historical records at the cost of increased storage utilization.
 
-The index structures consume approximately 22.5\% of the total storage, reflecting the sophisticated indexing strategy described in Section \ref{subsec:indexing-implementation}. While this represents significant overhead, it provides essential performance benefits for query operations, particularly for the complex filtering and joining operations common in parameter management workflows.
+The index structures consume approximately 22.5\% of the total storage, reflecting the sophisticated indexing strategy described in Section~\ref{subsec:indexing-implementation}. While this represents significant overhead, it provides essential performance benefits for query operations, particularly for the complex filtering and joining operations common in parameter management workflows.
 
-The actual active data—parameters, variants, and segments—consumes only 6.3\% of the total database size, with the majority of storage dedicated to audit trails, snapshots, and indexes. This distribution aligns with the requirements for regulated development environments described by Staron \cite{staron2021automotive}, where comprehensive traceability and historical record maintenance are essential for compliance and quality assurance.
+The actual active data—parameters, variants, and segments—consumes only 6.3\% of the total database size, with the majority of storage dedicated to audit trails, snapshots, and indexes. This distribution aligns with the requirements for regulated development environments described by Staron~\cite{staron2021automotive}, where comprehensive traceability and historical record maintenance are essential for compliance and quality assurance.
 
-Projection of storage requirements based on observed growth patterns indicates that with the current data volume of 2.28GB, the database size would reach approximately 9.1GB after one year of active use in a production environment. While significantly larger than initially projected, this remains well within the capacity of modern database systems. The implementation of table partitioning for the change history table, as described in Section \ref{subsec:partitioning-implementation}, provides an effective mechanism for managing this growth while maintaining query performance. According to Obe and Hsu \cite{obe2017postgresql}, partitioned tables allow efficient archiving of older history records to lower-cost storage while maintaining rapid access to recent changes.
+Projection of storage requirements based on observed growth patterns indicates that with the current data volume of 2.28GB, the database size would reach approximately 9.1GB after one year of active use in a production environment. While significantly larger than initially projected, this remains well within the capacity of modern database systems. The implementation of table partitioning for the change history table, as described in Section~\ref{sec:change-tracking-implementation}, provides an effective mechanism for managing this growth while maintaining query performance. According to Obe and Hsu~\cite{obe2017postgresql}, partitioned tables allow efficient archiving of older history records to lower-cost storage while maintaining rapid access to recent changes.
 
 \subsection{Versioning Approach Performance}
 \label{subsec:versioning-approach-performance}
 
-The performance characteristics of the phase-based parameter versioning approach selected in Chapter \ref{chap:methodology} were evaluated against the alternative change-based approach. This analysis aimed to validate the architectural decision to implement explicit phase copies rather than a delta-based versioning model.
+The performance characteristics of the phase-based parameter versioning approach selected in Chapter~\ref{chap:methodology} were evaluated against the alternative change-based approach. This analysis aimed to validate the architectural decision to implement explicit phase copies rather than a delta-based versioning model.
 
-Figure \ref{fig:versioning-approach-comparison} presents the performance comparison between the two approaches for parameter retrieval operations across different data volumes, along with the storage requirements for each approach.
+Figure~\ref{fig:versioning-approach-comparison} presents the performance comparison between the two approaches for parameter retrieval operations across different data volumes, along with the storage requirements for each approach.
 
 \begin{figure}[h]
     \centering
@@ -410,11 +400,11 @@ Figure \ref{fig:versioning-approach-comparison} presents the performance compari
 
 The performance analysis demonstrates that the phase-based approach offers better query performance, particularly as parameter counts increase. For the tested parameter counts, the phase-based approach remains below 100ms for parameter retrieval operations, while the version-based approach shows nonlinear growth with increasing parameter counts.
 
-The storage requirements analysis confirms that the phase-based approach consumes more storage than the version-based approach, with approximately 51\% higher storage requirements across all phases. However, this storage difference represents a reasonable tradeoff given the performance benefits for query operations. As noted by Bhattacherjee et al. \cite{bhattacherjee2015principles}, the recreation/storage tradeoff in dataset versioning should prioritize operation frequency, with frequently accessed data favoring a storage-intensive approach that minimizes recreation costs.
+The storage requirements analysis confirms that the phase-based approach consumes more storage than the version-based approach, with approximately 51\% higher storage requirements across all phases. However, this storage difference represents a reasonable tradeoff given the performance benefits for query operations. As noted by Bhattacherjee et al.~\cite{bhattacherjee2015principles}, the recreation/storage tradeoff in dataset versioning should prioritize operation frequency, with frequently accessed data favoring a storage-intensive approach that minimizes recreation costs.
 
-The phase-based approach also simplifies the implementation of phase transitions and comparison operations, which are fundamental to the automotive development process as described by Pretschner et al. \cite{pretschner2007software}. The explicit phase model aligns naturally with the mental model of automotive development engineers, who conceptualize parameter evolution in terms of distinct development phases rather than continuous time.
+The phase-based approach also simplifies the implementation of phase transitions and comparison operations, which are fundamental to the automotive development process as described by Pretschner et al.~\cite{pretschner2007software}. The explicit phase model aligns naturally with the mental model of automotive development engineers, who conceptualize parameter evolution in terms of distinct development phases rather than continuous time.
 
-These findings validate the architectural decision to implement a phase-based versioning approach for the\ac{VMAP} system. While consuming more storage than a version-based approach, the phase model provides performance benefits, implementation simplicity, and alignment with domain concepts—advantages that outweigh the additional storage requirements.
+These findings validate the architectural decision to implement a phase-based versioning approach for the VMAP system. While consuming more storage than a version-based approach, the phase model provides performance benefits, implementation simplicity, and alignment with domain concepts—advantages that outweigh the additional storage requirements.
 
 \section{Integration Testing}
 \label{sec:integration-testing}
@@ -476,9 +466,9 @@ Parameter file generation testing confirmed that the system could produce valid 
 \section{Feature Comparison with Excel-Based Approach}
 \label{sec:feature-comparison-excel}
 
-To assess the improvements provided by the\ac{VMAP} system, a feature comparison was conducted against the Excel-based approach currently used for parameter management. This comparison focused on capability coverage rather than performance metrics, providing a qualitative assessment of system improvements.
+To assess the improvements provided by the \ac{VMAP} system, a feature comparison was conducted against the Excel-based approach currently used for parameter management. This comparison focused on capability coverage rather than performance metrics, providing a qualitative assessment of system improvements.
 
-Table \ref{tab:feature-comparison} presents a comparison of key features between the\ac{VMAP} system and the Excel-based approach.
+Table \ref{tab:feature-comparison} presents a comparison of key features between the \ac{VMAP} system and the Excel-based approach.
 
 \begin{table}[h]
 \centering
@@ -507,19 +497,19 @@ Integration & Automated & Manual \\
 \end{tabular}
 \end{table}
 
-The\ac{VMAP} system provides significant advantages in all feature categories, with particular improvements in multi-user support, change tracking, and access control. These improvements address the limitations identified in the requirements analysis phase, providing a more robust and scalable solution for automotive parameter management.
+The \ac{VMAP} system provides significant advantages in all feature categories, with particular improvements in multi-user support, change tracking, and access control. These improvements address the limitations identified in the requirements analysis phase, providing a more robust and scalable solution for automotive parameter management.
 
 \subsection{Data Integrity Improvements}
 \label{subsec:data-integrity-improvements}
 
-Data integrity was evaluated through a set of controlled test cases where both systems were subjected to various validation scenarios including invalid values, constraint violations, and relationship consistency. The\ac{VMAP} system demonstrated superior data integrity protection, correctly preventing invalid operations through database constraints and business rule validation.
+Data integrity was evaluated through a set of controlled test cases where both systems were subjected to various validation scenarios including invalid values, constraint violations, and relationship consistency. The \ac{VMAP} system demonstrated superior data integrity protection, correctly preventing invalid operations through database constraints and business rule validation.
 
 The database-level constraints and validation mechanisms provide a robust defense against data corruption, implementing the comprehensive validation approach described in Section \ref{sec:validation-mechanisms}. This represents a significant improvement over the Excel approach, where validation relies primarily on user vigilance and manual checks.
 
 \subsection{Development Process Impact}
 \label{subsec:development-process-impact}
 
-Beyond technical improvements, the\ac{VMAP} system introduces significant enhancements to the automotive parameter development process. The centralized database approach enables concurrent work by multiple engineers, eliminating the file sharing bottlenecks common in the Excel-based approach. The role-based access control ensures that engineers can modify only their assigned modules, preventing accidental changes to other areas.
+Beyond technical improvements, the \ac{VMAP} system introduces significant enhancements to the automotive parameter development process. The centralized database approach enables concurrent work by multiple engineers, eliminating the file sharing bottlenecks common in the Excel-based approach. The role-based access control ensures that engineers can modify only their assigned modules, preventing accidental changes to other areas.
 
 The phase-based versioning approach aligns naturally with the automotive development lifecycle, supporting the structured progression from initial development through testing to final release. The explicit phase transitions provide clear development milestones, while the freezing mechanism ensures configuration stability at critical points.
 

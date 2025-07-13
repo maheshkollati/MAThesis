@@ -6,7 +6,7 @@ This chapter examines the current state of the art in database version control s
 \section{Parameter Management in Automotive Software Development}
 \label{sec:parameter-management}
 
-The complexity of automotive software has grown exponentially in recent decades, with modern vehicles containing up to 100 million lines of code distributed across dozens of electronic control units (ECUs) \cite{pretschner2007software}. This growth has significantly increased the importance and complexity of parameter management in automotive development.
+The complexity of automotive software has grown exponentially in recent decades, with modern vehicles containing up to 100 million lines of code distributed across dozens of \acp{ECU} \cite{pretschner2007software}. This growth has significantly increased the importance and complexity of parameter management in automotive development.
 
 \subsection{Evolution of Automotive Parameter Management}
 \label{subsec:evolution-parameter-management}
@@ -33,13 +33,13 @@ Kiencke and Nielsen \cite{kiencke2000automotive} discuss the specific challenges
 
 Current parameter management solutions in the automotive industry span a spectrum from general-purpose tools to specialized automotive calibration systems. 
 
-Staron \cite{staron2021automotive} discusses how AUTOSAR tools provide standardized interfaces for parameter management in modern automotive systems, but notes that these tools focus primarily on the technical aspects of parameter definition rather than the organizational processes of parameter development and validation through multiple development phases.
+\ac{AUTOSAR} is a global partnership of automotive manufacturers, suppliers, and technology companies that defines a standardized software architecture for automotive electronic control units (ECUs). Established in 2003, AUTOSAR aims to create an open industry standard for automotive E/E (electrical/electronic) architecture to manage the growing complexity of automotive software development. Staron \cite{staron2021automotive} discusses how AUTOSAR tools provide standardized interfaces for parameter management in modern automotive systems, but notes that these tools focus primarily on the technical aspects of parameter definition rather than the organizational processes of parameter development and validation through multiple development phases.
 
 Broy \cite{broy2006challenges} identifies the challenges of integrating parameter management into broader software development processes, noting that many organizations maintain separate workflows for software development and parameter calibration. This separation creates coordination challenges, particularly when parameter changes affect multiple software components or require software modifications.
 
-Pretschner et al. \cite{pretschner2007software} discuss how model-based development approaches are increasingly used in automotive development, with parameters linked to model elements to provide traceability and support automated validation. However, they note that the integration between parameter management tools and modeling environments remains incomplete in many organizations.
+Pretschner et al.\ \cite{pretschner2007software} discuss how model-based development approaches are increasingly used in automotive development, with parameters linked to model elements to provide traceability and support automated validation. However, they note that the integration between parameter management tools and modeling environments remains incomplete in many organizations.
 
-For database-oriented approaches to parameter management, Bhattacherjee et al. \cite{bhattacherjee2015principles} provide a theoretical foundation by examining the principles of dataset versioning. They describe the fundamental trade-offs between storage efficiency and reconstruction performance, which are particularly relevant for systems that must maintain multiple parameter configurations across different development phases.
+For database-oriented approaches to parameter management, Bhattacherjee et al.\ \cite{bhattacherjee2015principles} provide a theoretical foundation by examining the principles of dataset versioning. They describe the fundamental trade-offs between storage efficiency and reconstruction performance, which are particularly relevant for systems that must maintain multiple parameter configurations across different development phases.
 
 \section{Database Version Control Systems}
 \label{sec:database-version-control}
@@ -66,13 +66,13 @@ Mueller and Müller \cite{mueller2018conception} describe a practical implementa
 \subsection{Temporal Database Approaches}
 \label{subsec:temporal-database-approaches}
 
-Temporal database approaches provide a theoretical foundation for managing time-varying data in database systems. Kulkarni and Michels \cite{kulkarni2012temporal} describe the temporal features introduced in SQL:2011, which formalized support for period data types and temporal tables in the SQL standard. These features enable tracking of both valid time (business time) and transaction time (system time) dimensions, supporting bi-temporal data management.
+Temporal database approaches provide a theoretical foundation for managing time-varying data in database systems. Kulkarni and Michels \cite{kulkarni2012temporal} describe the temporal features introduced in SQL:2011, which formalized support for period data types and temporal tables in the \ac{SQL} standard. These features enable tracking of both valid time (business time) and transaction time (system time) dimensions, supporting bi-temporal data management.
 
 The valid time dimension represents when facts are true in the modeled reality, independent of when they are recorded in the database. This dimension supports business-oriented temporal queries such as "What was the value of this parameter in a specific phase?" or "When did this parameter change from value A to value B?" \cite{bohlen2018database}. The transaction time dimension represents when facts are recorded in the database, supporting auditability through questions like "Who changed this parameter, and when did they change it?" \cite{kulkarni2012temporal}.
 
 Bi-temporal databases combine both dimensions, providing a comprehensive framework for tracking both when changes occurred in the system and when they became effective in the real world \cite{bohlen2018database}. This approach is particularly valuable for regulated industries like automotive development, where both historical accuracy and change auditability are essential for compliance and quality assurance.
 
-Snodgrass \cite{snodgrass1999developing} provides a comprehensive guide to developing time-oriented database applications in SQL, describing practical techniques for implementing temporal functionality in relational database systems. The author presents various approaches to tracking historical data, including transaction-time tables, valid-time tables, and bi-temporal tables, with practical implementation guidance for each approach.
+Snodgrass \cite{snodgrass1999developing} provides a comprehensive guide to developing time-oriented database applications in \ac{SQL}, describing practical techniques for implementing temporal functionality in relational database systems. The author presents various approaches to tracking historical data, including transaction-time tables, valid-time tables, and bi-temporal tables, with practical implementation guidance for each approach.
 
 Biriukov \cite{biriukov2018implementation} examines practical implementation aspects of bi-temporal databases, highlighting the challenges of schema design, query formulation, and performance optimization. The author notes that domain-specific temporal approaches often provide more practical solutions than generic bi-temporal frameworks, particularly for applications with specialized temporal requirements.
 
@@ -92,40 +92,40 @@ Bhattacherjee et al. \cite{bhattacherjee2015principles} note that domain-specifi
 \section{Role-Based Access Control in Enterprise Systems}
 \label{sec:role-based-access-control}
 
-Role-Based Access Control (RBAC) has become a dominant paradigm for managing access rights in enterprise systems, providing a structured approach to security management that aligns with organizational responsibilities \cite{sandhu1998role}. For automotive parameter management, where different user roles have distinct responsibilities and access requirements, RBAC provides a foundation for implementing appropriate security controls.
+\ac{RBAC} has become a dominant paradigm for managing access rights in enterprise systems, providing a structured approach to security management that aligns with organizational responsibilities \cite{sandhu1998role}. For automotive parameter management, where different user roles have distinct responsibilities and access requirements, \ac{RBAC} provides a foundation for implementing appropriate security controls.
 
-\subsection{RBAC Model and Extensions}
+\subsection{\ac{RBAC} Model and Extensions}
 \label{subsec:rbac-model-extensions}
 
-The core RBAC model, as defined by Sandhu et al. \cite{sandhu1998role}, consists of users, roles, permissions, and sessions. Users are assigned to roles that correspond to job functions, and roles are granted permissions that authorize specific operations on protected resources. This indirect association between users and permissions through roles simplifies security administration while maintaining the principle of least privilege.
+The core \ac{RBAC} model, as defined by Sandhu et al. \cite{sandhu1998role}, consists of users, roles, permissions, and sessions. Users are assigned to roles that correspond to job functions, and roles are granted permissions that authorize specific operations on protected resources. This indirect association between users and permissions through roles simplifies security administration while maintaining the principle of least privilege.
 
-Several extensions to the basic RBAC model have been developed to address more complex security requirements. Sandhu et al. \cite{sandhu1998role} describe hierarchical RBAC, which introduces role hierarchies that enable permission inheritance between roles, supporting organizational structures with senior roles inheriting permissions from junior roles.
+Several extensions to the basic \ac{RBAC} model have been developed to address more complex security requirements. Sandhu et al. \cite{sandhu1998role} describe hierarchical \ac{RBAC}, which introduces role hierarchies that enable permission inheritance between roles, supporting organizational structures with senior roles inheriting permissions from junior roles.
 
-Sandhu and Bhamidipati \cite{sandhu1997arbac97} present administrative RBAC (ARBAC), which addresses the management of the RBAC system itself, defining who can assign users to roles and modify role permissions. This extension is particularly relevant for enterprise systems where role and permission management is distributed across different administrative domains.
+Sandhu and Bhamidipati \cite{sandhu1997arbac97} present administrative \ac{RBAC} (ARBAC), which addresses the management of the \ac{RBAC} system itself, defining who can assign users to roles and modify role permissions. This extension is particularly relevant for enterprise systems where role and permission management is distributed across different administrative domains.
 
-Ferraiolo et al. \cite{ferraiolo2011policy} describe policy-enhanced RBAC, which combines role-based permissions with attribute-based policies to provide context-sensitive access control. This hybrid approach is particularly valuable for systems where access decisions depend on both user roles and context-specific factors such as time, location, or resource attributes.
+Ferraiolo et al. \cite{ferraiolo2011policy} describe policy-enhanced \ac{RBAC}, which combines role-based permissions with attribute-based policies to provide context-sensitive access control. This hybrid approach is particularly valuable for systems where access decisions depend on both user roles and context-specific factors such as time, location, or resource attributes.
 
-\subsection{RBAC in Database Systems}
+\subsection{\ac{RBAC} in Database Systems}
 \label{subsec:rbac-database-systems}
 
-Modern database management systems provide varying levels of support for RBAC principles. Elmasri and Navathe \cite{elmasri2015fundamentals} describe the evolution of database security mechanisms from simple user-based privileges to more sophisticated role-based models. Most enterprise database systems now include native support for roles, user-role assignments, and permission management through SQL statements like GRANT and REVOKE.
+Modern database management systems provide varying levels of support for \ac{RBAC} principles. Elmasri and Navathe \cite{elmasri2015fundamentals} describe the evolution of database security mechanisms from simple user-based privileges to more sophisticated role-based models. Most enterprise database systems now include native support for roles, user-role assignments, and permission management through \ac{SQL} statements like GRANT and REVOKE.
 
-Obe and Hsu \cite{obe2017postgresql} detail PostgreSQL's implementation of RBAC concepts, including role hierarchies through role inheritance, permission management through fine-grained privileges, and row-level security policies for content-based access control. These capabilities provide a foundation for implementing domain-specific access control models on top of the database system's native security features.
+Obe and Hsu \cite{obe2017postgresql} detail PostgreSQL's implementation of \ac{RBAC} concepts, including role hierarchies through role inheritance, permission management through fine-grained privileges, and row-level security policies for content-based access control. These capabilities provide a foundation for implementing domain-specific access control models on top of the database system's native security features.
 
-However, database-level RBAC implementations typically focus on controlling access to database objects like tables, views, and functions, rather than providing application-level access control that considers domain-specific entities and operations. For complex applications like automotive parameter management, database-level RBAC must be complemented with application-level access control logic that maps domain-specific concepts to database operations \cite{ferraiolo2011policy}.
+However, database-level \ac{RBAC} implementations typically focus on controlling access to database objects like tables, views, and functions, rather than providing application-level access control that considers domain-specific entities and operations. For complex applications like automotive parameter management, database-level \ac{RBAC} must be complemented with application-level access control logic that maps domain-specific concepts to database operations \cite{ferraiolo2011policy}.
 
 \subsection{Access Control for Parameter Management}
 \label{subsec:access-control-parameter-management}
 
-Access control for automotive parameter management presents specific requirements that extend beyond basic RBAC models. Drawing from the literature, several key access control requirements can be identified:
+Access control for automotive parameter management presents specific requirements that extend beyond basic \ac{RBAC} models. Drawing from the literature, several key access control requirements can be identified:
 
 Sandhu et al. \cite{sandhu1998role} provide the theoretical foundation for role-based access control, which aligns with the organizational structure of automotive development teams. Different roles such as parameter engineers, module developers, and system integrators require different access rights to parameter data.
 
-Ferraiolo et al. \cite{ferraiolo2011policy} describe policy-enhanced RBAC, which combines role-based permissions with attribute-based policies. This hybrid approach is particularly relevant for parameter management, where access rights may depend on both user roles and attributes of the parameters being accessed, such as their development phase or module assignment.
+Ferraiolo et al. \cite{ferraiolo2011policy} describe policy-enhanced \ac{RBAC}, which combines role-based permissions with attribute-based policies. This hybrid approach is particularly relevant for parameter management, where access rights may depend on both user roles and attributes of the parameters being accessed, such as their development phase or module assignment.
 
 Hu et al. \cite{hu2015implementing} discuss practical aspects of implementing and managing policy rules in attribute-based access control, providing insights into the challenges of combining role-based and attribute-based approaches. Their work highlights the importance of balancing security requirements with usability considerations, which is particularly relevant for parameter management systems used by diverse stakeholder groups.
 
-Sandhu and Bhamidipati \cite{sandhu1997arbac97} address the administrative aspects of RBAC, which are important for parameter management systems where access control administration may be distributed across different organizational units. Their ARBAC97 model provides a framework for delegating administrative responsibilities while maintaining central governance.
+Sandhu and Bhamidipati \cite{sandhu1997arbac97} address the administrative aspects of \ac{RBAC}, which are important for parameter management systems where access control administration may be distributed across different organizational units. Their ARBAC97 model provides a framework for delegating administrative responsibilities while maintaining central governance.
 
 \section{Database Integration with Enterprise Systems}
 \label{sec:database-integration}
@@ -161,7 +161,7 @@ The review of existing literature reveals several research gaps in the domain of
 
 Current database versioning approaches, as described by Bhattacherjee et al. \cite{bhattacherjee2015principles} and Snodgrass \cite{snodgrass1999developing}, provide general frameworks for managing time-varying data but do not specifically address the phase-based development processes common in automotive parameter management. There is a need for specialized versioning approaches that align directly with automotive development workflows while providing the traceability and auditability required for regulatory compliance.
 
-The RBAC models described by Sandhu et al. \cite{sandhu1998role} and Ferraiolo et al. \cite{ferraiolo2011policy} provide a foundation for access control but require extensions to address the specific requirements of parameter management, where access rights depend on both organizational roles and parameter-specific attributes such as module assignment and development phase.
+The \ac{RBAC} models described by Sandhu et al. \cite{sandhu1998role} and Ferraiolo et al. \cite{ferraiolo2011policy} provide a foundation for access control but require extensions to address the specific requirements of parameter management, where access rights depend on both organizational roles and parameter-specific attributes such as module assignment and development phase.
 
 Integration approaches documented by Hohpe and Woolf \cite{hohpe2002enterprise} and Mueller and Müller \cite{mueller2018conception} provide general patterns for system integration but do not specifically address the challenges of integrating parameter management systems with automotive-specific enterprise systems such as parameter definition databases and vehicle configuration databases.
 

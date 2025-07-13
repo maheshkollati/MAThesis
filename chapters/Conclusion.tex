@@ -6,7 +6,7 @@ This chapter presents the conclusions drawn from the design, implementation, and
 \section{Summary of Contributions}
 \label{sec:contributions-summary}
 
-The\ac{VMAP} database system represents a significant advancement in automotive parameter management, replacing error-prone spreadsheet-based approaches with a structured, database-driven solution. The research has produced several key contributions to both academic knowledge and industry practice:
+The \ac{VMAP} database system represents a significant advancement in automotive parameter management, replacing error-prone spreadsheet-based approaches with a structured, database-driven solution. The research has produced several key contributions to both academic knowledge and industry practice:
 
 First, the implementation of a phase-based versioning model provides an effective approach to managing parameter evolution across automotive development cycles. Unlike generic temporal database approaches, this domain-specific versioning strategy aligns naturally with the structured development phases common in automotive engineering, supporting a clear separation between development stages while maintaining traceability \cite{broy2006challenges}. The phase model enables simultaneous work on different development stages while preserving milestone integrity, addressing a fundamental challenge in automotive software development.
 
@@ -21,7 +21,7 @@ Finally, the research provides valuable insights into database design patterns f
 \section{Key Findings}
 \label{sec:key-findings}
 
-The evaluation of the\ac{VMAP} system revealed several significant findings that validate the design decisions made during system development and provide insights for future database system implementations in automotive contexts.
+The evaluation of the \ac{VMAP} system revealed several significant findings that validate the design decisions made during system development and provide insights for future database system implementations in automotive contexts.
 
 \subsection{Versioning Approach Effectiveness}
 \label{subsec:versioning-effectiveness}
@@ -37,7 +37,7 @@ The phase-based approach also demonstrated significant advantages for implementa
 
 The evaluation of the hybrid role-permission model revealed that the approach effectively balanced flexibility with performance. As shown in Section \ref{subsec:module-access-impact}, the addition of module-specific access checks introduced a performance overhead of 45.8\% for permission verification in the hybrid model, compared to 88.2\% in a traditional role-based approach.
 
-This finding suggests that the more complex permission model accommodates additional access control dimensions with relatively lower overhead, validating Ferraiolo's observations \cite{ferraiolo2011policy} regarding the scalability of attribute-enhanced RBAC models. Despite the performance overhead, both approaches maintained acceptable performance for interactive operations, with response times below 4ms for individual permission checks.
+This finding suggests that the more complex permission model accommodates additional access control dimensions with relatively lower overhead, validating Ferraiolo's observations \cite{ferraiolo2011policy} regarding the scalability of attribute-enhanced \ac{RBAC} models. Despite the performance overhead, both approaches maintained acceptable performance for interactive operations, with response times below 4ms for individual permission checks.
 
 The hybrid approach also demonstrated the flexibility required for complex organizational structures, supporting both role-based permission inheritance and direct permission assignments for exception cases. This flexibility addresses a common challenge in engineering organizations, where standard role definitions often require customization for specific projects or temporary access requirements \cite{sandhu1997arbac97}.
 
@@ -62,7 +62,7 @@ The integration testing also validated the effectiveness of the vehicle configur
 \section{Limitations}
 \label{sec:limitations}
 
-While the\ac{VMAP} system successfully addresses the core requirements for automotive parameter management, several limitations were identified during implementation and evaluation that could affect its application in specific contexts.
+While the \ac{VMAP} system successfully addresses the core requirements for automotive parameter management, several limitations were identified during implementation and evaluation that could affect its application in specific contexts.
 
 \subsection{Performance Limitations}
 \label{subsec:performance-limitations}
@@ -85,14 +85,14 @@ The database schema, while well-optimized for the identified requirements, follo
 \subsection{Integration Limitations}
 \label{subsec:integration-limitations}
 
-The current integration with external systems relies heavily on scheduled synchronization operations rather than event-driven updates. This approach introduces potential synchronization delays, where parameter changes in source systems might not be immediately reflected in the\ac{VMAP} database. For time-sensitive engineering processes, these delays could impact workflow efficiency.
+The current integration with external systems relies heavily on scheduled synchronization operations rather than event-driven updates. This approach introduces potential synchronization delays, where parameter changes in source systems might not be immediately reflected in the \ac{VMAP} database. For time-sensitive engineering processes, these delays could impact workflow efficiency.
 
 The vehicle configuration code rule evaluation mechanism, while effective for static rules, provides limited support for dynamic rule evaluation based on calculated values or complex relationships. This limitation could restrict the expressiveness of variant selection logic in advanced engineering scenarios where dynamic configuration determination is required.
 
 \section{Future Work}
 \label{sec:future-work}
 
-Based on the findings and limitations identified during system implementation and evaluation, several directions for future research and development have been identified. These opportunities range from technical optimizations to architectural extensions that could enhance the\ac{VMAP} system's capabilities and address emerging requirements in automotive parameter management.
+Based on the findings and limitations identified during system implementation and evaluation, several directions for future research and development have been identified. These opportunities range from technical optimizations to architectural extensions that could enhance the \ac{VMAP} system's capabilities and address emerging requirements in automotive parameter management.
 
 \subsection{Performance Optimizations}
 \label{subsec:performance-optimizations}
@@ -152,7 +152,7 @@ This capability could be extended with rule-based validation for parameter relat
 
 To address the limitations of scheduled synchronization, future development could implement event-driven integration with external systems. By leveraging database change data capture capabilities, the system could detect and react to changes in source systems in near-real-time, significantly reducing synchronization delays.
 
-This approach would involve implementing a message-based integration architecture as described by Hohpe and Woolf \cite{hohpe2002enterprise}, where change events from source systems trigger specific synchronization actions in the\ac{VMAP} database. By processing changes incrementally as they occur rather than in batch operations, the system could maintain more consistent data across systems while reducing synchronization overhead.
+This approach would involve implementing a message-based integration architecture as described by Hohpe and Woolf \cite{hohpe2002enterprise}, where change events from source systems trigger specific synchronization actions in the \ac{VMAP} database. By processing changes incrementally as they occur rather than in batch operations, the system could maintain more consistent data across systems while reducing synchronization overhead.
 
 \subsubsection{Enhanced Vehicle Configuration Integration}
 \label{subsubsec:vehicle-configuration-integration}
@@ -164,35 +164,35 @@ Additionally, implementing a simulation framework for vehicle configurations wou
 \section{Broader Implications}
 \label{sec:broader-implications}
 
-The development and evaluation of the\ac{VMAP} database system offers several broader implications for database research and automotive software development beyond the specific implementation described in this thesis.
+The development and evaluation of the \ac{VMAP} database system offers several broader implications for database research and automotive software development beyond the specific implementation described in this thesis.
 
 \subsection{Implications for Database Research}
 \label{subsec:database-research-implications}
 
-The\ac{VMAP} system demonstrates the effectiveness of domain-specific versioning approaches over generic temporal database techniques for specialized applications. By aligning database versioning with the natural structure of the application domain—in this case, automotive development phases—the system achieves both conceptual clarity and performance advantages. This finding suggests that domain-specific adaptations of established database patterns may offer significant benefits in specialized contexts, a perspective that could inform future research in applied database design \cite{bhattacherjee2015principles}.
+The \ac{VMAP} system demonstrates the effectiveness of domain-specific versioning approaches over generic temporal database techniques for specialized applications. By aligning database versioning with the natural structure of the application domain—in this case, automotive development phases—the system achieves both conceptual clarity and performance advantages. This finding suggests that domain-specific adaptations of established database patterns may offer significant benefits in specialized contexts, a perspective that could inform future research in applied database design \cite{bhattacherjee2015principles}.
 
-The implementation also highlights the evolving relationship between relational database systems and document-oriented approaches. While maintaining a fundamentally relational structure, the\ac{VMAP} system leverages PostgreSQL's JSONB capabilities for change tracking, combining structured schema enforcement with flexible document storage. This hybrid approach suggests promising directions for database research that bridges traditional relational models with document-oriented flexibility \cite{obe2017postgresql}.
+The implementation also highlights the evolving relationship between relational database systems and document-oriented approaches. While maintaining a fundamentally relational structure, the \ac{VMAP} system leverages PostgreSQL's JSONB capabilities for change tracking, combining structured schema enforcement with flexible document storage. This hybrid approach suggests promising directions for database research that bridges traditional relational models with document-oriented flexibility \cite{obe2017postgresql}.
 
 The performance analysis provides empirical evidence of the storage-performance tradeoffs inherent in different versioning strategies, offering valuable data points for researchers exploring versioning approaches in other domains. These findings contribute to the ongoing discussion of recreation/storage tradeoffs in versioned datasets, providing concrete measurements of these tradeoffs in a real-world implementation \cite{bhattacherjee2015principles}.
 
 \subsection{Implications for Automotive Software Development}
 \label{subsec:automotive-development-implications}
 
-For automotive software development, the\ac{VMAP} system demonstrates the feasibility and advantages of transitioning from document-based parameter management to structured database approaches. The evaluation results provide empirical evidence of the performance, consistency, and traceability improvements possible through this transition, potentially encouraging similar transformations in other aspects of automotive software development \cite{broy2006challenges}.
+For automotive software development, the \ac{VMAP} system demonstrates the feasibility and advantages of transitioning from document-based parameter management to structured database approaches. The evaluation results provide empirical evidence of the performance, consistency, and traceability improvements possible through this transition, potentially encouraging similar transformations in other aspects of automotive software development \cite{broy2006challenges}.
 
 The integration architecture establishes patterns for connecting specialized engineering databases with enterprise systems, addressing a significant challenge in automotive development environments. By demonstrating effective synchronization between parameter management and vehicle configuration systems, the implementation provides a template for similar integrations across the automotive development ecosystem \cite{hohpe2002enterprise}.
 
-The comprehensive audit capabilities implemented in the\ac{VMAP} system highlight the increasing importance of traceability in automotive software development, particularly as vehicles become more software-defined and subject to regulatory oversight. The storage implications of these audit requirements, as revealed in the evaluation, provide valuable planning insights for automotive organizations implementing similar systems \cite{staron2021automotive}.
+The comprehensive audit capabilities implemented in the \ac{VMAP} system highlight the increasing importance of traceability in automotive software development, particularly as vehicles become more software-defined and subject to regulatory oversight. The storage implications of these audit requirements, as revealed in the evaluation, provide valuable planning insights for automotive organizations implementing similar systems \cite{staron2021automotive}.
 
-More broadly, the\ac{VMAP} system represents a step toward the more rigorous software engineering practices increasingly required in automotive development. By applying established database principles to the specialized domain of parameter management, the system contributes to the evolution of automotive software development from document-centric approaches to structured, database-driven methodologies \cite{pretschner2007software}.
+More broadly, the \ac{VMAP} system represents a step toward the more rigorous software engineering practices increasingly required in automotive development. By applying established database principles to the specialized domain of parameter management, the system contributes to the evolution of automotive software development from document-centric approaches to structured, database-driven methodologies \cite{pretschner2007software}.
 
 \section{Conclusion}
 \label{sec:final-conclusion}
 
-The\ac{VMAP} database system represents a significant advancement in automotive parameter management, addressing fundamental challenges in version control, user access, and system integration. Through a carefully designed database architecture implemented in PostgreSQL, the system provides a robust foundation for managing parameter configurations across development phases, supporting variant customization for diverse vehicle configurations.
+The \ac{VMAP} database system represents a significant advancement in automotive parameter management, addressing fundamental challenges in version control, user access, and system integration. Through a carefully designed database architecture implemented in PostgreSQL, the system provides a robust foundation for managing parameter configurations across development phases, supporting variant customization for diverse vehicle configurations.
 
 The phase-based versioning approach, hybrid role-permission model, and comprehensive audit capabilities collectively enable a more structured and reliable parameter management process. These capabilities address critical limitations of spreadsheet-based approaches, providing improved data integrity, enhanced traceability, and systematic validation of parameter configurations.
 
 While the implementation has demonstrated clear advantages over existing approaches, several opportunities for enhancement remain in areas such as performance optimization, architectural extensions, and integration refinements. Future development in these areas could further improve system capabilities and address emerging requirements in automotive parameter management.
 
-Beyond its specific technical contributions, the\ac{VMAP} system illustrates the value of applying proven database engineering principles to specialized domains like automotive development. By combining domain-specific knowledge with established database patterns, the system achieves both technical excellence and practical usability, demonstrating the potential for database-driven approaches to transform complex engineering workflows.
+Beyond its specific technical contributions, the \ac{VMAP} system illustrates the value of applying proven database engineering principles to specialized domains like automotive development. By combining domain-specific knowledge with established database patterns, the system achieves both technical excellence and practical usability, demonstrating the potential for database-driven approaches to transform complex engineering workflows.

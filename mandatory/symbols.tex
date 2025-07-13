@@ -8,17 +8,3 @@
 % The table automatically spans over multiple pages.
 
 % Use "siunitx" package for units
-
-\begin{center}
-	\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
-    	\endhead
-        \textbf{\IfLanguageName{ngerman}{Größe}{Symbol}} & \textbf{\IfLanguageName{ngerman}{Einheit}{Unit}} & \textbf{\IfLanguageName{ngerman}{Beschreibung}{Description}}\\
-        \midrule
-        $F_\text{N}$ & \si{\newton} & Force\\
-        \midrule
-        $\tau$ & \si[inter-unit-product =\ensuremath{}]{\newton\meter} & Torque\\
-        % Insert mathematic terms using the inline math environment $$ like in the example above.
-        % Use \midrule to separate parts of your symbols table.
-		% Enter \\ after every line.
-    \end{longtable}
-\end{center}

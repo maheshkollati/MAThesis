@@ -1,17 +1,17 @@
 \chapter{Theoretical Background}
 \label{chap:theoretical-background}
 
-This chapter establishes the theoretical foundation necessary for understanding the design and implementation of the Variant Management and Parametrization (VMAP) database system. It begins with an overview of automotive electronic control systems and parameter management, explaining the fundamental concepts that drive the requirements for the\ac{VMAP} system. The chapter then explores database management systems, database design methodologies, and access control models relevant to the implementation. Finally, it discusses version control concepts and temporal database management approaches, which are critical for the parameter versioning requirements in automotive software development.
+This chapter establishes the theoretical foundation necessary for understanding the design and implementation of the \ac{VMAP} database system. It begins with an overview of automotive electronic control systems and parameter management, explaining the fundamental concepts that drive the requirements for the \ac{VMAP} system. The chapter then explores database management systems, database design methodologies, and access control models relevant to the implementation. Finally, it discusses version control concepts and temporal database management approaches, which are critical for the parameter versioning requirements in automotive software development.
 
 \section{Automotive Electronic Control Systems}
 \label{sec:automotive-electronic-systems}
 
-Modern commercial vehicles contain dozens of Electronic Control Units (ECUs) that manage various vehicle subsystems. Each \ac{ECU} is a specialized computing device that controls specific functions through software parameters \cite{staron2021automotive}. Understanding the structure and organization of these systems is essential for designing an effective parameter management solution.
+Modern commercial vehicles contain dozens of \acp{ECU} that manage various vehicle subsystems. Each \ac{ECU} is a specialized computing device that controls specific functions through software parameters \cite{staron2021automotive}. Understanding the structure and organization of these systems is essential for designing an effective parameter management solution.
 
-\subsection{ECU Hierarchy and Parameter Organization}
+\subsection{\ac{ECU} Hierarchy and Parameter Organization}
 \label{subsec:ecu-hierarchy}
 
-Automotive electronic systems follow a hierarchical organization that structures parameters into logical groupings. Figure \ref{fig:ecu-hierarchy} illustrates this hierarchical structure, showing how parameters are organized in automotive electronic systems. At the top level, Electronic Control Units (ECUs) represent distinct hardware components controlling specific vehicle functions such as engine management, transmission control, or brake systems \cite{kiencke2000automotive}. Within each \ac{ECU}, modules represent functional software units that implement specific capabilities such as cruise control, adaptive power steering, diagnosis. Each module contains Parameter IDs (PIDs) that group related parameters, and finally, individual parameters define specific configuration values that affect system behavior \cite{staron2021autosar}.
+Automotive electronic systems follow a hierarchical organization that structures parameters into logical groupings. Figure \ref{fig:ecu-hierarchy} illustrates this hierarchical structure, showing how parameters are organized in automotive electronic systems. At the top level, \acp{ECU} represent distinct hardware components controlling specific vehicle functions such as engine management, transmission control, or brake systems \cite{kiencke2000automotive}. Within each \ac{ECU}, modules represent functional software units that implement specific capabilities such as cruise control, adaptive power steering, diagnosis. Each module contains \acp{PID} that group related parameters, and finally, individual parameters define specific configuration values that affect system behavior \cite{staron2021autosar}.
 
 \begin{figure}[ht]
     \centering
@@ -20,7 +20,7 @@ Automotive electronic systems follow a hierarchical organization that structures
     \label{fig:ecu-hierarchy}
 \end{figure}
 
-As shown in Figure \ref{fig:ecu-hierarchy}, parameters can either use their default values or be customized through variants and segments. When a parameter is used without customization, its default value is applied. However, when specific vehicle configurations require different parameter settings, variants are created, and segments define the modified parameter values within these variants. This hierarchical structure is not merely organizational but reflects the actual architecture of automotive electronic systems, where software components are modularized for maintainability, reusability, and functional separation. The Common Powertrain Controller (\ac{CPC}), a central \ac{ECU} in modern trucks, manages critical powertrain functions through thousands of configurable parameters organized into this hierarchical structure \cite{staron2021automotive}.
+As shown in Figure \ref{fig:ecu-hierarchy}, parameters can either use their default values or be customized through variants and segments. When a parameter is used without customization, its default value is applied. However, when specific vehicle configurations require different parameter settings, variants are created, and segments define the modified parameter values within these variants. This hierarchical structure is not merely organizational but reflects the actual architecture of automotive electronic systems, where software components are modularized for maintainability, reusability, and functional separation. The \ac{CPC}, a central \ac{ECU} in modern trucks, manages critical powertrain functions through thousands of configurable parameters organized into this hierarchical structure \cite{staron2021automotive}.
 
 Parameters themselves have complex characteristics beyond simple values. They can be scalar values, one-dimensional arrays (curves), or multi-dimensional arrays (maps or tables). Each parameter has specific attributes defining its data type, valid range, engineering units, scale factors, and default values \cite{pretschner2007software}. For instance, an engine timing map might be represented as a two-dimensional array where engine speed and load are the independent variables, and ignition timing angle is the dependent variable. This complexity in parameter structure creates specific requirements for the database system designed to manage them.
 
@@ -58,12 +58,12 @@ This phase-based release process establishes specific requirements for the datab
 \section{Database Management Systems}
 \label{sec}
 
-Database management systems (DBMS) serve as the foundation for structured information storage and retrieval. They provide mechanisms for storing, organizing, and accessing data while ensuring integrity, security, and concurrent access \cite{elmasri2015fundamentals}. For the \ac{VMAP} system, selecting an appropriate database approach is critical for meeting the complex requirements of automotive parameter management.
+\ac{DBMS} serve as the foundation for structured information storage and retrieval. They provide mechanisms for storing, organizing, and accessing data while ensuring integrity, security, and concurrent access \cite{elmasri2015fundamentals}. For the \ac{VMAP} system, selecting an appropriate database approach is critical for meeting the complex requirements of automotive parameter management.
 
 \subsection{Relational Database Management Systems}
 \label{subsec:relational-database-management-systems}
 
-Relational Database Management Systems (RDBMS) organize data into structured tables composed of rows and columns, based on the relational model proposed by E.F. Codd in 1970 \cite{codd1970relational}. The relational model establishes a mathematical foundation for representing data as relations (tables) with well-defined operations for data manipulation. This approach has dominated database technology for decades due to its solid theoretical foundation and practical advantages for structured data management.
+\ac{RDBMS} organize data into structured tables composed of rows and columns, based on the relational model proposed by E.F. Codd in 1970 \cite{codd1970relational}. The relational model establishes a mathematical foundation for representing data as relations (tables) with well-defined operations for data manipulation. This approach has dominated database technology for decades due to its solid theoretical foundation and practical advantages for structured data management.
 
 \begin{figure}[ht]
     \centering
@@ -83,7 +83,7 @@ ACID compliance makes relational databases particularly suitable for automotive 
 \subsection{Non-Relational Database Systems}
 \label{subsec:non-relational-database-systems}
 
-Non-relational databases, often referred to as NoSQL (Not Only SQL) databases, emerged as alternatives to the relational model, particularly for use cases involving large-scale distributed systems, unstructured data, or schema flexibility requirements. Unlike relational databases, NoSQL systems typically sacrifice some aspects of ACID compliance in favor of scalability, flexibility, and performance characteristics suited to specific application domains \cite{bhattacherjee2015principles}.
+Non-relational databases, often referred to as \ac{NoSQL} databases, emerged as alternatives to the relational model, particularly for use cases involving large-scale distributed systems, unstructured data, or schema flexibility requirements. Unlike relational databases, NoSQL systems typically sacrifice some aspects of ACID compliance in favor of scalability, flexibility, and performance characteristics suited to specific application domains \cite{bhattacherjee2015principles}.
 
 \begin{figure}[ht]
     \centering
@@ -92,7 +92,7 @@ Non-relational databases, often referred to as NoSQL (Not Only SQL) databases, e
     \label{fig:nosql-types}
 \end{figure}
 
-Figure \ref{fig:nosql-types} illustrates the four major types of NoSQL databases, each with distinct data models and storage approaches. Key-value databases (top-left) store data as simple key-value pairs, offering fast lookups but limited query functionality. Graph databases (top-right) organize data as networks of interconnected nodes and relationships, excelling at representing complex relationships. Column-family databases (bottom-left) store data in column-oriented structures that can efficiently handle sparse data. Document databases (bottom-right) store semi-structured data as documents, typically in formats like JSON or XML, providing schema flexibility while maintaining query capabilities.
+Figure \ref{fig:nosql-types} illustrates the four major types of \ac{NoSQL} databases, each with distinct data models and storage approaches. Key-value databases (top-left) store data as simple key-value pairs, offering fast lookups but limited query functionality. Graph databases (top-right) organize data as networks of interconnected nodes and relationships, excelling at representing complex relationships. Column-family databases (bottom-left) store data in column-oriented structures that can efficiently handle sparse data. Document databases (bottom-right) store semi-structured data as documents, typically in formats like JSON or XML, providing schema flexibility while maintaining query capabilities.
 
 NoSQL databases can be categorized into these four types based on their data models: document databases (MongoDB, CouchDB), key-value stores (Redis, DynamoDB), column-family stores (Cassandra, HBase), and graph databases (Neo4j, Amazon Neptune). Many NoSQL systems follow the BASE principle (Basically Available, Soft state, Eventually consistent) rather than ACID, prioritizing availability and partition tolerance over immediate consistency \cite{brewer2000towards}.
 
@@ -129,7 +129,7 @@ For automotive parameter management systems, use case modeling helps identify th
 \subsection{Entity-Relationship Modeling}
 \label{subsec:entity-relationship-modeling}
 
-After understanding user requirements through use cases, the next step is to model the data itself. Entity-Relationship (ER) modeling provides a conceptual framework for representing the data structure needed to support the identified use cases. Introduced by Peter Chen in 1976, ER modeling has become the most widely used approach for conceptual database design \cite{chen1976entity}.
+After understanding user requirements through use cases, the next step is to model the data itself. \ac{ER} modeling provides a conceptual framework for representing the data structure needed to support the identified use cases. Introduced by Peter Chen in 1976, \ac{ER} modeling has become the most widely used approach for conceptual database design \cite{chen1976entity}.
 
 \begin{figure}[ht]
     \centering
@@ -138,41 +138,41 @@ After understanding user requirements through use cases, the next step is to mod
     \label{fig:er-diagram}
 \end{figure}
 
-Figure \ref{fig:er-diagram} presents a detailed entity-relationship diagram for a fitness studio database. The diagram shows six main entities: Members, Member Signups, Class Schedule, Classes, Types, and Instructors. Each entity is represented as a rectangle containing its attributes, with primary keys clearly labeled at the top of each entity. The diagram uses color coding to visually distinguish different entity types and their related attributes. Foreign key relationships are explicitly shown with connecting lines and arrows pointing to the referenced primary keys, illustrating the database's referential integrity constraints.
+Figure \ref{fig:er-diagram} presents a detailed \ac{ER} diagram for a fitness studio database. The diagram shows six main entities: Members, Member Signups, Class Schedule, Classes, Types, and Instructors. Each entity is represented as a rectangle containing its attributes, with primary keys clearly labeled at the top of each entity. The diagram uses color coding to visually distinguish different entity types and their related attributes. Foreign key relationships are explicitly shown with connecting lines and arrows pointing to the referenced primary keys, illustrating the database's referential integrity constraints.
 
 The diagram demonstrates several important relational concepts. The Members entity contains basic member information including a unique identifier, name, email, and phone number. The Class Schedule entity serves as a central hub, connecting classes with their instructors and time slots. The Member Signups entity implements a many-to-many relationship between members and scheduled classes, with an additional attribute to track attendance (no\_show). The Classes entity includes a foreign key reference to the Types entity, establishing a categorization system for different class offerings. This comprehensive diagram provides a clear blueprint for database implementation, showing both the structural components and their interrelationships in the fitness studio domain.
 
-ER modeling identifies three main components: Entities represent the objects or concepts about which information needs to be stored. In an automotive context, these might include vehicles, electronic control units (ECUs), parameters, and users. Entities are represented as rectangles in ER diagrams. Attributes describe the specific properties or characteristics of each entity. For example, a parameter entity might have attributes like name, value, unit, and description. Attributes are shown as ovals connected to their entity. Relationships describe the associations between entities. For instance, "ECUs contain parameters" expresses a relationship between \ac{ECU} and parameter entities. Relationships are shown as diamonds connecting the related entities, with cardinality notations indicating how many instances of each entity can participate in the relationship \cite{elmasri2015fundamentals}.
+\ac{ER} modeling identifies three main components: Entities represent the objects or concepts about which information needs to be stored. In an automotive context, these might include vehicles, \acp{ECU}, parameters, and users. Entities are represented as rectangles in \ac{ER} diagrams. Attributes describe the specific properties or characteristics of each entity. For example, a parameter entity might have attributes like name, value, unit, and description. Attributes are shown as ovals connected to their entity. Relationships describe the associations between entities. For instance, "\acp{ECU} contain parameters" expresses a relationship between \ac{ECU} and parameter entities. Relationships are shown as diamonds connecting the related entities, with cardinality notations indicating how many instances of each entity can participate in the relationship \cite{elmasri2015fundamentals}.
 
-ER modeling is particularly valuable for complex domains like automotive systems because it provides a visual representation that stakeholders can understand while being precise enough to guide database implementation. Chen explains that "the entity-relationship model adopts the more natural view that the real world consists of entities and relationships" \cite{chen1976entity}, making it an intuitive approach for modeling real-world systems.
+\ac{ER} modeling is particularly valuable for complex domains like automotive systems because it provides a visual representation that stakeholders can understand while being precise enough to guide database implementation. Chen explains that "the \ac{ER} model adopts the more natural view that the real world consists of entities and relationships" \cite{chen1976entity}, making it an intuitive approach for modeling real-world systems.
 
 \subsection{Database Normalization}
 \label{subsec:database-normalization}
 
-Once the conceptual model is established through ER modeling, database normalization helps refine this model into an efficient, consistent structure. Normalization is a systematic process developed by E.F. Codd that organizes data to minimize redundancy and avoid update anomalies \cite{codd1970relational}.
+Once the conceptual model is established through \ac{ER} modeling, database normalization helps refine this model into an efficient, consistent structure. Normalization is a systematic process developed by E.F. Codd that organizes data to minimize redundancy and avoid update anomalies \cite{codd1970relational}.
 
 Normalization proceeds through several "normal forms," each addressing specific types of data inconsistencies:
 
-First Normal Form (1NF) requires that each cell in a table contains only a single value, not a list of values. For example, storing multiple phone numbers in a single field would violate 1NF. This ensures that data is atomic (indivisible) and can be manipulated consistently.
+\ac{1NF} requires that each cell in a table contains only a single value, not a list of values. For example, storing multiple phone numbers in a single field would violate \ac{1NF}. This ensures that data is atomic (indivisible) and can be manipulated consistently.
 
-Second Normal Form (2NF) builds on 1NF by requiring that all non-key attributes depend on the entire primary key, not just part of it. This prevents situations where changing one piece of data requires multiple updates in different places.
+\ac{2NF} builds on \ac{1NF} by requiring that all non-key attributes depend on the entire primary key, not just part of it. This prevents situations where changing one piece of data requires multiple updates in different places.
 
-Third Normal Form (3NF) further refines the structure by requiring that non-key attributes depend only on the primary key, not on other non-key attributes. This eliminates transitive dependencies that can lead to update anomalies \cite{elmasri2015fundamentals}.
+\ac{3NF} further refines the structure by requiring that non-key attributes depend only on the primary key, not on other non-key attributes. This eliminates transitive dependencies that can lead to update anomalies \cite{elmasri2015fundamentals}.
 
-For most practical applications, achieving 3NF provides a good balance between data integrity and system performance. As explained by Date, "Third normal form is considered adequate for most practical purposes; further normalization is usually performed only when necessary" \cite{date2011sql}.
+For most practical applications, achieving \ac{3NF} provides a good balance between data integrity and system performance. As explained by Date, "Third normal form is considered adequate for most practical purposes; further normalization is usually performed only when necessary" \cite{date2011sql}.
 
 In automotive parameter management, normalization helps organize complex data about \acp{ECU}, modules, and parameters into a structure that maintains consistency while supporting efficient access. For example, normalizing parameter data ensures that when a parameter value changes, that change only needs to be recorded in one place, eliminating the risk of inconsistent values across the database.
 
 \subsection{Role-Based Access Control Models}
 \label{subsec:role-based-access-control}
 
-Database systems often contain sensitive information that should not be accessible to all users. Role-Based Access Control (RBAC) provides a structured approach to managing permissions within a database system. Introduced by David Ferraiolo and Richard Kuhn in the 1990s, RBAC has become the predominant model for access control in enterprise systems due to its balance of security and administrative simplicity \cite{sandhu1998role}.
+Database systems often contain sensitive information that should not be accessible to all users. \ac{RBAC} provides a structured approach to managing permissions within a database system. Introduced by David Ferraiolo and Richard Kuhn in the 1990s, \ac{RBAC} has become the predominant model for access control in enterprise systems due to its balance of security and administrative simplicity \cite{sandhu1998role}.
 
-The core concept of RBAC is that permissions are associated with roles, and users are assigned to appropriate roles rather than being granted permissions directly. A role represents a specific function within an organization, such as ``administrator,'' ``engineer,'' or ``analyst.'' Each role is granted a set of permissions that allow users assigned to that role to perform specific operations on database objects like reading, creating, updating, or deleting records \cite{ferraiolo2011policy}.
+The core concept of \ac{RBAC} is that permissions are associated with roles, and users are assigned to appropriate roles rather than being granted permissions directly. A role represents a specific function within an organization, such as ``administrator,'' ``engineer,'' or ``analyst.'' Each role is granted a set of permissions that allow users assigned to that role to perform specific operations on database objects like reading, creating, updating, or deleting records \cite{ferraiolo2011policy}.
 
 This structure provides several important advantages over direct permission assignment. First, it simplifies administration by allowing permissions to be managed at the role level rather than the individual user level. When a new user joins the organization, they can simply be assigned to the appropriate roles rather than requiring configuration of individual permissions. Second, it improves security by implementing the principle of least privilege, ensuring that users have only the permissions necessary for their specific responsibilities which reduces the risk of unauthorized access or accidental data modifications \cite{sandhu1998role}.
 
-The theoretical foundation of RBAC includes several key components: users (individuals who need access to the system), roles (collections of permissions that correspond to job functions), permissions (defined operations on specific resources), and sessions (temporary bindings between users and their assigned roles). These components provide a flexible framework for implementing access control policies tailored to specific organizational needs while maintaining a clear separation between users and permissions through the role abstraction \cite{sandhu1997arbac97}.
+The theoretical foundation of \ac{RBAC} includes several key components: users (individuals who need access to the system), roles (collections of permissions that correspond to job functions), permissions (defined operations on specific resources), and sessions (temporary bindings between users and their assigned roles). These components provide a flexible framework for implementing access control policies tailored to specific organizational needs while maintaining a clear separation between users and permissions through the role abstraction \cite{sandhu1997arbac97}.
 
 
 \subsection{Version Control for Databases}

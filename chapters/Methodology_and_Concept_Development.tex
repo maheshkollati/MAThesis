@@ -1,7 +1,7 @@
 \chapter{Methodology and Concept Development}
 \label{chap:methodology}
 
-This chapter presents the systematic approach taken in designing the Variant Management and Parametrization (VMAP) system. The methodology follows established software engineering principles to address the complex requirements of automotive parameter management. Beginning with a requirements analysis, the chapter proceeds to detail the conceptual architecture design, data model, validation mechanisms, and integration approaches developed to ensure system robustness and compatibility with existing enterprise infrastructure.
+This chapter presents the systematic approach taken in designing the \ac{VMAP} system. The methodology follows established software engineering principles to address the complex requirements of automotive parameter management. Beginning with a requirements analysis, the chapter proceeds to detail the conceptual architecture design, data model, validation mechanisms, and integration approaches developed to ensure system robustness and compatibility with existing enterprise infrastructure.
 
 \section{Requirements Analysis}
 \label{sec:requirements-analysis}
@@ -11,9 +11,9 @@ The foundation of the\ac{VMAP} system design was a comprehensive requirements an
 \subsection{Functional Requirements}
 \label{subsec:functional-requirements}
 
-The primary functional requirements were derived from direct observation of engineers' current Excel-based workflow combined with semi-structured interviews conducted with module developers and documentation specialists. Through this process, several critical requirements emerged for the\ac{VMAP} system.
+The primary functional requirements were derived from direct observation of engineers' current Excel-based workflow combined with semi-structured interviews conducted with module developers and documentation specialists. Through this process, several critical requirements emerged for the \ac{VMAP} system.
 
-The system must support the hierarchical organization of parameters within \acp{ECU}, Modules, and Parameter IDs (PIDs), mirroring the domain-specific structure of automotive electronic systems as described by Staron \cite{staron2021automotive}. This hierarchical organization is essential for maintaining the logical structure of vehicle parameters and aligning with established engineering practices.
+The system must support the hierarchical organization of parameters within \acp{ECU}, Modules, and \acp{PID}, mirroring the domain-specific structure of automotive electronic systems as described by Staron \cite{staron2021automotive}. This hierarchical organization is essential for maintaining the logical structure of vehicle parameters and aligning with established engineering practices.
 
 Users must be able to create variants for parameters with specific code rules determining their applicability, and define segments representing modified parameter values. If no segment exists, the system must default to Parameter Definition Database values—an approach that allows efficient storage by tracking only modifications rather than duplicating unchanged parameters, aligning with Bhattacherjee's principles of dataset versioning \cite{bhattacherjee2015principles}.
 
@@ -24,13 +24,13 @@ All modifications require comprehensive logging with user information, timestamp
 \subsection{Integration with External Systems}
 \label{subsec:integration-external-systems}
 
-The stakeholder interviews and process analysis revealed that\ac{VMAP} must integrate with two critical external enterprise systems: the \ac{PDD} and the \ac{VCD}.
+The stakeholder interviews and process analysis revealed that \ac{VMAP} must integrate with two critical external enterprise systems: the \ac{PDD} and the \ac{VCD}.
 
-The Parameter Definition Database (PDD) serves as the authoritative source for the hierarchical structure of automotive electronic systems, containing definitions of \acp{ECU}, Modules,\acp{PID}, and baseline parameter configurations. As noted by Pretschner et al. \cite{pretschner2007software}, maintaining this hierarchical structure is essential for automotive software development. The workshops with domain experts confirmed that while\ac{VMAP} will manage parameter variants and customizations, it must rely on \ac{PDD}for the underlying parameter definitions and structural relationships, requiring a robust synchronization mechanism to maintain consistency between the systems.
+The \ac{PDD} serves as the authoritative source for the hierarchical structure of automotive electronic systems, containing definitions of \acp{ECU}, Modules, \acp{PID}, and baseline parameter configurations. As noted by Pretschner et al. \cite{pretschner2007software}, maintaining this hierarchical structure is essential for automotive software development. The workshops with domain experts confirmed that while \ac{VMAP} will manage parameter variants and customizations, it must rely on \ac{PDD} for the underlying parameter definitions and structural relationships, requiring a robust synchronization mechanism to maintain consistency between the systems.
 
-The Vehicle Configuration Database (VCD) contains comprehensive vehicle specifications and configuration codes that determine which parameter variants apply to specific vehicle configurations. Integration with this system is necessary for two critical functions: validating the boolean code rules associated with parameter variants to ensure they reference valid vehicle codes, and supporting parameter file generation for specific vehicle configurations by resolving the applicable parameter variants based on vehicle codes. This integration requirement aligns with Staron's analysis of automotive software architectures, which emphasizes the importance of configuration management in supporting variant-rich vehicle platforms \cite{staron2021automotive}.
+The \ac{VCD} contains comprehensive vehicle specifications and configuration codes that determine which parameter variants apply to specific vehicle configurations. Integration with this system is necessary for two critical functions: validating the boolean code rules associated with parameter variants to ensure they reference valid vehicle codes, and supporting parameter file generation for specific vehicle configurations by resolving the applicable parameter variants based on vehicle codes. This integration requirement aligns with Staron's analysis of automotive software architectures, which emphasizes the importance of configuration management in supporting variant-rich vehicle platforms \cite{staron2021automotive}.
 
-These integration requirements necessitated careful consideration of data synchronization approaches, leading to an exploration of different strategies for maintaining consistency between\ac{VMAP} and these external systems while minimizing performance impact and complexity.
+These integration requirements necessitated careful consideration of data synchronization approaches, leading to an exploration of different strategies for maintaining consistency between \ac{VMAP} and these external systems while minimizing performance impact and complexity.
 
 \subsection{User Role Requirements}
 \label{subsec:user-role-requirements}
@@ -83,7 +83,7 @@ Based on the identified user role requirements, two distinct approaches to user 
     \label{fig:traditional-rbac}
 \end{figure}
 
-The traditional role-based approach, illustrated in Figure \ref{fig:traditional-rbac}, assigns users to predefined roles that contain fixed sets of permissions, following the classic Role-Based Access Control (RBAC) model described by Sandhu \cite{sandhu1998role}. In this approach, each user is assigned one or more roles (Administrator, Module Developer, Documentation Team, Read-Only User), and all permissions are granted through these role assignments without individual permission adjustments.
+The traditional role-based approach, illustrated in Figure \ref{fig:traditional-rbac}, assigns users to predefined roles that contain fixed sets of permissions, following the classic \ac{RBAC} model described by Sandhu \cite{sandhu1998role}. In this approach, each user is assigned one or more roles (Administrator, Module Developer, Documentation Team, Read-Only User), and all permissions are granted through these role assignments without individual permission adjustments.
 
 This approach offers administrative simplicity, as user management involves only assigning appropriate roles rather than configuring individual permissions. The role structure also provides clear organizational alignment, with roles directly corresponding to job functions within the development process. From an implementation perspective, this approach simplifies permission checking, typically requiring only verification of role membership rather than individual permission verification.
 
@@ -108,7 +108,7 @@ The hybrid approach is particularly valuable in the automotive parameter managem
 \section{Parameter Synchronization Approaches}
 \label{sec:parameter-sync-approaches}
 
-Integration with the Parameter Definition Database (PDD) represents a critical aspect of the\ac{VMAP} system, requiring careful consideration of synchronization approaches. Two different conceptual approaches were explored for maintaining parameter data across the release phases: the change-based approach and the phase-based approach.
+Integration with the \ac{PDD} represents a critical aspect of the\ac{VMAP} system, requiring careful consideration of synchronization approaches. Two different conceptual approaches were explored for maintaining parameter data across the release phases: the change-based approach and the phase-based approach.
 
 \subsection{Change-Based Synchronization Approach}
 \label{subsec:change-based-sync}
@@ -151,7 +151,7 @@ The primary consideration with this approach is the increased storage requiremen
 \section{Database System Considerations}
 \label{sec:database-system-considerations}
 
-Selecting an appropriate database management system for\ac{VMAP} required consideration of different options against the specific requirements of automotive parameter management. Four major relational database systems were considered as potential platforms for the\ac{VMAP} implementation: PostgreSQL, Oracle, Microsoft SQL Server, and MySQL.
+Selecting an appropriate database management system for \ac{VMAP} required consideration of different options against the specific requirements of automotive parameter management. Four major relational database systems were considered as potential platforms for the\ac{VMAP} implementation: PostgreSQL, Oracle, Microsoft SQL Server, and MySQL.
 
 \subsection{Database System Requirements}
 \label{subsec:database-requirements}
@@ -226,11 +226,11 @@ Dual licensing: GPL and commercial \cite{williams2004web} \\
 
 The comparative analysis revealed different strengths among the database systems. PostgreSQL offers excellent support for complex data types and extensibility, particularly valuable for representing multi-dimensional parameters and implementing domain-specific operations. Oracle provides robust enterprise features with sophisticated optimization capabilities but introduces licensing complexity. SQL Server offers strong integration with Microsoft technologies, while MySQL provides simplicity but has limitations for complex data management requirements.
 
-This analysis provides a foundation for database system selection, considering both technical capabilities and practical factors such as licensing and total cost of ownership. The implementation chapter will detail the specific database system selected and how its capabilities are leveraged in the\ac{VMAP} implementation.
+This analysis provides a foundation for database system selection, considering both technical capabilities and practical factors such as licensing and total cost of ownership. The implementation chapter will detail the specific database system selected and how its capabilities are leveraged in the \ac{VMAP} implementation.
 \section{Entity-Relationship Model}
 \label{sec:entity-relationship-model}
 
-Based on the requirements analysis and architectural considerations, a comprehensive entity-relationship (ER) model was developed to capture the complex relationships between system entities. This model follows the approach described by Chen \cite{chen1976entity}, providing a conceptual foundation for the database implementation.
+Based on the requirements analysis and architectural considerations, a comprehensive \ac{ER} model was developed to capture the complex relationships between system entities. This model follows the approach described by Chen \cite{chen1976entity}, providing a conceptual foundation for the database implementation.
 
 \begin{figure}[h]
 \centering
@@ -243,13 +243,13 @@ Figure \ref{fig} illustrates the complete entity-relationship model for the\ac{V
 \subsection{Core Data Entities}
 \label{subsec:core-data-entities}
 
-The ER model includes several categories of entities representing different aspects of the system:
+The \ac{ER} model includes several categories of entities representing different aspects of the system:
 
 User management entities include Users, Roles, Permissions, and their relationships, implementing a role-permission model for access control. These entities support the authentication and authorization requirements identified during the requirements analysis.
 
 Release management entities encompass Releases, Release Phases, and \ac{ECU} Phase mappings, providing the foundation for the phase-based version control approach. These entities support the automotive development cycle with its distinct phases and milestones.
 
-Parameter structure entities include \acp{ECU}, Modules,\acp{PID}, Parameters, and Parameter Dimensions, representing the hierarchical organization of vehicle electronic systems as described by Staron \cite{staron2021automotive}. These entities capture both the structure and characteristics of parameters, including multi-dimensional parameters like maps and tables.
+Parameter structure entities include \acp{ECU}, Modules, \acp{PID}, Parameters, and Parameter Dimensions, representing the hierarchical organization of vehicle electronic systems as described by Staron \cite{staron2021automotive}. These entities capture both the structure and characteristics of parameters, including multi-dimensional parameters like maps and tables.
 
 Variant management entities comprise Variants, Segments, and their relationships to parameters, implementing the core parameter customization functionality. These entities support the creation of parameter variations for different vehicle configurations and operating conditions.
 
@@ -262,7 +262,7 @@ Audit entities encompass Change History, Transaction Records, and Phase Copy His
 \subsection{Relationship Structure}
 \label{subsec:relationship-structure}
 
-The relationships between entities in the ER model reflect the complex interactions between different aspects of automotive parameter management. Key relationships include:
+The relationships between entities in the \ac{ER} model reflect the complex interactions between different aspects of automotive parameter management. Key relationships include:
 
 Hierarchical relationships between \acp{ECU}, Modules,\acp{PID}, and Parameters, representing the structural organization of automotive electronic systems. These relationships enforce the domain-specific hierarchy while supporting navigation from higher-level entities to their components.
 
@@ -275,35 +275,26 @@ Temporal relationships for audit and history entities, capturing the evolution o
 \subsection{Normalization and Optimization}
 \label{subsec:normalization-optimization}
 
-The ER model was developed using data normalization principles to minimize redundancy while maintaining data integrity, following the approach described by Codd \cite{codd1970relational}. The model generally adheres to Third Normal Form (3NF), ensuring that non-key attributes depend on the primary key rather than on other non-key attributes.
+The \ac{ER} model was developed using data normalization principles to minimize redundancy while maintaining data integrity, following the approach described by Codd \cite{codd1970relational}. The model generally adheres to \ac{3NF}, ensuring that non-key attributes depend on the primary key rather than on other non-key attributes.
 
 Strategic denormalization was considered in specific areas to optimize performance for common operations, following the principles described by Molinaro \cite{molinaro2005sql}. For example, certain frequently accessed attributes from parent entities might be duplicated in child entities to reduce join operations in common queries, providing performance benefits that outweigh the controlled redundancy.
 
 \section{Validation Mechanisms}
 \label{sec:validation-mechanisms}
 
-To ensure data integrity and consistency, multiple validation mechanism layers were conceptualized for the\ac{VMAP} system, from basic constraints to sophisticated business rule validation. These mechanisms work together to maintain parameter data quality and reliability throughout the system lifecycle.
+To ensure data integrity and consistency, multiple validation mechanism layers were conceptualized for the \ac{VMAP} system, from basic constraints to sophisticated business rule validation. These mechanisms work together to maintain parameter data quality and reliability throughout the system lifecycle.
 
 \subsection{Data Integrity Constraints}
 \label{subsec:data-integrity-constraints}
 
 Database-level constraints were identified as the foundation for enforcing basic integrity rules, following the principles described by Elmasri and Navathe \cite{elmasri2015fundamentals}. These constraints include primary key constraints ensuring unique entity identifiers, foreign key constraints maintaining referential integrity between related entities, not-null constraints ensuring required fields contain values, unique constraints preventing duplicate values in specified columns, and check constraints enforcing domain-specific rules such as valid date ranges and parameter value ranges.
 
-These constraints are designed into the database schema as integral parts of entity definitions, ensuring consistent enforcement throughout the system regardless of access path. By implementing constraints at the database level rather than in application code,\ac{VMAP} ensures that all data modifications adhere to fundamental integrity rules regardless of the source of those modifications.
+These constraints are designed into the database schema as integral parts of entity definitions, ensuring consistent enforcement throughout the system regardless of access path. By implementing constraints at the database level rather than in application code, \ac{VMAP} ensures that all data modifications adhere to fundamental integrity rules regardless of the source of those modifications.
 
 \subsection{Business Rule Validation}
 \label{subsec:business-rule-validation}
 
 Domain-specific business rules were conceptualized to be implemented through database triggers and stored procedures, providing a second layer of validation beyond basic constraints. These rules include parameter range validation automatically checking modified values against defined minimum and maximum bounds, phase status validation preventing modifications to frozen phases, segment validation ensuring segments reference valid parameters and variants, and user access validation ensuring users can only modify parameters, variants, and segments for modules to which they have been granted access.
-
-\subsection{Conflict Resolution Strategies}
-\label{subsec:conflict-resolution-strategies}
-
-In a multi-user environment, concurrent modifications can create conflicts. Several strategies were conceptualized to detect and resolve these conflicts, maintaining data consistency while supporting collaborative parameter management.
-
-For web-based interactions, optimistic concurrency control using version timestamps allows multiple users to view the same data concurrently, detecting conflicts only when updates collide. This approach aligns with the principles described by Bhattacherjee et al. \cite{bhattacherjee2015principles}, optimizing for the common case where conflicts are rare while still ensuring data integrity.
-
-When changes propagate from one phase to the next, conflicts can arise if the target phase has already been modified. Explicit conflict resolution mechanisms compare the source variant or segment with existing target configurations during phase propagation operations. When conflicts are detected, resolution options allow users to make informed decisions: override the target with source values, preserve target values, or merge values based on specified rules.
 
 \subsection{Audit and Traceability Mechanisms}
 \label{subsec:audit-mechanisms}
