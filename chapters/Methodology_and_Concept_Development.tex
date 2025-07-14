@@ -156,19 +156,7 @@ Selecting an appropriate database management system for \ac{VMAP} required consi
 \subsection{Database System Requirements}
 \label{subsec:database-requirements}
 
-The requirements analysis identified several critical database capabilities needed for effective parameter management:
-
-1. Support for complex data types, including arrays for multi-dimensional parameters and structured types for variant definitions.
-
-2. Robust transaction support for maintaining data consistency during operations affecting multiple related entities.
-
-3. Advanced indexing capabilities to optimize the performance of common query patterns, particularly parameter retrieval across different dimensions.
-
-4. Extensibility for implementing domain-specific operations and validation rules.
-
-5. Comprehensive access control mechanisms supporting the role-based security model.
-
-6. Efficient storage and retrieval of historical data for audit and traceability purposes.
+The requirements analysis identified several critical database capabilities needed for effective parameter management. First, support for complex data types, including arrays for multi-dimensional parameters and structured types for variant definitions, is essential for representing the sophisticated parameter structures common in automotive systems. Second, robust transaction support for maintaining data consistency during operations affecting multiple related entities ensures data integrity during complex operations such as phase transitions. Third, advanced indexing capabilities are required to optimize the performance of common query patterns, particularly parameter retrieval across different dimensions of the hierarchical structure. Fourth, extensibility for implementing domain-specific operations and validation rules enables the system to incorporate automotive-specific logic directly within the database layer. Fifth, comprehensive access control mechanisms supporting the role-based security model are necessary for managing user permissions across different organizational roles. Finally, efficient storage and retrieval of historical data for audit and traceability purposes supports both regulatory compliance and diagnostic capabilities.
 
 These requirements guided the evaluation of different database systems, focusing on their respective strengths and limitations in addressing the specific needs of automotive parameter management.
 
@@ -226,7 +214,19 @@ Dual licensing: GPL and commercial \cite{williams2004web} \\
 
 The comparative analysis revealed different strengths among the database systems. PostgreSQL offers excellent support for complex data types and extensibility, particularly valuable for representing multi-dimensional parameters and implementing domain-specific operations. Oracle provides robust enterprise features with sophisticated optimization capabilities but introduces licensing complexity. SQL Server offers strong integration with Microsoft technologies, while MySQL provides simplicity but has limitations for complex data management requirements.
 
-This analysis provides a foundation for database system selection, considering both technical capabilities and practical factors such as licensing and total cost of ownership. The implementation chapter will detail the specific database system selected and how its capabilities are leveraged in the \ac{VMAP} implementation.
+\subsection{Database System Selection}
+\label{subsec:database-system-selection}
+
+Based on the comparative analysis, PostgreSQL was selected as the database platform for the \ac{VMAP} implementation. This decision was driven by several key factors that align with the specific requirements of automotive parameter management. PostgreSQL's native support for arrays, JSON/JSONB, and custom data types provides essential capabilities for representing multi-dimensional parameters and complex variant structures. This eliminates the need for complex workarounds or additional middleware components that would be required with other database systems \cite{obe2017postgresql}. The ability to create custom functions, data types, and operators in PostgreSQL enables implementation of domain-specific operations directly within the database. This capability is particularly valuable for implementing parameter resolution algorithms and validation logic that can execute efficiently at the database level \cite{obe2017postgresql}.
+
+PostgreSQL's diverse indexing capabilities, including GIN indexes for full-text search and partial indexes for conditional indexing, provide optimal support for the complex query patterns common in parameter management. These capabilities are essential for maintaining performance with the large parameter datasets typical in automotive applications \cite{obe2017postgresql}. PostgreSQL's implementation of MVCC (Multi-Version Concurrency Control) and support for various isolation levels ensures data consistency during complex operations affecting multiple related entities, which is critical for maintaining parameter integrity during phase transitions and bulk operations \cite{obe2017postgresql}.
+
+The open-source nature of PostgreSQL eliminates licensing costs while providing enterprise-grade capabilities. This factor was particularly important for the research context of this thesis, enabling implementation without commercial licensing constraints. PostgreSQL's vibrant development community and regular release cycle provide assurance of continued innovation and support, which is important for long-term system sustainability \cite{obe2017postgresql}.
+
+While Oracle provides comparable technical capabilities and would be suitable for enterprise deployment, its complex licensing model and higher total cost of ownership make it less appropriate for this research implementation. Similarly, while SQL Server offers robust enterprise features, its Windows-centric approach and licensing requirements present unnecessary constraints for this application. MySQL, despite its popularity and simplicity, lacks several advanced features required for sophisticated parameter management, particularly in areas of complex data types, extensibility, and advanced indexing capabilities \cite{williams2004web}.
+
+The selection of PostgreSQL provides a solid foundation for implementing the sophisticated database features required by the \ac{VMAP} system while maintaining the flexibility needed for research and development activities.
+
 \section{Entity-Relationship Model}
 \label{sec:entity-relationship-model}
 
