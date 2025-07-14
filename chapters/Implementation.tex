@@ -42,7 +42,7 @@ CREATE TABLE ecu_modules (
 
 The junction table \texttt{ecu\_modules} implements the many-to-many relationship using foreign key constraints as described by Elmasri and Navathe \cite{elmasri2015fundamentals}. Each entity includes an \texttt{external\_id} attribute to maintain mapping with the Parameter Definition Database (PDD), facilitating integration through persistent identifier correlation as recommended by Hohpe and Woolf \cite{hohpe2002enterprise}.
 
-\acp{PID} and parameters constitute the lower levels of the hierarchy, with PIDs grouping related parameters for specific modules. The parameter table implements additional attributes for handling the complexity of automotive parameter specifications:
+\acp{PID} and parameters constitute the lower levels of the hierarchy, with \acp{PID} grouping related parameters for specific modules. The parameter table implements additional attributes for handling the complexity of automotive parameter specifications:
 
 \begin{lstlisting}[language=SQL, caption={Parameter Table Implementation}, label={lst:parameter-table}]
 CREATE TABLE parameters (
@@ -539,7 +539,7 @@ CREATE INDEX idx_variants_name_trgm
     ON variants USING gin (name gin_trgm_ops);
 \end{lstlisting}
 
-These indexes match the natural navigation paths in the data model, implementing the access path optimization pattern described by Molinaro \cite{molinaro2005sql}. The hierarchical path indexes support efficient traversal from ECUs through modules and PIDs to parameters, while the phase-specific indexes accelerate queries filtered by release phase, a common operation in the system.
+These indexes match the natural navigation paths in the data model, implementing the access path optimization pattern described by Molinaro \cite{molinaro2005sql}. The hierarchical path indexes support efficient traversal from ECUs through modules and \acp{PID} to parameters, while the phase-specific indexes accelerate queries filtered by release phase, a common operation in the system.
 
 The trigram-based text search indexes utilize PostgreSQL's specialized text search capabilities as described by Obe and Hsu \cite{obe2017postgresql}. These indexes enable efficient pattern matching and similarity-based searches, accommodating the fuzzy search requirements identified during user interviews. According to Karwin \cite{karwin2010sql}, these specialized indexes can significantly improve the performance of text-based queries, which are common in parameter management systems where engineers need to locate parameters by name or partial name.
 
@@ -596,7 +596,7 @@ BEGIN
   FROM 
     parameters p
   JOIN 
-    pids\ac{PID}ON p.pid_id = pid.pid_id
+    pids pid ON p.pid_id = pid.pid_id
   JOIN 
     modules m ON pid.module_id = m.module_id
   JOIN 
@@ -778,7 +778,7 @@ BEGIN
               AND ss.dimension_index = st.dimension_index
         )
     )
-    -- Return\acp{PID} with change indicators
+    -- Return PIDs with change indicators
     SELECT 
         cp.pid_id,
         cp.name,
@@ -788,7 +788,7 @@ BEGIN
     FROM 
         common_pids cp
     WHERE
-        -- Only return\acp{PID} that have at least one type of change
+        -- Only return PIDs that have at least one type of change
         cp.pid_id IN (SELECT pid_id FROM param_changes)
         OR cp.pid_id IN (SELECT pid_id FROM variant_changes)
         OR cp.pid_id IN (SELECT pid_id FROM segment_changes)

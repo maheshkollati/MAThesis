@@ -38,7 +38,7 @@ A second crucial objective focuses on the implementation of a sophisticated vers
 
 The research also aims to establish a comprehensive role-based access control system that supports the diverse needs of different user groups within the development process. This includes creating specialized interfaces and permissions for Module Developers, Documentation Team members, Administrators, and Read-only Users, each with specific capabilities and restrictions aligned with their responsibilities \cite{sandhu1998role}. The access control system must balance security requirements with the need for efficient collaboration among development teams.
 
-Integration with existing enterprise systems represents another critical objective of this research. The\ac{VMAP} system must establish seamless data exchange mechanisms with internal database systems, ensuring consistent information flow while minimizing manual intervention \cite{broy2006challenges}. This integration should support automated validation of parameter changes and provide mechanisms for maintaining data consistency across different systems.
+Integration with existing enterprise systems represents another critical objective of this research. The \ac{VMAP} system must establish seamless data exchange mechanisms with internal database systems, ensuring consistent information flow while minimizing manual intervention \cite{broy2006challenges}. This integration should support automated validation of parameter changes and provide mechanisms for maintaining data consistency across different systems.
 
 A final key objective involves the development of database interfaces and query optimization strategies that will support the web-based interface implementation. While the actual \ac{UI} development falls outside the scope of the thesis, the research will focus on designing efficient database structures, stored procedures, and APIs that enable seamless integration with the planned web interface \cite{pretschner2007software}. This includes developing optimized query patterns for complex operations such as parameter comparison, variant management, and release workflows, while ensuring robust data validation and business rule enforcement.
 
@@ -66,82 +66,10 @@ Chapter \ref{chap:state-of-art} presents a comprehensive review of the state of 
 
 Chapter \ref{chap:methodology} details the methodology and concept development, beginning with a thorough requirements analysis based on industry needs and academic best practices. This chapter explores the system architecture design, consisting of the database schema, version control mechanisms, and user management frameworks. Particular attention is given to the integration requirements with existing systems and the development of robust validation mechanisms for parameter management.
 
-The implementation strategy and technical design are presented in Chapter \ref{chap:implementation}, which outlines the practical realization of the VMAP system. This chapter describes the development of the database structure, the implementation of version control mechanisms, and the creation of the database interfaces. The chapter also details the integration approaches with internal database systems, highlighting the technical challenges and solutions developed during the implementation phase.
+The implementation strategy and technical design are presented in Chapter \ref{chap:implementation}, which outlines the practical realization of the \ac{VMAP} system. This chapter describes the development of the database structure, the implementation of version control mechanisms, and the creation of the database interfaces. The chapter also details the integration approaches with internal database systems, highlighting the technical challenges and solutions developed during the implementation phase.
 
-Chapter \ref{chap:evaluation} focuses on system evaluation and validation, presenting a comprehensive assessment of the VMAP system against the defined research objectives. This chapter includes detailed performance analyses, user acceptance testing results, and comparative evaluations against existing parameter management solutions. The evaluation framework incorporates both quantitative metrics and qualitative assessments to provide a thorough understanding of the system's effectiveness.
+Chapter \ref{chap:evaluation} focuses on system evaluation and validation, presenting a comprehensive assessment of the \ac{VMAP} system against the defined research objectives. This chapter includes detailed performance analyses, user acceptance testing results, and comparative evaluations against existing parameter management solutions. The evaluation framework incorporates both quantitative metrics and qualitative assessments to provide a thorough understanding of the system's effectiveness.
 
 The thesis concludes with Chapter \ref{chap:conclusion}, which summarizes the research findings and presents recommendations for future development. This chapter reflects on the contributions of the research to both academic knowledge and industry practice, discussing the implications for automotive software development and configuration management. Additionally, it outlines potential areas for future research and system enhancement based on the insights gained during the project.
 
 Throughout these chapters, the research methodology combines theoretical analysis with practical implementation, ensuring that the resulting system meets both academic standards and industry requirements. Special attention is given to database versioning approaches, user role management, and integration strategies with existing systems, addressing the unique challenges of automotive software configuration management.
-
-\section{Project Plan}
-
-The research project follows a structured approach spanning six months from November 2024 to April 2025, organized into three distinct phases: Exposé, Implementation, and Finalization. The comprehensive timeline ensures systematic progression through all research objectives while maintaining academic rigor and quality standards.
-
-\subsection{Exposé Phase (November - January)}
-
-The initial phase focuses on establishing strong theoretical foundations and gathering comprehensive requirements. Literature review constitutes a significant portion of this phase, extending over six weeks to ensure thorough coverage of current database versioning approaches, parameter management systems, and industry practices in automotive applications. This review encompasses analysis of existing version control systems, examination of industry standards for software configuration management, and evaluation of current parameter management solutions.
-
-Requirements analysis follows the literature review, spanning three weeks to capture detailed system specifications. This phase involves extensive stakeholder consultation to document system requirements, analyze existing Excel-based workflows, define integration requirements with internal database systems, and establish user roles and access control specifications. The Exposé phase concludes with the submission of a comprehensive research proposal at the end of Week 3 in January.
-
-\subsection{Implementation Phase (December - March)}
-
-The implementation phase encompasses four major components, each allocated four weeks for development and refinement. Database design initiates this phase, focusing on developing the schema for parameter management, designing version control mechanisms, creating data models for user management, and planning integration interfaces with existing systems. 
-
-System architecture development follows, concentrating on overall system design, version control workflows, user management frameworks, and validation mechanisms. This stage establishes the foundational structure for the entire system while ensuring alignment with identified requirements and industry standards.
-
-Prototype development constitutes the third component, involving implementation of core database functionality, development of version control features, creation of user management interfaces, and construction of system integration components. This stage transforms theoretical designs into practical implementations while maintaining focus on system usability and performance.
-
-The final component of this phase involves comprehensive testing and validation, including database performance testing, validation of version control mechanisms, testing of user management functions, and verification of system integration capabilities. This stage ensures all implemented features meet specified requirements and performance standards.
-
-\subsection{Finalization Phase (April)}
-
-The concluding phase focuses on documentation and thesis preparation over four weeks. The first two weeks are dedicated to comprehensive documentation, including compilation of implementation details and system architecture documentation. 
-
-The subsequent two weeks concentrate on thesis writing, involving comprehensive documentation of research findings, inclusion of test results and analysis, preparation of conclusions and recommendations, and thorough content review and refinement. The phase concludes with thesis submission in Week 16 and final project presentation in Week 17.
-
-\begin{sidewaysfigure}
-        \begin{ganttchart}[vgrid,
-            y unit title = 0.7cm,
-            y unit chart = 0.5cm,
-            bar/.append style={fill=red!70},
-            bar incomplete/.append style={fill=black!30},
-            bar top shift =0.2,
-            bar height=.5,
-            group/.append style={draw=black,fill=NavyBlue!70},
-            group incomplete/.append style={draw=black, fill=black!50},
-            group left shift=0,
-            group right shift=0,
-            group height=.7,
-            group peaks height = 0,
-            milestone height = 0.7,
-            milestone/.append style={fill=orange},
-            ]{1}{25}
-            
-            \gantttitle{2024-2025}{25} \\
-            \gantttitle{Nov}{4}\gantttitle{Dec}{4}\gantttitle{Jan}{5}\gantttitle{Feb}{4}\gantttitle{Mar}{4}\gantttitle{Apr}{4} \\
-            \gantttitlelist{45,...,52}{1}
-            \gantttitlelist{1,...,17}{1} \\
-            
-            \ganttgroup{Exposé}{1}{7} \\
-            \ganttbar{Literature Review}{1}{6} \\
-            \ganttbar{Requirements Analysis}{3}{5} \\
-            \ganttmilestone{Exposé Submission}{11} \\
-            
-            \ganttgroup{Implementation}{5}{21} \\
-            \ganttbar{Database Design}{5}{8} \\
-            \ganttlinkedbar{System Architecture}{9}{12} \\
-            \ganttlinkedbar{Prototype Development}{13}{17} \\
-            \ganttlinkedbar{Testing and Validation}{18}{21} \\
-            
-            \ganttgroup{Finalization}{21}{24} \\
-            \ganttbar{Documentation}{21}{22} \\
-            \ganttlinkedbar{Thesis Writing}{23}{24} \\
-            \ganttmilestone{Final Submission}{24} \\
-            \ganttmilestone{Presentation}{25} \\
-            
-            \\ \ganttnewline[thick, black]
-        
-        \end{ganttchart}
-    \caption{Gantt Chart of the planned work schedule.}\label{fig:Gantt-chart-1}
-\end{sidewaysfigure}

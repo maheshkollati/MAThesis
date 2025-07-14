@@ -210,7 +210,7 @@ For each write operation test case (FRZ-01 through FRZ-04), verification include
 
 Variant management validation focused on assessing the system's capabilities for handling parameter customization through variants and segments. Testing employed an approach covering variant creation and segment modification workflows, using both the baseline dataset (188 variants, 28,776 segments) and the production-scale dataset (830 variants, 167,990 segments) to analyze functionality and performance under varying data volumes.
 
-Variant creation testing verified proper implementation of domain constraints as defined in the conceptual architecture (Section \ref{sec:entity-relationship-model}). Test cases included validation of unique name constraints within\acp{PID}, verification of proper code rule storage, and confirmation of correct relationship establishment between variants and their parent\acp{PID}. All test cases passed successfully for both scalar and complex parameters, with constraint enforcement consistently preventing invalid operations. As Karwin \cite{karwin2010sql} notes, constraint-based validation provides a robust foundation for maintaining data integrity in complex relational systems.
+Variant creation testing verified proper implementation of domain constraints as defined in the conceptual architecture (Section \ref{sec:entity-relationship-model}). Test cases included validation of unique name constraints within \acp{PID}, verification of proper code rule storage, and confirmation of correct relationship establishment between variants and their parent \acp{PID}. All test cases passed successfully for both scalar and complex parameters, with constraint enforcement consistently preventing invalid operations. As Karwin \cite{karwin2010sql} notes, constraint-based validation provides a robust foundation for maintaining data integrity in complex relational systems.
 
 The testing methodology included both black-box functional testing and white-box database state verification as shown in Listing \ref{lst:variant-creation-verification}.
 
@@ -404,7 +404,7 @@ The storage requirements analysis confirms that the phase-based approach consume
 
 The phase-based approach also simplifies the implementation of phase transitions and comparison operations, which are fundamental to the automotive development process as described by Pretschner et al.~\cite{pretschner2007software}. The explicit phase model aligns naturally with the mental model of automotive development engineers, who conceptualize parameter evolution in terms of distinct development phases rather than continuous time.
 
-These findings validate the architectural decision to implement a phase-based versioning approach for the VMAP system. While consuming more storage than a version-based approach, the phase model provides performance benefits, implementation simplicity, and alignment with domain concepts—advantages that outweigh the additional storage requirements.
+These findings validate the architectural decision to implement a phase-based versioning approach for the \ac{VMAP} system. While consuming more storage than a version-based approach, the phase model provides performance benefits, implementation simplicity, and alignment with domain concepts—advantages that outweigh the additional storage requirements.
 
 \section{Integration Testing}
 \label{sec:integration-testing}
@@ -441,7 +441,7 @@ Modified Parameters & 3,764 & 3,691 & 98.1\% \\
 \hline
 New Modules & 12 & 12 & 100\% \\
 \hline
-New\acp{PID} & 67 & 67 & 100\% \\
+New \acp{PID} & 67 & 67 & 100\% \\
 \hline
 Removed Parameters & 42 & 42 & 100\% \\
 \hline

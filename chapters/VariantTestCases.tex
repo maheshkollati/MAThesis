@@ -1,7 +1,7 @@
 \chapter{Variant Management Test Cases}
 \label{appendix:variant-management-tests}
 
-This appendix provides a comprehensive listing of all test cases used to validate the variant management functionality implemented in the\ac{VMAP} database. The test cases are organized by category and include detailed information about test actions, expected outcomes, and test results.
+This appendix provides a comprehensive listing of all test cases used to validate the variant management functionality implemented in the \ac{VMAP} database. The test cases are organized by category and include detailed information about test actions, expected outcomes, and test results.
 
 \section{Variant Creation Test Cases}
 \label{sec:variant-creation-tests}
@@ -27,7 +27,7 @@ This section details the test cases for validating variant creation functionalit
 \endlastfoot
 VC-01 & Basic Variant Creation & Create variant with valid name and code rule & Variant created successfully & Pass \\
 \hline
-VC-02 & Duplicate Variant Name & Create variant with name that already exists in\ac{PID}& Name uniqueness error & Pass \\
+VC-02 & Duplicate Variant Name & Create variant with name that already exists in \ac{PID} & Name uniqueness error & Pass \\
 \hline
 VC-03 & Empty Variant Name & Create variant with empty name & Validation error & Pass \\
 \hline
@@ -41,11 +41,11 @@ VC-07 & Valid Code Rule & Create variant with syntactically valid code rule & Va
 \hline
 VC-08 & Complex Code Rule & Create variant with complex rule containing multiple operators & Variant created successfully & Pass \\
 \hline
-VC-09 & Invalid\ac{PID}Reference & Create variant with non-existent\ac{PID}& Foreign key constraint error & Pass \\
+VC-09 & Invalid \ac{PID} Reference & Create variant with non-existent \ac{PID} & Foreign key constraint error & Pass \\
 \hline
 VC-10 & Creation in Frozen Phase & Create variant in a frozen phase & Phase frozen error & Pass \\
 \hline
-VC-11 & Variant in Inactive\ac{PID}& Create variant for parameter in inactive\ac{PID}& Validation error & Pass \\
+VC-11 & Variant in Inactive \ac{PID} & Create variant for parameter in inactive \ac{PID} & Validation error & Pass \\
 \hline
 VC-12 & Null Code Rule & Create variant with null code rule & Variant created successfully & Pass \\
 \hline
@@ -215,17 +215,17 @@ VP-01 & Baseline Variant Creation & Create 10 variants and measure time & < 2 se
 \hline
 VP-02 & Baseline Segment Creation & Create 100 segments and measure time & < 10 seconds total time & Pass \\
 \hline
-VP-03 & High Volume Variant Creation & Create 100 variants for single\ac{PID}& < 20 seconds total time & Pass \\
+VP-03 & High Volume Variant Creation & Create 100 variants for single \ac{PID} & < 20 seconds total time & Pass \\
 \hline
 VP-04 & High Volume Segment Creation & Create 1000 segments across multiple variants & < 2 minutes total time & Pass \\
 \hline
-VP-05 & Single\ac{PID}Load Test & Create 500 variants for single\ac{PID}& System remains responsive & Pass \\
+VP-05 & Single \ac{PID} Load Test & Create 500 variants for single \ac{PID} & System remains responsive & Pass \\
 \hline
 VP-06 & Multi-dimensional Parameter Load & Create segments for 3D parameter with 1000 elements & < 3 minutes total time & Pass \\
 \hline
 VP-07 & Concurrent User Simulation & 10 concurrent users creating variants & No deadlocks or errors & Pass \\
 \hline
-VP-08 & Variant Retrieval Scaling & Retrieve variants from\acp{PID} with 10, 100, and 500 variants & Response time < 250ms & Pass \\
+VP-08 & Variant Retrieval Scaling & Retrieve variants from \acp{PID} with 10, 100, and 500 variants & Response time < 250ms & Pass \\
 \hline
 \end{longtable}
 
