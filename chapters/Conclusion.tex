@@ -1,198 +1,79 @@
 \chapter{Conclusion and Future Work}
 \label{chap:conclusion}
 
-This chapter presents the conclusions drawn from the design, implementation, and evaluation of the \ac{VMAP} database system. The research has addressed critical challenges in automotive parameter management through a comprehensive database solution that supports version control, role-based access, and integration with enterprise systems. This chapter summarizes the key contributions and findings, discusses limitations of the current implementation, and outlines directions for future research and development.
+This thesis presented the design, implementation, and evaluation of the \ac{VMAP} database system for automotive parameter management. The research addressed critical challenges in parameter versioning, access control, and enterprise integration through a comprehensive PostgreSQL-based solution that replaces error-prone spreadsheet approaches with structured database management.
 
-\section{Summary of Contributions}
-\label{sec:contributions-summary}
+\section{Research Contributions}
+\label{sec:research-contributions}
 
-The \ac{VMAP} database system represents a significant advancement in automotive parameter management, replacing error-prone spreadsheet-based approaches with a structured, database-driven solution. The research has produced several key contributions to both academic knowledge and industry practice:
+The \ac{VMAP} system delivers significant advancements in automotive parameter management through four key contributions that address fundamental limitations in current approaches.
 
-First, the implementation of a phase-based versioning model provides an effective approach to managing parameter evolution across automotive development cycles. Unlike generic temporal database approaches, this domain-specific versioning strategy aligns naturally with the structured development phases common in automotive engineering, supporting a clear separation between development stages while maintaining traceability \cite{broy2006challenges}. The phase model enables simultaneous work on different development stages while preserving milestone integrity, addressing a fundamental challenge in automotive software development.
+The phase-based versioning model provides an effective alternative to generic temporal database approaches by aligning parameter evolution with automotive development cycles. Unlike traditional change-based versioning, this domain-specific strategy supports simultaneous work across development phases while maintaining milestone integrity and clear separation between development stages. The approach enables efficient parameter retrieval without complex reconstruction while supporting the structured progression common in automotive engineering.
 
-Second, the hybrid role-permission access control model delivers a flexible framework for managing user access across complex organizational structures. By combining role-based permissions with module-specific access controls, the system achieves a balance between administrative simplicity and access granularity \cite{ferraiolo2011policy}. This approach accommodates the specialized access patterns common in automotive development, where engineers typically have responsibility for specific vehicle subsystems rather than entire parameter sets.
+The hybrid role-permission access control model combines traditional \ac{RBAC} with module-specific permissions to accommodate complex organizational structures in automotive development. This approach balances administrative simplicity with access granularity, supporting engineers who typically have responsibility for specific vehicle subsystems rather than entire parameter sets. Comprehensive constraint enforcement maintains security while providing the flexibility needed for specialized access patterns.
 
-Third, the integration architecture establishes robust connections with enterprise systems, enabling consistent data flow across the automotive development environment. The synchronization mechanisms maintain parameter definitions across different development phases while supporting variant customization and parameter file generation. This integration addresses a critical requirement in automotive software development, where parameter management must operate within a complex ecosystem of engineering tools and databases \cite{hohpe2002enterprise}.
+The enterprise integration architecture establishes robust data synchronization with parameter definition and vehicle configuration databases through structured mechanisms that maintain consistency across the development environment. The implementation supports variant customization and parameter file generation while minimizing manual intervention and maintaining data integrity across interconnected systems.
 
-Fourth, the comprehensive audit and documentation capabilities provide complete traceability for all parameter modifications, supporting both diagnostic analysis and regulatory compliance. The snapshot-based documentation approach creates immutable records of parameter configurations at significant development milestones, addressing the increasing regulatory requirements for configuration management in automotive software development \cite{staron2021automotive}.
+The comprehensive audit system provides complete traceability through automatic change tracking, snapshot-based documentation, and detailed provenance information. This capability addresses increasing regulatory requirements for configuration management in automotive software development while supporting both diagnostic analysis and compliance verification.
 
-Finally, the research provides valuable insights into database design patterns for complex domain-specific applications. The strategic denormalization approach, specialized indexing strategies, and query optimization techniques demonstrate effective database engineering practices for managing complex data relationships and supporting domain-specific workflows \cite{obe2017postgresql}.
+\section{Technical Findings and Validation}
+\label{sec:technical-findings}
 
-\section{Key Findings}
-\label{sec:key-findings}
+The evaluation revealed significant findings that validate design decisions and provide insights for database system implementations in automotive contexts.
 
-The evaluation of the \ac{VMAP} system revealed several significant findings that validate the design decisions made during system development and provide insights for future database system implementations in automotive contexts.
+\subsection{Performance and Scalability}
+\label{subsec:performance-scalability}
 
-\subsection{Versioning Approach Effectiveness}
-\label{subsec:versioning-effectiveness}
+The phase-based versioning approach demonstrated superior performance compared to change-based alternatives, maintaining query response times below 100ms even with datasets exceeding 100,000 parameters. While consuming approximately 51\% more storage across phases, the performance benefits for query operations justify this tradeoff, particularly for interactive operations where response time directly impacts user productivity.
 
-The comparison between the implemented phase-based versioning approach and alternative change-based approach demonstrated significant performance advantages for common operations at the cost of moderate storage overhead. As shown in Section \ref{subsec:versioning-approach-performance}, the phase-based approach maintained query response times below 100ms even with large parameter sets, while the change-based approach exhibited nonlinear growth with increasing parameter counts.
+The hybrid access control model introduced a 45.8\% performance overhead compared to traditional approaches, but maintained acceptable response times below 4ms for permission checks. Strategic indexing provided 6.5x to 21.8x performance improvements over non-indexed implementations, validating the indexing strategy's effectiveness for common query patterns.
 
-This finding validates the architectural decision to implement explicit phase copies rather than a delta-based versioning model. While consuming approximately 51\% more storage across all phases, the performance benefits for query operations justify this tradeoff, particularly for interactive operations where response time directly impacts user productivity. As noted by Bhattacherjee et al. \cite{bhattacherjee2015principles}, the recreation/storage tradeoff in dataset versioning should prioritize operation frequency, with frequently accessed data favoring a storage-intensive approach that minimizes recreation costs.
+Storage analysis revealed that change history dominates allocation (60.8\% of database size) while active parameter data requires only 6.3\% of total storage. This distribution aligns with audit requirements in regulated automotive environments, demonstrating the feasibility of comprehensive audit systems despite substantial storage implications.
 
-The phase-based approach also demonstrated significant advantages for implementation simplicity and alignment with domain concepts. The explicit phase model aligned naturally with the mental model of automotive development engineers, reducing conceptual complexity and providing clear development milestones. These advantages extend beyond performance metrics to affect usability and adoption, particularly important factors for systems that must be integrated into established engineering workflows \cite{nielsen1994usability}.
+\subsection{System Limitations}
+\label{subsec:system-limitations}
 
-\subsection{Access Control Performance}
-\label{subsec:access-control-performance}
+The phase comparison operation exhibited suboptimal scaling, with execution times increasing from 2.8 seconds for baseline datasets to 12.4 seconds for production-scale data, exceeding interactive response thresholds for larger datasets. This operation represents a candidate for future optimization through materialized view approaches or query restructuring.
 
-The evaluation of the hybrid role-permission model revealed that the approach effectively balanced flexibility with performance. As shown in Section \ref{subsec:module-access-impact}, the addition of module-specific access checks introduced a performance overhead of 45.8\% for permission verification in the hybrid model, compared to 88.2\% in a traditional role-based approach.
+Integration synchronization showed increasing execution times over successive operations, rising from approximately 15 minutes initially to 30 minutes after 10 cycles. While acceptable for typical synchronization frequencies, this trend suggests that performance optimization should be prioritized for long-term scalability.
 
-This finding suggests that the more complex permission model accommodates additional access control dimensions with relatively lower overhead, validating Ferraiolo's observations \cite{ferraiolo2011policy} regarding the scalability of attribute-enhanced \ac{RBAC} models. Despite the performance overhead, both approaches maintained acceptable performance for interactive operations, with response times below 4ms for individual permission checks.
+The current implementation provides limited support for parameter dependency tracking, relying primarily on user knowledge rather than system enforcement for maintaining parameter consistency across complex interrelationships.
 
-The hybrid approach also demonstrated the flexibility required for complex organizational structures, supporting both role-based permission inheritance and direct permission assignments for exception cases. This flexibility addresses a common challenge in engineering organizations, where standard role definitions often require customization for specific projects or temporary access requirements \cite{sandhu1997arbac97}.
+\section{Future Research Directions}
+\label{sec:future-research}
 
-\subsection{Storage Distribution Insights}
-\label{subsec:storage-distribution}
+Several opportunities for enhancement and research have been identified based on implementation experience and evaluation findings.
 
-The analysis of storage requirements revealed significant insights about data distribution in parameter management systems with comprehensive audit capabilities. As shown in Section \ref{subsec:storage-requirements-analysis}, the change history dominated storage allocation, consuming approximately 60.8\% of the total database size, while active parameter data accounted for only 6.3\%.
+\subsection{Performance Optimization}
+\label{subsec:performance-optimization}
 
-This distribution aligns with Bhattacherjee's observations \cite{bhattacherjee2015principles} regarding versioning and audit systems, where historical record storage typically surpasses active data by a substantial margin. The finding has important implications for storage planning and database administration in regulated industries where comprehensive audit trails are mandatory.
+Phase comparison operations could benefit from materialized view approaches where difference data is pre-computed and incrementally maintained rather than calculated on demand. Research into parallel query execution could leverage multi-core processors more effectively for resource-intensive operations.
 
-Another significant finding was the storage impact of documentation snapshots, which consumed approximately 124MB despite representing only 7 distinct snapshots. This substantial storage footprint validates Fowler's observations \cite{fowler2003patterns} about the storage implications of the snapshot pattern, particularly when applied to complex data structures with many relationships.
+Incremental synchronization approaches focusing on changed entities rather than comprehensive comparisons could address observed synchronization performance degradation. Automated partition management with time-based subpartitioning could further improve performance for historical queries while maintaining logical organization.
 
-\subsection{External System Integration Challenges}
-\label{subsec:integration-challenges}
+\subsection{Architectural Extensions}
+\label{subsec:architectural-extensions}
 
-The evaluation of integration with external enterprise systems revealed increasing synchronization time over successive operations, with execution times rising from approximately 15 minutes initially to around 30 minutes after 10 synchronization cycles. This gradual increase aligns with the observations of Mueller and Müller \cite{mueller2018conception} regarding database synchronization in complex engineering environments.
+The phase-based versioning model could be extended with branching capabilities to support parallel development streams, similar to distributed version control systems. Parametric inheritance mechanisms could enable more efficient management of variant similarities through inheritance hierarchies rather than independent entity treatment.
 
-This finding highlights a significant challenge for long-term system maintenance, with projected synchronization times potentially reaching 45 minutes after 20 synchronization cycles. While still acceptable for typical synchronization frequencies, this trend suggests that synchronization performance optimization should be a priority for future development.
+Advanced parameter dependency management represents a significant opportunity for research into dependency tracking and validation systems. By modeling parameter relationships explicitly, the system could automatically identify potential inconsistencies and implement rule-based validation capturing engineering knowledge.
 
-The integration testing also validated the effectiveness of the vehicle configuration integration, with the system successfully evaluating complex boolean expressions against vehicle configurations. This capability is essential for supporting the variant-rich development approach common in the automotive industry, where parameters must be customized for numerous vehicle configurations \cite{staron2021autosar}.
-
-\section{Limitations}
-\label{sec:limitations}
-
-While the \ac{VMAP} system successfully addresses the core requirements for automotive parameter management, several limitations were identified during implementation and evaluation that could affect its application in specific contexts.
-
-\subsection{Performance Limitations}
-\label{subsec:performance-limitations}
-
-The phase comparison operation demonstrated suboptimal scaling with increasing data volumes, with execution times increasing from 2.8 seconds for the baseline dataset to 12.4 seconds for the full dataset—a scaling factor of 4.4x. This operation, which involves complex joins across multiple tables to identify differences between parameter configurations, exceeds interactive response thresholds for larger datasets, potentially affecting usability for certain workflows.
-
-The database change history mechanism, while providing comprehensive audit capabilities, contributes significantly to storage growth, with change records accounting for approximately 60.8\% of the total database size. This growth pattern could present challenges for long-term database management, potentially requiring archiving strategies for older change records to maintain acceptable storage utilization and backup performance.
-
-The integration with the \ac{PDD} showed increasing synchronization times over successive operations, with execution times rising to approximately 30 minutes after 10 synchronization cycles. This performance degradation could impact the practicality of frequent synchronization operations in active development environments, where timely parameter updates are essential for effective engineering workflows.
-
-\subsection{Architectural Limitations}
-\label{subsec:architectural-limitations}
-
-The phase-based versioning approach, while effective for structured development cycles, offers limited support for non-sequential development models where parameters might evolve through different paths. For organizations employing alternative development methodologies, this structured approach might introduce unnecessary rigidity in parameter management workflows.
-
-The current implementation provides limited support for parameter dependency tracking, where changes to one parameter might necessitate adjustments to related parameters. Without explicit dependency management, ensuring parameter consistency across complex interrelationships relies primarily on user knowledge rather than system enforcement, potentially allowing inconsistent configurations.
-
-The database schema, while well-optimized for the identified requirements, follows a relatively traditional relational approach rather than incorporating newer capabilities like native JSON support or graph database structures. This design choice prioritizes reliability and compatibility over potential performance or modeling advantages offered by more specialized database technologies.
-
-\subsection{Integration Limitations}
-\label{subsec:integration-limitations}
-
-The current integration with external systems relies heavily on scheduled synchronization operations rather than event-driven updates. This approach introduces potential synchronization delays, where parameter changes in source systems might not be immediately reflected in the \ac{VMAP} database. For time-sensitive engineering processes, these delays could impact workflow efficiency.
-
-The vehicle configuration code rule evaluation mechanism, while effective for static rules, provides limited support for dynamic rule evaluation based on calculated values or complex relationships. This limitation could restrict the expressiveness of variant selection logic in advanced engineering scenarios where dynamic configuration determination is required.
-
-\section{Future Work}
-\label{sec:future-work}
-
-Based on the findings and limitations identified during system implementation and evaluation, several directions for future research and development have been identified. These opportunities range from technical optimizations to architectural extensions that could enhance the \ac{VMAP} system's capabilities and address emerging requirements in automotive parameter management.
-
-\subsection{Performance Optimizations}
-\label{subsec:performance-optimizations}
-
-\subsubsection{Change History Partitioning Enhancements}
-\label{subsubsec:change-history-partitioning}
-
-The current implementation includes basic partitioning for the change history table based on release IDs, as described in Section \ref{sec:change-tracking-implementation}. This approach could be extended with time-based subpartitioning to further improve performance for historical queries. By implementing a hierarchical partitioning scheme that combines release-based partitioning with time-based subpartitions, the system could achieve more granular data distribution while maintaining logical organization by release \cite{obe2017postgresql}.
-
-Additionally, implementing automated partition management for the change history table would enhance long-term maintainability. This extension would include partition rotation procedures that archive older partitions to lower-cost storage while maintaining rapid access to recent changes. According to Schwartz et al. \cite{schwartz2012high}, such automated partition management is essential for sustaining performance in rapidly growing audit systems.
-
-\subsubsection{Query Optimization for Phase Comparison}
-\label{subsubsec:query-optimization}
-
-The phase comparison operation demonstrated suboptimal scaling with increasing data volumes, suggesting an opportunity for query optimization. Future development could explore materialized view approaches for phase comparison, where difference data is pre-computed and incrementally maintained rather than calculated on demand. This approach could significantly reduce response times for comparison operations, potentially bringing even complex comparisons within interactive response thresholds.
-
-Another promising avenue is the implementation of parallel query execution for phase comparison operations. By partitioning the comparison workload across multiple execution threads, the system could leverage modern multi-core processors more effectively, reducing execution time for this resource-intensive operation \cite{obe2017postgresql}.
-
-\subsubsection{Synchronization Performance Improvements}
-\label{subsubsec:synchronization-improvements}
-
-To address the observed synchronization performance degradation, future development could implement an incremental synchronization approach that focuses on changed entities rather than performing comprehensive comparisons. By leveraging change data capture techniques described by Seenivasan and Vaithianathan \cite{seenivasan2023real}, the system could achieve more efficient synchronization with minimal overhead growth over time.
-
-Additionally, the implementation of parallel synchronization for independent \acp{ECU} could significantly reduce overall synchronization time. By processing multiple \acp{ECU} concurrently, the system could better utilize available resources and reduce the total time required for synchronization operations, particularly in environments with numerous \acp{ECU}.
-
-\subsection{Architectural Enhancements}
-\label{subsec:architectural-enhancements}
-
-\subsubsection{Advanced Versioning Capabilities}
-\label{subsubsec:advanced-versioning}
-
-The current phase-based versioning model could be extended with branching capabilities to support parallel development streams. This enhancement would allow engineers to create specialized branches for experimental parameter configurations while maintaining the stability of the main development sequence. By incorporating branching concepts from software version control systems like Git, the database could support more flexible development workflows while preserving traceability \cite{bhattacherjee2015principles}.
-
-The implementation of parametric inheritance mechanisms would enable more efficient management of variant similarities and differences. Rather than treating each variant as an independent entity, the system could implement inheritance hierarchies where specialized variants inherit parameter values from base configurations, reducing redundancy and simplifying maintenance of related variants \cite{staron2021automotive}.
-
-\subsubsection{Data Archiving and Retention}
-\label{subsubsec:data-archiving}
-
-A comprehensive data archiving framework would enhance long-term database maintainability by providing structured processes for managing historical data. This framework would include configurable retention policies for different data types, automated archiving procedures for historical data, and seamless access mechanisms for archived information.
-
-The implementation could leverage PostgreSQL's tablespace capabilities to physically separate active and archived data while maintaining logical accessibility through the database schema. By transitioning older data to compressed tablespaces or lower-cost storage, the system could maintain performance for active operations while preserving historical records for compliance purposes \cite{obe2017postgresql}.
-
-For regulatory compliance scenarios, the framework would include legal hold mechanisms that override standard retention policies for data subject to specific preservation requirements. This capability is particularly important in the automotive industry, where product liability considerations may require extended retention of development records \cite{staron2021automotive}.
-
-\subsubsection{Advanced Parameter Dependency Management}
-\label{subsubsec:dependency-management}
-
-The implementation of explicit parameter dependency tracking would enhance system capabilities for maintaining consistency across related parameters. By modeling the relationships between parameters, the system could automatically identify potential inconsistencies when parameters are modified, prompting engineers to review and update related parameters as needed.
-
-This capability could be extended with rule-based validation for parameter relationships, implementing domain-specific constraints that enforce engineering rules across parameter sets. Such validation would reduce the risk of inconsistent configurations and improve overall parameter quality by capturing domain expertise in executable rules \cite{pretschner2007software}.
-
-\subsection{Integration Enhancements}
-\label{subsec:integration-enhancements}
-
-\subsubsection{Event-Driven Integration}
-\label{subsubsec:event-driven-integration}
-
-To address the limitations of scheduled synchronization, future development could implement event-driven integration with external systems. By leveraging database change data capture capabilities, the system could detect and react to changes in source systems in near-real-time, significantly reducing synchronization delays.
-
-This approach would involve implementing a message-based integration architecture as described by Hohpe and Woolf \cite{hohpe2002enterprise}, where change events from source systems trigger specific synchronization actions in the \ac{VMAP} database. By processing changes incrementally as they occur rather than in batch operations, the system could maintain more consistent data across systems while reducing synchronization overhead.
-
-\subsubsection{Enhanced Vehicle Configuration Integration}
-\label{subsubsec:vehicle-configuration-integration}
-
-The vehicle configuration integration could be enhanced with support for dynamic rule evaluation, allowing more sophisticated variant selection logic based on calculated values or complex relationships. This extension would enable more flexible variant applicability definitions, addressing advanced engineering scenarios where static rule evaluation is insufficient.
-
-Additionally, implementing a simulation framework for vehicle configurations would enhance parameter validation capabilities, allowing engineers to verify parameter behavior across diverse vehicle scenarios. By combining configuration simulation with parameter resolution, the system could provide valuable insights into parameter behavior before physical testing, potentially reducing development cycles \cite{staron2021automotive}.
+Event-driven integration architectures could detect and react to changes in source systems in near-real-time, significantly reducing synchronization delays through message-based integration patterns and change data capture capabilities.
 
 \section{Broader Implications}
 \label{sec:broader-implications}
 
-The development and evaluation of the \ac{VMAP} database system offers several broader implications for database research and automotive software development beyond the specific implementation described in this thesis.
+The \ac{VMAP} system demonstrates the effectiveness of domain-specific versioning approaches over generic temporal database techniques for specialized applications. By aligning database versioning with natural application domain structure, the system achieves both conceptual clarity and performance advantages, suggesting that domain-specific adaptations of established database patterns may offer significant benefits in specialized contexts.
 
-\subsection{Implications for Database Research}
-\label{subsec:database-research-implications}
+For automotive software development, the system provides empirical evidence of performance, consistency, and traceability improvements possible through transitioning from document-based to structured database approaches. The comprehensive audit capabilities highlight the increasing importance of traceability in automotive software development as vehicles become more software-defined and subject to regulatory oversight.
 
-The \ac{VMAP} system demonstrates the effectiveness of domain-specific versioning approaches over generic temporal database techniques for specialized applications. By aligning database versioning with the natural structure of the application domain—in this case, automotive development phases—the system achieves both conceptual clarity and performance advantages. This finding suggests that domain-specific adaptations of established database patterns may offer significant benefits in specialized contexts, a perspective that could inform future research in applied database design \cite{bhattacherjee2015principles}.
-
-The implementation also highlights the evolving relationship between relational database systems and document-oriented approaches. While maintaining a fundamentally relational structure, the \ac{VMAP} system leverages PostgreSQL's JSONB capabilities for change tracking, combining structured schema enforcement with flexible document storage. This hybrid approach suggests promising directions for database research that bridges traditional relational models with document-oriented flexibility \cite{obe2017postgresql}.
-
-The performance analysis provides empirical evidence of the storage-performance tradeoffs inherent in different versioning strategies, offering valuable data points for researchers exploring versioning approaches in other domains. These findings contribute to the ongoing discussion of recreation/storage tradeoffs in versioned datasets, providing concrete measurements of these tradeoffs in a real-world implementation \cite{bhattacherjee2015principles}.
-
-\subsection{Implications for Automotive Software Development}
-\label{subsec:automotive-development-implications}
-
-For automotive software development, the \ac{VMAP} system demonstrates the feasibility and advantages of transitioning from document-based parameter management to structured database approaches. The evaluation results provide empirical evidence of the performance, consistency, and traceability improvements possible through this transition, potentially encouraging similar transformations in other aspects of automotive software development \cite{broy2006challenges}.
-
-The integration architecture establishes patterns for connecting specialized engineering databases with enterprise systems, addressing a significant challenge in automotive development environments. By demonstrating effective synchronization between parameter management and vehicle configuration systems, the implementation provides a template for similar integrations across the automotive development ecosystem \cite{hohpe2002enterprise}.
-
-The comprehensive audit capabilities implemented in the \ac{VMAP} system highlight the increasing importance of traceability in automotive software development, particularly as vehicles become more software-defined and subject to regulatory oversight. The storage implications of these audit requirements, as revealed in the evaluation, provide valuable planning insights for automotive organizations implementing similar systems \cite{staron2021automotive}.
-
-More broadly, the \ac{VMAP} system represents a step toward the more rigorous software engineering practices increasingly required in automotive development. By applying established database principles to the specialized domain of parameter management, the system contributes to the evolution of automotive software development from document-centric approaches to structured, database-driven methodologies \cite{pretschner2007software}.
+The hybrid approach combining relational structure with document-oriented features (JSONB for change tracking) suggests promising directions for database research that bridges traditional relational models with document-oriented flexibility while maintaining schema enforcement.
 
 \section{Conclusion}
 \label{sec:final-conclusion}
 
-The \ac{VMAP} database system represents a significant advancement in automotive parameter management, addressing fundamental challenges in version control, user access, and system integration. Through a carefully designed database architecture implemented in PostgreSQL, the system provides a robust foundation for managing parameter configurations across development phases, supporting variant customization for diverse vehicle configurations.
+The \ac{VMAP} database system successfully addresses fundamental challenges in automotive parameter management through a carefully designed PostgreSQL architecture that combines phase-based versioning, hybrid access control, and comprehensive audit capabilities. The system provides a robust foundation for managing parameter configurations across development phases while supporting variant customization for diverse vehicle configurations.
 
-The phase-based versioning approach, hybrid role-permission model, and comprehensive audit capabilities collectively enable a more structured and reliable parameter management process. These capabilities address critical limitations of spreadsheet-based approaches, providing improved data integrity, enhanced traceability, and systematic validation of parameter configurations.
+The evaluation demonstrates clear advantages over existing spreadsheet-based approaches in data consistency, access control, change traceability, and integration capabilities. While opportunities for enhancement remain in performance optimization and architectural extensions, the current implementation provides a solid foundation that successfully addresses immediate requirements while supporting future development.
 
-While the implementation has demonstrated clear advantages over existing approaches, several opportunities for enhancement remain in areas such as performance optimization, architectural extensions, and integration refinements. Future development in these areas could further improve system capabilities and address emerging requirements in automotive parameter management.
-
-Beyond its specific technical contributions, the \ac{VMAP} system illustrates the value of applying proven database engineering principles to specialized domains like automotive development. By combining domain-specific knowledge with established database patterns, the system achieves both technical excellence and practical usability, demonstrating the potential for database-driven approaches to transform complex engineering workflows.
+The research contributes to both academic knowledge in database systems and practical advancement in automotive software development methodologies. By combining domain-specific knowledge with established database engineering principles, the system demonstrates the potential for database-driven approaches to transform complex engineering workflows and improve the reliability and efficiency of critical development processes.
